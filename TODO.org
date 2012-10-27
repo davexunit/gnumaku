@@ -1,0 +1,9 @@
+* TODO Free off-screen bullets back to the bullet pool
+* TODO Create a bullet data type that wraps the bullet system and bullet id into one data structure
+* TODO Create some sane subdirectories for source and data files
+* DONE Open port for a REPL so the program can be modified as it is running
+* TODO Allow many types of bullet sprites
+** TODO Create a sprite sheet struct with Guile bindings
+** TODO Add a sprite sheet member variable to bullet system
+** TODO Add a sprite index member variable to bullet
+** TODO Use sprite sheet with given sprite index when drawing bullets
