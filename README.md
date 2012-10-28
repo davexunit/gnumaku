@@ -3,7 +3,7 @@ Gnumaku
 
 About
 -----
-Gnumaku is (trying to be) a libre bullet hell shooting game. It is not currently nowhere close to being a game yet.
+Gnumaku is (trying to be) a libre bullet hell shooting game. It is currently a young project with very little functionality.
 
 Tech
 ----
