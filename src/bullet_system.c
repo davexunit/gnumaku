@@ -21,10 +21,6 @@ init_bullet (Bullet *bullet)
     bullet->angular_velocity = 0;
     bullet->x = 0;
     bullet->y = 0;
-    bullet->dx = 0;
-    bullet->dy = 0;
-    bullet->ddx = 0;
-    bullet->ddy = 0;
     bullet->alive = false;
 }
 
@@ -140,6 +136,17 @@ clear_bullet_system (SCM bullet_system_smob)
     return SCM_UNSPECIFIED;
 }
 
+static void
+update_bullet(Bullet *bullet, float dt) {
+    float theta = deg2rad(bullet->direction);
+    float dx = bullet->speed * cos(theta) * dt;
+    float dy = bullet->speed * sin(theta) * dt;
+    bullet->x += dx;
+    bullet->y += dy;
+    bullet->speed += bullet->acceleration * dt;
+    bullet->direction += bullet->angular_velocity * dt;
+}
+
 static SCM
 update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 {
@@ -152,8 +159,7 @@ update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 	
 	if (bullet->alive)
 	{
-	    bullet->x += bullet->dx * dt;
-	    bullet->y += bullet->dy * dt;
+	    update_bullet(bullet, dt);
 	}
     }
 
@@ -197,16 +203,6 @@ set_bullet_system_image (SCM bullet_system_smob, SCM s_image_file)
     return SCM_UNSPECIFIED;
 }
 
-static void
-update_bullet_vectors(Bullet *bullet)
-{
-    float theta = deg2rad(bullet->direction);
-    bullet->dx = cos(theta) * bullet->speed;
-    bullet->dy = sin(theta) * bullet->speed;
-    bullet->ddx = cos(theta) * bullet->acceleration;
-    bullet->ddy = sin(theta) * bullet->acceleration;
-}
-
 static SCM
 set_bullet_position (SCM bullet_system_smob, SCM s_bullet_index, SCM s_x, SCM s_y)
 {
@@ -233,7 +229,21 @@ set_bullet_speed (SCM bullet_system_smob, SCM s_bullet_index, SCM s_speed)
     Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
 
     bullet->speed = speed;
-    update_bullet_vectors(bullet);
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;    
+}
+
+static SCM
+set_bullet_acceleration (SCM bullet_system_smob, SCM s_bullet_index, SCM s_acceleration)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    int bullet_index = scm_to_int(s_bullet_index);
+    float acceleration = scm_to_double(s_acceleration);
+    Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
+
+    bullet->acceleration = acceleration;
 
     scm_remember_upto_here_1 (bullet_system_smob);
 
@@ -249,12 +259,27 @@ set_bullet_direction (SCM bullet_system_smob, SCM s_bullet_index, SCM s_directio
     Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
 
     bullet->direction = direction;
-    update_bullet_vectors(bullet);
 
     scm_remember_upto_here_1 (bullet_system_smob);
 
     return SCM_UNSPECIFIED;    
 }
+
+static SCM
+set_bullet_angular_velocity (SCM bullet_system_smob, SCM s_bullet_index, SCM s_angular_velocity)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    int bullet_index = scm_to_int(s_bullet_index);
+    float angular_velocity = scm_to_double(s_angular_velocity);
+    Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
+
+    bullet->angular_velocity = angular_velocity;
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;    
+}
+
      
 void
 init_bullet_system_type (void)
@@ -273,4 +298,6 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-position", 4, 0, 0, set_bullet_position);
     scm_c_define_gsubr ("set-bullet-speed", 3, 0, 0, set_bullet_speed);
     scm_c_define_gsubr ("set-bullet-direction", 3, 0, 0, set_bullet_direction);
+    scm_c_define_gsubr ("set-bullet-acceleration", 3, 0, 0, set_bullet_acceleration);
+    scm_c_define_gsubr ("set-bullet-angular-velocity", 3, 0, 0, set_bullet_angular_velocity);
 }

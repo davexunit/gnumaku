@@ -12,8 +12,6 @@ typedef struct {
     float acceleration;
     float angular_velocity;
     float x, y;
-    float dx, dy;
-    float ddx, ddy;
     bool alive;
     ALLEGRO_BITMAP *image;
 } Bullet;
