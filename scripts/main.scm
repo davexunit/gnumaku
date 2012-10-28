@@ -20,24 +20,63 @@
   (set-segments! agenda '())
   (clear-bullet-system bullets))
 
-(define (emit-circle x y radius num-bullets rotate callback)
+(define pi 3.141592654)
+
+(define (deg2rad angle)
+  (* angle (/ pi 180)))
+
+(define (cos-deg angle)
+  (cos (deg2rad angle)))
+
+(define (sin-deg angle)
+  (sin (deg2rad angle)))
+
+(define (emit-circle system x y radius num-bullets rotate callback)
   (define bullet-list '())
   (let iterate ((i 0))
     (when (< i num-bullets)
-      (let ((bullet (make-bullet bullets)))
-	(set-bullet-position bullets bullet x y)
-	(set-bullet-direction bullets bullet (+ rotate (* i (/ 360 num-bullets))))
-	(set! bullet-list (cons bullet bullet-list))
-	(iterate (1+ i)))))
+      (let ((bullet (make-bullet bullets))
+	    (direction (+ rotate (* i (/ 360 num-bullets)))))
+	(let ((pos-x (+ x (* radius (cos-deg direction))))
+	      (pos-y (+ y (* radius (sin-deg direction)))))
+	  (set-bullet-position bullets bullet pos-x pos-y)
+	  (set-bullet-direction bullets bullet direction)
+	  (set! bullet-list (cons bullet bullet-list))
+	  (iterate (1+ i))))))
+  (when (procedure? callback)
+    (callback system bullet-list)))
+
+(primitive-load "scripts/virtue-of-wind-god.scm")
+
+(define (emit-arc x y radius  num-bullets callback)
+  (define bullet-list '())
+  (let iterate ((i 0))
+    (when (< i num-bullets)
+      (let ((bullet (make-bullet bullets))
+	    (direction (* i (/ length num-bullets))))
+	(let ((pos-x (+ x (* radius (cos-deg direction))))
+	      (pos-y (+ y (* radius (sin-deg direction)))))
+	  (set-bullet-position bullets bullet pos-x pos-y)
+	  (set-bullet-direction bullets bullet direction)
+	  (set! bullet-list (cons bullet bullet-list))
+	  (iterate (1+ i))))))
   (callback bullet-list))
 
 (define (emit-spiral-forever x y rotate-step delay callback)
   (coroutine
    (lambda ()
      (let repeat ((rotate 0))
-       (emit-circle x y 20 8 rotate callback)
+       (emit-circle x y 40 8 rotate callback)
        (wait delay)
        (repeat (+ rotate rotate-step))))))
+
+(define (emit-circle-forever x y radius num-bullets delay callback)
+  (coroutine
+   (lambda ()
+     (let repeat ()
+       (emit-circle x y radius num-bullets 0 callback)
+       (wait delay)
+       (repeat)))))
 
 (define (stress-test)
   (let iterate ((i 0))
@@ -67,6 +106,36 @@
 	(set-bullet-speed bullets bullet 100)
 	(set-bullet-acceleration bullets bullet 100)
 	(set-bullet-angular-velocity bullets bullet 20))
+      bullet-list))))
+
+(define (cool-reverse bullet-list)
+  (coroutine
+   (lambda ()
+     (for-each
+      (lambda (bullet)
+	(set-bullet-sprite bullets bullet 2)
+	(set-bullet-speed bullets bullet 0))
+      bullet-list)
+     (wait 1)
+     (for-each
+      (lambda (bullet)
+	(change-bullet-direction bullets bullet -180)
+	(set-bullet-acceleration bullets bullet 200))
+      bullet-list))))
+
+(define (splosion bullet-list)
+  (coroutine
+   (lambda ()
+     (for-each
+      (lambda (bullet)
+	(set-bullet-sprite bullets bullet 2)
+	(set-bullet-speed bullets bullet 0))
+      bullet-list)
+     (wait 1)
+     (for-each
+      (lambda (bullet)
+	(change-bullet-direction bullets bullet -180)
+	(set-bullet-acceleration bullets bullet 200))
       bullet-list))))
 
 (define (large-bullet bullet-list)
@@ -104,6 +173,18 @@
 	(set-bullet-speed bullets bullet 100)
 	(set-bullet-direction bullets bullet (random 360)))
       bullet-list))))
+
+(define (inward-spiral x y rotate-step delay)
+  (coroutine
+   (lambda ()
+     (let repeat ((rotate 0)
+		  (radius 150))
+       (when (> radius 0)
+	 (emit-circle x y radius 8 rotate diamond-bullet)
+	 (emit-circle x y radius 8 (- rotate (random 16)) diamond-bullet)
+	 (emit-circle x y radius 8 (- rotate (random 16)) diamond-bullet)
+	 (wait delay)
+	 (repeat (+ rotate rotate-step) (- radius 10)))))))
 
 (game-on-start-hook game (lambda ()
 			   (define sprite-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
