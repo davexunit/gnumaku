@@ -147,6 +147,23 @@ update_bullet(Bullet *bullet, float dt) {
     bullet->direction += bullet->angular_velocity * dt;
 }
 
+static void
+remove_out_of_bounds_bullet(Bullet *bullet)
+{
+    // hard-coded values for now
+    static float border = 32;
+    static float width = 800;
+    static float height = 600;
+
+    if (bullet->x < -border ||
+	bullet->x > width + border ||
+	bullet->y < -border ||
+	bullet->y > height + border)
+    {
+	bullet->alive = false;
+    }
+}
+
 static SCM
 update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 {
@@ -159,7 +176,8 @@ update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 	
 	if (bullet->alive)
 	{
-	    update_bullet(bullet, dt);
+	    update_bullet (bullet, dt);
+	    remove_out_of_bounds_bullet (bullet);
 	}
     }
 
