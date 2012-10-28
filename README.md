@@ -12,7 +12,7 @@ The Allegro 5 game library has been chosen for it's simplicity and use of OpenGL
 
 Through the power of Guile, it is possible to write very awesome bullet patterns easily.
 Using a simple implementation of coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
-This sample code creates a 4-armed spiral bullet emitter:
+Here's what a bullet script might look like:
 
     (define (emit-circle x y num-bullets rotate callback)
       (define bullet-list '())
