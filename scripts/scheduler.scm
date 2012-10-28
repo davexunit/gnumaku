@@ -82,10 +82,12 @@
       (process-queue q)))
 
   (set-current-time! agenda (+ (current-time agenda) dt))
-  (if (agenda-empty? agenda)
-      "Agenda is empty"
-      (let ((segment (first-segment agenda)))
-	(when (>= (current-time agenda) (segment-time segment))
-	  (process-queue (segment-queue segment))
-	  (set-segments! agenda (rest-segments agenda))))))
+  (let loop ()
+    (if (agenda-empty? agenda)
+	"Agenda is empty"
+	(let ((segment (first-segment agenda)))
+	  (when (>= (current-time agenda) (segment-time segment))
+	    (process-queue (segment-queue segment))
+	    (set-segments! agenda (rest-segments agenda))
+	    (loop))))))
 
