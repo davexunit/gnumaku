@@ -1,3 +1,4 @@
+
 #include "game.h"
 
 static scm_t_bits game_tag;
@@ -102,7 +103,11 @@ game_loop(SCM game_smob) {
 	fprintf (stderr, "failed to create display!\n");
     }
 
-    font = al_load_ttf_font ("CarroisGothic-Regular.ttf", 24, 0);
+    font = al_load_ttf_font ("data/fonts/CarroisGothic-Regular.ttf", 24, 0);
+
+    if (!font) {
+	fprintf(stderr, "failed to load font\n");
+    }
 
     if (scm_is_true (game->on_start))
 	scm_call_0 (game->on_start);
