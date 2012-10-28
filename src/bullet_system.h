@@ -5,6 +5,7 @@
 #include <allegro5/allegro_image.h>
 
 #include "math.h"
+#include "sprite_sheet.h"
 
 typedef struct {
     float speed;
@@ -19,9 +20,9 @@ typedef struct {
 typedef struct {
     int max_bullets;
     Bullet *bullets;
-    ALLEGRO_BITMAP *image;
+    SCM sprite_sheet;
 } BulletSystem;
 
-void init_bullet_system_type(void);
+void init_bullet_system_type (void);
 
 #endif
