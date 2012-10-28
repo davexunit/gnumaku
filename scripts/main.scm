@@ -37,25 +37,25 @@
      (for-each
       (lambda (bullet)
 	(set-bullet-speed bullets bullet 120))
-	;;(set-bullet-angular-velocity bullets bullet 180))
       bullet-list)
      (wait 1)
      (for-each
       (lambda (bullet)
-	(set-bullet-speed bullets bullet 0))
+	(set-bullet-speed bullets bullet -60))
       bullet-list)
-     (wait 1)
+     (wait .75)
      (for-each
       (lambda (bullet)
 	(set-bullet-speed bullets bullet 100)
-	(set-bullet-angular-velocity bullets bullet 0))
+	(set-bullet-acceleration bullets bullet 100)
+	(set-bullet-angular-velocity bullets bullet 20))
       bullet-list))))
 
 (define (emit-spiral-forever x y rotate-step delay)
   (coroutine
    (lambda ()
      (let repeat ((rotate 0))
-       (emit-circle x y 5 rotate bullet-stuff)
+       (emit-circle x y 8 rotate bullet-stuff)
        (wait delay)
        (repeat (+ rotate rotate-step))))))
 
