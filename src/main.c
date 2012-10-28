@@ -3,11 +3,11 @@
 #include <libguile.h>
 
 #include "math.h"
+#include "sprite_sheet.h"
 #include "game.h"
 #include "bullet_system.h"
 
 static void inner_main();
-static SCM game_loop();
 
 int
 main (int argc, char **argv) {
@@ -18,7 +18,8 @@ main (int argc, char **argv) {
 
 static void
 inner_main (void *closure, int argc, char **argv) {
-    init_game_type();
-    init_bullet_system_type();
+    init_sprite_sheet_type ();
+    init_game_type ();
+    init_bullet_system_type ();
     scm_c_primitive_load ("scripts/main.scm");
 }
