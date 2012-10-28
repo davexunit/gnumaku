@@ -34,7 +34,7 @@ This sample code creates a 4-armed spiral bullet emitter:
 
 Dependencies
 ------------
-GNU Guile >= 2.0
+GNU Guile >= 2.0  
 Allegro >= 5.0
 
 License
@@ -43,7 +43,7 @@ GNU GPL v3
 
 Thanks
 ------
-In particular, thanks to mark_weaver for helping me with everything Scheme and Guile related on a regular basis.
+Thanks to mark_weaver for helping me with everything Scheme and Guile related on a regular basis.
 Thanks to wingo for his coroutine implementation.
 Thanks to MIT Press for SICP.
-Many thanks to the fine folks on the #guile and #allegro rooms on freenode.
+Thanks to the fine folks on the #guile and #allegro rooms on freenode.
