@@ -291,6 +291,21 @@ set_bullet_direction (SCM bullet_system_smob, SCM s_bullet_index, SCM s_directio
 }
 
 static SCM
+change_bullet_direction (SCM bullet_system_smob, SCM s_bullet_index, SCM s_direction)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    int bullet_index = scm_to_int(s_bullet_index);
+    float direction = scm_to_double(s_direction);
+    Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
+
+    bullet->direction += direction;
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;    
+}
+
+static SCM
 set_bullet_angular_velocity (SCM bullet_system_smob, SCM s_bullet_index, SCM s_angular_velocity)
 {
     BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
@@ -341,4 +356,5 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-acceleration", 3, 0, 0, set_bullet_acceleration);
     scm_c_define_gsubr ("set-bullet-angular-velocity", 3, 0, 0, set_bullet_angular_velocity);
     scm_c_define_gsubr ("set-bullet-sprite", 3, 0, 0, set_bullet_sprite);
+    scm_c_define_gsubr ("change-bullet-direction", 3, 0, 0, change_bullet_direction);
 }
