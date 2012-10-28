@@ -14,21 +14,41 @@ Through the power of Guile, it is possible to write very awesome bullet patterns
 Using a simple implementation of coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
 This sample code creates a 4-armed spiral bullet emitter:
 
-    (define (emit-circle x y num-bullets speed rotate)
+    (define (emit-circle x y num-bullets rotate callback)
+      (define bullet-list '())
       (let iterate ((i 0))
-        (if (< i num-bullets)
-    	(begin
-    	  (let ((bullet (make-bullet bullets)))
-    	    (set-bullet-position  bullets bullet x y)
-    	    (set-bullet-direction bullets bullet (+ (* i (/ 360 num-bullets)) rotate))
-    	    (set-bullet-speed     bullets bullet speed)
-    	    (iterate (1+ i)))))))
+        (when (< i num-bullets)
+          (let ((bullet (make-bullet bullets)))
+    	(set-bullet-position bullets bullet x y)
+    	(set-bullet-direction bullets bullet (+ rotate (* i (/ 360 num-bullets))))
+    	(set! bullet-list (cons bullet bullet-list))
+    	(iterate (1+ i)))))
+      (callback bullet-list))
+    
+    (define (bullet-stuff bullet-list)
+      (coroutine
+       (lambda ()
+         (for-each
+          (lambda (bullet)
+    	(set-bullet-speed bullets bullet 120))
+         bullet-list)
+         (wait 1)
+         (for-each
+          (lambda (bullet)
+    	(set-bullet-speed bullets bullet 0))
+          bullet-list)
+         (wait 1)
+         (for-each
+          (lambda (bullet)
+    	(set-bullet-speed bullets bullet 100)
+    	(set-bullet-angular-velocity bullets bullet 0))
+          bullet-list))))
     
     (define (emit-spiral-forever x y rotate-step delay)
       (coroutine
        (lambda ()
          (let repeat ((rotate 0))
-           (emit-circle x y 4 90 rotate)
+           (emit-circle x y 5 rotate bullet-stuff)
            (wait delay)
            (repeat (+ rotate rotate-step))))))
 
