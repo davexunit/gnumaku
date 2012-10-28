@@ -2,14 +2,14 @@
 * TODO Create a bullet data type that wraps the bullet system and bullet id into one data structure
 * DONE Create some sane subdirectories for source and data files
 * DONE Open port for a REPL so the program can be modified as it is running
-* TODO Allow many types of bullet sprites
-** TODO Create a sprite sheet struct with Guile bindings
-** TODO Add a sprite sheet member variable to bullet system
-** TODO Add a sprite index member variable to bullet
-** TODO Use sprite sheet with given sprite index when drawing bullets
+* DONE Allow many types of bullet sprites
+** DONE Create a sprite sheet struct with Guile bindings
+** DONE Add a sprite sheet member variable to bullet system
+** DONE Use sub-bitmaps of the sprite sheet to set bullet bitmaps
 * DONE Add angular velocity to bullets
 ** TODO Stop using Euler integration
 * TODO Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
 ** TODO Add a bounding box struct
 * TODO Add a counter to bullet system that counts active bullets
+* DONE Rotate bullet sprites in the direction they are moving
