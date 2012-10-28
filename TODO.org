@@ -13,3 +13,5 @@
 ** TODO Add a bounding box struct
 * TODO Add a counter to bullet system that counts active bullets
 * DONE Rotate bullet sprites in the direction they are moving
+* TODO Add a 'killable' flag to bullets
+** Bullets that are scripted after their creation should flip the killable bit to false when they are done
