@@ -22,6 +22,8 @@ init_bullet (Bullet *bullet)
     bullet->x = 0;
     bullet->y = 0;
     bullet->alive = false;
+    bullet->killable = true;
+    bullet->image = NULL;
 }
 
 static SCM
@@ -162,10 +164,11 @@ remove_out_of_bounds_bullet(Bullet *bullet)
     static float width = 800;
     static float height = 600;
 
-    if (bullet->x < -border ||
-	bullet->x > width + border ||
-	bullet->y < -border ||
-	bullet->y > height + border)
+    if ((bullet->x < -border ||
+	 bullet->x > width + border ||
+	 bullet->y < -border ||
+	 bullet->y > height + border) &&
+	bullet->killable)
     {
 	bullet->alive = false;
     }
@@ -335,6 +338,21 @@ set_bullet_sprite (SCM bullet_system_smob, SCM s_bullet_index, SCM s_sprite_inde
 
     return SCM_UNSPECIFIED;    
 }
+
+static SCM
+set_bullet_killable (SCM bullet_system_smob, SCM s_bullet_index, SCM s_killable)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    int bullet_index = scm_to_int (s_bullet_index);
+    bool killable = scm_to_bool (s_killable);
+    Bullet *bullet = get_bullet_at_index(bullet_system, bullet_index);
+
+    bullet->killable = killable;
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;    
+}
      
 void
 init_bullet_system_type (void)
@@ -356,5 +374,6 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-acceleration", 3, 0, 0, set_bullet_acceleration);
     scm_c_define_gsubr ("set-bullet-angular-velocity", 3, 0, 0, set_bullet_angular_velocity);
     scm_c_define_gsubr ("set-bullet-sprite", 3, 0, 0, set_bullet_sprite);
+    scm_c_define_gsubr ("set-bullet-killable", 3, 0, 0, set_bullet_killable);
     scm_c_define_gsubr ("change-bullet-direction", 3, 0, 0, change_bullet_direction);
 }
