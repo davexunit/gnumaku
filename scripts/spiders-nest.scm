@@ -9,6 +9,7 @@
    (lambda ()
      (for-each
       (lambda (bullet)
+	(set-bullet-killable system bullet #f)
 	(set-bullet-sprite system bullet 1))
       bullet-list)
      (wait 2)
@@ -20,6 +21,7 @@
      (wait 1)
      (for-each
       (lambda (bullet)
+	(set-bullet-killable system bullet #t)
      	(set-bullet-speed system bullet 4)
      	(change-bullet-direction system bullet 180)
      	(set-bullet-acceleration system bullet 300))
@@ -33,7 +35,7 @@
        (repeat
 	(lambda ()
 	  (emit-circle system x y radius 16 angle do-movement)
-	  (set! angle (- (random 5) 2.5))
-	  (set! radius (+ radius 6))
+	  (set! angle (- (random 4) 2))
+	  (set! radius (+ radius 8))
 	  (wait .01))
 	70)))))

@@ -46,7 +46,7 @@
   (when (procedure? callback)
     (callback system bullet-list)))
 
-(primitive-load "scripts/virtue-of-wind-god.scm")
+(primitive-load "scripts/spiders-nest.scm")
 
 (define (emit-arc x y radius  num-bullets callback)
   (define bullet-list '())
