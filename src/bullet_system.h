@@ -14,7 +14,6 @@ typedef struct {
     float angular_velocity;
     float x, y;
     bool alive;
-    bool killable;
     ALLEGRO_BITMAP *image;
 } Bullet;
 
