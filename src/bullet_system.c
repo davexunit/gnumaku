@@ -433,9 +433,9 @@ init_bullet_system_type (void)
     scm_set_smob_print (bullet_system_tag, print_bullet_system);
 
     scm_c_define_gsubr ("make-bullet-system", 1, 0, 0, make_bullet_system);
-    scm_c_define_gsubr ("clear-bullet-system", 1, 0, 0, clear_bullet_system);
+    scm_c_define_gsubr ("clear-bullet-system!", 1, 0, 0, clear_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system", 1, 0, 0, draw_bullet_system);
-    scm_c_define_gsubr ("update-bullet-system", 2, 0, 0, update_bullet_system);
+    scm_c_define_gsubr ("update-bullet-system!", 2, 0, 0, update_bullet_system);
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet!", 2, 0, 0, set_bullet_system_sprite_sheet);
     scm_c_define_gsubr ("make-bullet", 1, 0, 0, make_bullet);
     scm_c_define_gsubr ("kill-bullet", 2, 0, 0, kill_bullet);
@@ -452,5 +452,5 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-acceleration!", 3, 0, 0, set_bullet_acceleration);
     scm_c_define_gsubr ("set-bullet-angular-velocity!", 3, 0, 0, set_bullet_angular_velocity);
     scm_c_define_gsubr ("set-bullet-sprite!", 3, 0, 0, set_bullet_sprite);
-    scm_c_define_gsubr ("change-bullet-direction", 3, 0, 0, change_bullet_direction);
+    scm_c_define_gsubr ("change-bullet-direction!", 3, 0, 0, change_bullet_direction);
 }
