@@ -13,3 +13,10 @@
 ** TODO Add a bounding box struct
 * TODO Add a counter to bullet system that counts active bullets
 * DONE Rotate bullet sprites in the direction they are moving
+* TODO Break Scheme code into modules
+** TODO Coroutine module
+** TODO Scheduler module
+** TODO Bullet pattern primitives module
+* DONE Create some macros
+** DONE Coroutine macro
+
