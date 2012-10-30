@@ -1,4 +1,4 @@
-(define (coroutine proc)
+(define (do-coroutine proc)
   (define (handler cont callback . args)
     (define (resume . args)
       (call-with-prompt 'coroutine-prompt
@@ -10,3 +10,9 @@
   (call-with-prompt 'coroutine-prompt
 		    (lambda () (proc))
 		    handler))
+
+(define-syntax coroutine
+  (syntax-rules ()
+    ((coroutine exp ...)
+     (do-coroutine
+      (lambda () exp ...)))))
