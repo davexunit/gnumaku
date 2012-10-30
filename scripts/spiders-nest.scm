@@ -11,20 +11,20 @@
        (lambda ()
 	 (for-each
 	  (lambda (bullet)
-	    (set-bullet-sprite system bullet 1))
+	    (set-bullet-sprite! system bullet 1))
 	  bullet-list)
 	 (wait (- 2 delay))
 	 (for-each
 	  (lambda (bullet)
-	    (change-bullet-direction system bullet (- -190 r))
-	    (set-bullet-acceleration system bullet 200))
+	    (change-bullet-direction! system bullet (- -190 r))
+	    (set-bullet-acceleration! system bullet 200))
 	  bullet-list)
 	 (wait (- 0.66 delay))
 	 (for-each
 	  (lambda (bullet)
-	    (set-bullet-speed system bullet 4)
-	    (change-bullet-direction system bullet (- -190 (* r 50)))
-	    (set-bullet-acceleration system bullet 300))
+	    (set-bullet-speed! system bullet 4)
+	    (change-bullet-direction! system bullet (- -190 (* r 50)))
+	    (set-bullet-acceleration! system bullet 300))
 	  bullet-list)))))
 
   (coroutine
