@@ -1,0 +1,25 @@
+(define pi 3.141592654)
+
+(define (deg2rad angle)
+  (* angle (/ pi 180)))
+
+(define (cos-deg angle)
+  (cos (deg2rad angle)))
+
+(define (sin-deg angle)
+  (sin (deg2rad angle)))
+
+(define (emit-circle system x y radius num-bullets rotate callback)
+  (define bullet-list '())
+  (let iterate ((i 0))
+    (when (< i num-bullets)
+      (let ((bullet (make-bullet bullets))
+	    (direction (+ rotate (* i (/ 360 num-bullets)))))
+	(let ((pos-x (+ x (* radius (cos-deg direction))))
+	      (pos-y (+ y (* radius (sin-deg direction)))))
+	  (set-bullet-position! bullets bullet pos-x pos-y)
+	  (set-bullet-direction! bullets bullet direction)
+	  (set! bullet-list (cons bullet bullet-list))
+	  (iterate (1+ i))))))
+  (when (procedure? callback)
+    (callback system bullet-list)))
