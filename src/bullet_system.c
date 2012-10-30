@@ -160,9 +160,9 @@ remove_out_of_bounds_bullet(Bullet *bullet)
 {
     // hard-coded values for now
     static float x = -400;
-    static float y = -300;
+    static float y = -600;
     static float width = 1600;
-    static float height = 1200;
+    static float height = 1500;
 
     if (bullet->x < x ||
 	bullet->x > x + width ||
