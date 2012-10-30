@@ -1,5 +1,7 @@
 * DONE Free off-screen bullets back to the bullet pool
 * TODO Create a bullet data type that wraps the bullet system and bullet id into one data structure
+** TODO Create a BulletRef struct with member variables bullet_index and bullet_system
+** TODO Change all bullet methods to take BulletRef as an argument instead of a bullet system and bullet index
 * DONE Create some sane subdirectories for source and data files
 * DONE Open port for a REPL so the program can be modified as it is running
 * DONE Allow many types of bullet sprites
@@ -10,13 +12,14 @@
 ** TODO Stop using Euler integration
 * TODO Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
-** TODO Add a bounding box struct
+** DONE Add a bounding box struct
 * TODO Add a counter to bullet system that counts active bullets
 * DONE Rotate bullet sprites in the direction they are moving
 * TODO Break Scheme code into modules
 ** TODO Coroutine module
 ** TODO Scheduler module
 ** TODO Bullet pattern primitives module
+** TODO Yield functions module
 * DONE Create some macros
 ** DONE Coroutine macro
 
