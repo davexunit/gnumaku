@@ -14,44 +14,13 @@ Through the power of Guile, it is possible to write very awesome bullet patterns
 Using a simple implementation of coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
 Here's what a bullet script might look like:
 
-    (define (emit-circle x y num-bullets rotate callback)
-      (define bullet-list '())
-      (let iterate ((i 0))
-        (when (< i num-bullets)
-          (let ((bullet (make-bullet bullets)))
-    	(set-bullet-position bullets bullet x y)
-    	(set-bullet-direction bullets bullet (+ rotate (* i (/ 360 num-bullets))))
-    	(set! bullet-list (cons bullet bullet-list))
-    	(iterate (1+ i)))))
-      (callback bullet-list))
-    
-    (define (bullet-stuff bullet-list)
+    (define (emit-circle-forever x y radius num-bullets delay callback)
       (coroutine
-       (lambda ()
-         (for-each
-          (lambda (bullet)
-    	(set-bullet-speed bullets bullet 120))
-         bullet-list)
-         (wait 1)
-         (for-each
-          (lambda (bullet)
-    	(set-bullet-speed bullets bullet 0))
-          bullet-list)
-         (wait 1)
-         (for-each
-          (lambda (bullet)
-    	(set-bullet-speed bullets bullet 100)
-    	(set-bullet-angular-velocity bullets bullet 0))
-          bullet-list))))
+       (let repeat ()
+         (emit-circle bullets x y radius num-bullets 0 callback)
+         (wait delay)
+         (repeat))))
     
-    (define (emit-spiral-forever x y rotate-step delay)
-      (coroutine
-       (lambda ()
-         (let repeat ((rotate 0))
-           (emit-circle x y 5 rotate bullet-stuff)
-           (wait delay)
-           (repeat (+ rotate rotate-step))))))
-
 Dependencies
 ------------
 GNU Guile >= 2.0  
