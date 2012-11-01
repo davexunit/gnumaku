@@ -271,11 +271,20 @@ static int
 print_bullet_ref (SCM bullet_ref_smob, SCM port, scm_print_state *pstate)
 {
     BulletRef *bullet_ref = (BulletRef *) SCM_SMOB_DATA (bullet_ref_smob);
+    Bullet *bullet = bullet_ref->bullet;
 
     scm_puts ("#<BulletRef ", port);
-    scm_display (scm_from_int ((long int) bullet_ref->bullet_system), port);
-    scm_puts (", ", port);
-    scm_display (scm_from_int ((long int) bullet_ref->bullet), port);
+    scm_display (scm_from_double (bullet->x), port);
+    scm_puts (" ", port);
+    scm_display (scm_from_double (bullet->y), port);
+    scm_puts (" ", port);
+    scm_display (scm_from_double (bullet->speed), port);
+    scm_puts (" ", port);
+    scm_display (scm_from_double (bullet->direction), port);
+    scm_puts (" ", port);
+    scm_display (scm_from_double (bullet->acceleration), port);
+    scm_puts (" ", port);
+    scm_display (scm_from_double (bullet->angular_velocity), port);
     scm_puts (">", port);
 
     /* non-zero means success */
