@@ -143,10 +143,16 @@
        (let ((offset (if (odd? row) 32 0)))
 	 (let columns ((column 0))
 	   (when (< column 8)
-	     (let ((bullet (make-bullet bullets)))
-	       (set-bullet-position! bullet (+ x offset (* column 64)) (+ y (* row 32)))
-	       (set-bullet-sprite! bullet 2)
-	       (set! bullet-list (cons bullet bullet-list)))
+	     (set!
+	      bullet-list
+	      (cons
+	       (emit-bullet
+		bullets
+		(+ x offset (* column 64))
+		(+ y (* row 32))
+		0 0 0 0 2)
+	       bullet-list))
+	     (wait (/ 1.0 120))
 	     (columns (1+ column)))))
        (rows (1+ row))))
    (wait 1)

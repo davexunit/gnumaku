@@ -23,3 +23,13 @@
 	  (iterate (1+ i))))))
   (when (procedure? callback)
     (callback bullet-list)))
+
+(define (emit-bullet system x y speed direction acceleration angular-velocity sprite)
+  (let ((bullet (make-bullet system)))
+    (set-bullet-position! bullet x y)
+    (set-bullet-speed! bullet speed)
+    (set-bullet-direction! bullet direction)
+    (set-bullet-acceleration! bullet acceleration)
+    (set-bullet-angular-velocity! bullet angular-velocity)
+    (set-bullet-sprite! bullet sprite)
+    bullet))
