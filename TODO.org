@@ -1,7 +1,7 @@
 * DONE Free off-screen bullets back to the bullet pool
-* TODO Create a bullet data type that wraps the bullet system and bullet id into one data structure
-** TODO Create a BulletRef struct with member variables bullet_index and bullet_system
-** TODO Change all bullet methods to take BulletRef as an argument instead of a bullet system and bullet index
+* DONE Create a bullet data type that wraps the bullet system and bullet id into one data structure
+** DONE Create a BulletRef struct with member variables bullet and bullet_system
+** DONE Change all bullet methods to take BulletRef as an argument instead of a bullet system and bullet index
 * DONE Create some sane subdirectories for source and data files
 * DONE Open port for a REPL so the program can be modified as it is running
 * DONE Allow many types of bullet sprites
@@ -9,7 +9,8 @@
 ** DONE Add a sprite sheet member variable to bullet system
 ** DONE Use sub-bitmaps of the sprite sheet to set bullet bitmaps
 * DONE Add angular velocity to bullets
-** TODO Stop using Euler integration
+* TODO Stop using Euler integration
+** Maybe...
 * TODO Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
 ** DONE Add a bounding box struct
@@ -22,4 +23,15 @@
 ** TODO Yield functions module
 * DONE Create some macros
 ** DONE Coroutine macro
-
+* DONE Add keyboard event callbacks
+** DONE Map allegro key codes to scheme symbols in a hash table
+* TODO Add player and enemies
+** No need for C here, this can be done on the Scheme side
+* TODO Add collision detection
+** TODO Collision between player and enemy bullets
+** TODO Collision between player bullets and enemies
+* TODO Develop actual gameplay :P
+* TODO Refactor game loop into several smaller functions
+* TODO Control FPS rendering from Scheme
+** It's hard-coded in the game loop right now
+* TODO Pick a C code formatting style and STICK TO IT FFS
