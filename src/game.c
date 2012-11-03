@@ -26,6 +26,9 @@ make_game ()
     game->on_start = SCM_BOOL_F;
     game->on_update = SCM_BOOL_F;
     game->on_draw = SCM_BOOL_F;
+    game->on_key_pressed = SCM_BOOL_F;
+    game->on_key_released = SCM_BOOL_F;
+    game->running = true;
      
     /* Step 3: Create the smob.
      */
@@ -65,7 +68,28 @@ on_draw_hook (SCM game_smob, SCM callback)
 }
 
 static SCM
-game_loop(SCM game_smob) {
+on_key_pressed_hook (SCM game_smob, SCM callback)
+{
+    Game *game = check_game(game_smob);
+    
+    game->on_key_pressed = callback;
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
+on_key_released_hook (SCM game_smob, SCM callback)
+{
+    Game *game = check_game(game_smob);
+    
+    game->on_key_released = callback;
+
+    return SCM_UNSPECIFIED;
+}
+
+/* TODO: Refactor this into a few smaller, easier to follow functions */
+static SCM
+game_run(SCM game_smob) {
     Game *game = check_game(game_smob);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_FONT *font = NULL;
@@ -76,11 +100,9 @@ game_loop(SCM game_smob) {
     float fpsbank = 0;
     char fps_string[16] = "0 fps";
     int frames = 0;
-    bool running = true;
     bool redraw = true;
 
-    srand (time (NULL));
-
+    /* Initialize Allegro things */
     if(!al_init())
     {
 	fprintf (stderr, "failed to initialize allegro!\n");
@@ -103,6 +125,7 @@ game_loop(SCM game_smob) {
 	fprintf (stderr, "failed to create display!\n");
     }
 
+    /* Temporary hard-coded font for showing FPS */
     font = al_load_ttf_font ("data/fonts/CarroisGothic-Regular.ttf", 24, 0);
 
     if (!font) {
@@ -121,15 +144,16 @@ game_loop(SCM game_smob) {
     al_start_timer(timer);
     last_time = al_get_time();
 
-    while(running) {
+    while(game->running) {
 	// Handle events
 	ALLEGRO_EVENT event;
 				
 	al_wait_for_event(event_queue, &event);
 				
 	if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-	    running = false;
+	    game->running = false;
 	}
+
 	else if(event.type == ALLEGRO_EVENT_TIMER) {
 	    redraw = true;
 
@@ -147,8 +171,8 @@ game_loop(SCM game_smob) {
 		scm_call_1 (game->on_update, scm_from_double(timestep));
 	}
 	else if(event.type == ALLEGRO_EVENT_KEY_UP) {
-	    if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
-		running = false;
+	    if (scm_is_true (game->on_key_released)) {
+		scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
 	    }
 	}
 
@@ -175,6 +199,16 @@ game_loop(SCM game_smob) {
 }
 
 static SCM
+game_stop(SCM game_smob)
+{
+    Game *game = check_game(game_smob);
+    
+    game->running = false;
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
 mark_game (SCM game_smob)
 {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
@@ -182,6 +216,9 @@ mark_game (SCM game_smob)
     // Mark callbacks
     scm_gc_mark (game->on_start);
     scm_gc_mark (game->on_update);
+    scm_gc_mark (game->on_draw);
+    scm_gc_mark (game->on_key_pressed);
+    scm_gc_mark (game->on_key_released);
 
     return game->on_draw;
 }
@@ -219,5 +256,8 @@ init_game_type (void)
     scm_c_define_gsubr ("game-on-start-hook", 2, 0, 0, on_start_hook);
     scm_c_define_gsubr ("game-on-update-hook", 2, 0, 0, on_update_hook);
     scm_c_define_gsubr ("game-on-draw-hook", 2, 0, 0, on_draw_hook);
-    scm_c_define_gsubr ("game-run", 1, 0, 0, game_loop);
+    scm_c_define_gsubr ("game-on-key-pressed-hook", 2, 0, 0, on_key_pressed_hook);
+    scm_c_define_gsubr ("game-on-key-released-hook", 2, 0, 0, on_key_released_hook);
+    scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
+    scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
 }
