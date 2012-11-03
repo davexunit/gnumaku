@@ -23,6 +23,11 @@ typedef struct {
     SCM sprite_sheet;
 } BulletSystem;
 
+typedef struct {
+    BulletSystem *bullet_system;
+    Bullet *bullet;
+} BulletRef;
+
 void init_bullet_system_type (void);
 
 #endif
