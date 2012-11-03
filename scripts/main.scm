@@ -4,6 +4,7 @@
 
 ;;(add-to-load-path (dirname (current-filename)))
 ;;(display %load-path)
+(primitive-load "scripts/keycodes.scm")
 (primitive-load "scripts/coroutine.scm")
 (primitive-load "scripts/scheduler.scm")
 (primitive-load "scripts/yield.scm")
@@ -167,15 +168,29 @@
        (wait delay)
        (repeat (+ rotate rotate-step) (- radius 10))))))
 
-(game-on-start-hook game (lambda ()
-			   (define sprite-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
-			   (set-bullet-system-sprite-sheet! bullets sprite-sheet)))
+(game-on-start-hook
+ game
+ (lambda ()
+   (define sprite-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
+   (set-bullet-system-sprite-sheet! bullets sprite-sheet)))
 
-(game-on-update-hook game (lambda (dt)
-			    (update-agenda agenda dt)
-			    (update-bullet-system! bullets dt)))
+(game-on-update-hook
+ game
+ (lambda (dt)
+   (update-agenda agenda dt)
+   (update-bullet-system! bullets dt)))
 
-(game-on-draw-hook game (lambda ()
-			  (draw-bullet-system bullets)))
+(game-on-draw-hook
+ game
+ (lambda ()
+   (draw-bullet-system bullets)))
+
+(game-on-key-released-hook
+ game
+ (lambda (key)
+   (when (eq? key (keycode 'escape))
+     (game-stop game))
+  (when (eq? key (keycode 'space))
+    (cave-spiders-nest bullets 400 150))))
 
 (game-run game)
