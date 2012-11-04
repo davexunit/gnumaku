@@ -35,3 +35,4 @@
 * TODO Control FPS rendering from Scheme
 ** It's hard-coded in the game loop right now
 * TODO Pick a C code formatting style and STICK TO IT FFS
+* TODO Get rid of those annoying compiler warnings for scm_c_define_gsubr
