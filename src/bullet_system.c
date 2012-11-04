@@ -1,5 +1,3 @@
-#include <libguile.h>
-
 #include "bullet_system.h"
 
 static scm_t_bits bullet_system_tag;
@@ -32,6 +30,8 @@ init_bullet (Bullet *bullet)
     bullet->y = 0;
     bullet->alive = false;
     bullet->image = NULL;
+    bullet->color = al_map_rgba_f (1, 1, 1, 1);
+    init_rect (&bullet->hitbox, 0, 0, 0, 0);
 }
 
 static SCM
@@ -216,6 +216,28 @@ draw_bullet_system (SCM bullet_system_smob)
 }
 
 static SCM
+draw_bullet_system_hitboxes (SCM bullet_system_smob)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+
+    for (int i = 0; i < bullet_system->max_bullets; ++i)
+    {
+	Bullet *bullet = bullet_system->bullets + i;
+
+	if (bullet->alive && bullet->image)
+	{
+	    Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
+	    al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
+			       al_map_rgba_f (1, 0, 1, 1), 2);
+	}
+    }
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
 set_bullet_system_sprite_sheet (SCM bullet_system_smob, SCM sprite_sheet_smob)
 {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
@@ -386,6 +408,25 @@ set_bullet_sprite (SCM bullet_ref_smob, SCM s_sprite_index)
 }
 
 static SCM
+set_bullet_hitbox (SCM bullet_ref_smob, SCM s_x, SCM s_y, SCM s_width, SCM s_height)
+{
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    float x = scm_to_double (s_x);
+    float y = scm_to_double (s_y);
+    float width = scm_to_double (s_width);
+    float height = scm_to_double (s_height);
+
+    bullet_ref->bullet->hitbox.x = x;
+    bullet_ref->bullet->hitbox.y = y;
+    bullet_ref->bullet->hitbox.width = width;
+    bullet_ref->bullet->hitbox.height = height;
+
+    scm_remember_upto_here_1 (bullet_ref_smob);
+
+    return SCM_UNSPECIFIED;    
+}
+
+static SCM
 kill_bullet (SCM bullet_ref_smob)
 {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
@@ -468,6 +509,7 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("make-bullet-system", 1, 0, 0, make_bullet_system);
     scm_c_define_gsubr ("clear-bullet-system!", 1, 0, 0, clear_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system", 1, 0, 0, draw_bullet_system);
+    scm_c_define_gsubr ("draw-bullet-system-hitboxes", 1, 0, 0, draw_bullet_system_hitboxes);
     scm_c_define_gsubr ("update-bullet-system!", 2, 0, 0, update_bullet_system);
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet!", 2, 0, 0, set_bullet_system_sprite_sheet);
 
@@ -491,5 +533,6 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-acceleration!", 2, 0, 0, set_bullet_acceleration);
     scm_c_define_gsubr ("set-bullet-angular-velocity!", 2, 0, 0, set_bullet_angular_velocity);
     scm_c_define_gsubr ("set-bullet-sprite!", 2, 0, 0, set_bullet_sprite);
+    scm_c_define_gsubr ("set-bullet-hitbox!", 5, 0, 0, set_bullet_hitbox);
     scm_c_define_gsubr ("change-bullet-direction!", 2, 0, 0, change_bullet_direction);
 }

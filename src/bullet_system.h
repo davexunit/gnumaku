@@ -3,9 +3,12 @@
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
+#include <libguile.h>
 
 #include "math.h"
 #include "sprite_sheet.h"
+#include "rect.h"
 
 typedef struct {
     float speed;
@@ -14,7 +17,9 @@ typedef struct {
     float angular_velocity;
     float x, y;
     bool alive;
+    Rect hitbox;
     ALLEGRO_BITMAP *image;
+    ALLEGRO_COLOR color;
 } Bullet;
 
 typedef struct {
