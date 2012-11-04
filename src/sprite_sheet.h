@@ -18,6 +18,5 @@ typedef struct
 
 SpriteSheet* check_sprite_sheet (SCM sprite_sheet_smob);
 void init_sprite_sheet_type (void);
-void draw_sprite_sheet_tile (SpriteSheet *sprite_sheet, int tile, float x, float y);
 
 #endif

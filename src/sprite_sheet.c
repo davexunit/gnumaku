@@ -113,12 +113,3 @@ init_sprite_sheet_type (void)
 
     scm_c_define_gsubr ("make-sprite-sheet", 5, 0, 0, make_sprite_sheet);
 }
-
-void
-draw_sprite_sheet_tile (SpriteSheet *sprite_sheet, int tile, float x, float y)
-{
-    if (sprite_sheet->image)
-    {
-	al_draw_bitmap(sprite_sheet->tiles[tile], x, y, 0);
-    }
-}
