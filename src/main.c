@@ -21,6 +21,7 @@ static void
 inner_main (void *closure, int argc, char **argv) {
     init_sprite_sheet_type ();
     init_sprite_type ();
+    init_rect_type ();
     init_game_type ();
     init_bullet_system_type ();
     scm_c_primitive_load ("scripts/main.scm");
