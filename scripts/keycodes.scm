@@ -1,4 +1,3 @@
-
 (define (keycode key)
   (define keycodes (make-hash-table))
 
