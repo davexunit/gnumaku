@@ -8,6 +8,7 @@
 (primitive-load "scripts/coroutine.scm")
 (primitive-load "scripts/scheduler.scm")
 (primitive-load "scripts/yield.scm")
+(primitive-load "scripts/bullet-types.scm")
 (primitive-load "scripts/primitives.scm")
 (primitive-load "scripts/player.scm")
 (primitive-load "scripts/enemy.scm")
@@ -19,6 +20,7 @@
 (define bullets (make-bullet-system max-bullets))
 (define player (make-player))
 (define enemy (make-enemy 100))
+(define debug-mode #f)
 
 (define (clear-everything)
   (set-segments! agenda '())
@@ -38,153 +40,35 @@
 	  (iterate (1+ i))))))
   (callback bullet-list))
 
-(define (emit-spiral-forever enemy rotate-step delay callback)
+(define (emit-spiral-forever enemy radius num-bullets rotate-step delay speed acceleration angular-velocity type)
   (coroutine
    (let repeat ((rotate 0))
-     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 40 8 rotate callback)
+     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) radius num-bullets rotate speed acceleration angular-velocity type)
      (wait delay)
      (repeat (+ rotate rotate-step)))))
 
-(define (emit-circle-forever x y radius num-bullets delay callback)
+(define (emit-splosion enemy delay)
   (coroutine
    (let repeat ()
-     (emit-circle bullets x y radius num-bullets 0 callback)
-     (wait delay)
-     (repeat))))
-
-(define (emit-splosion enemy delay callback)
-  (coroutine
-   (let repeat ()
-     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 0 callback)
+     (splosion-bullet (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 0 100 0 0 'large-orange))
      (wait (/ delay 2))
-     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 (/ 360 12) callback)
+     (splosion-bullet (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 (/ 360 12) 100 0 0 'large-orange))
      (wait (/ delay 2))
      (repeat))))
-
-(define (stress-test)
-  (let iterate ((i 0))
-    (when (< i max-bullets)
-      (let ((bullet (make-bullet bullets)))
-	(set-bullet-position!  bullet (random 800) (random 600))
-	(set-bullet-direction! bullet (random 360))
-	(set-bullet-speed!     bullet (+ 50 (random 50)))
-	(iterate (1+ i))))))
-
-(define (bullet-stuff bullet-list)
-  (coroutine
-   (for-each
-    (lambda (bullet)
-      (set-bullet-sprite! bullet 2)
-      (set-bullet-speed! bunllet 120))
-    bullet-list)
-   (wait 1)
-   (for-each
-    (lambda (bullet)
-      (set-bullet-speed! bullet -60))
-    bullet-list)
-   (wait .75)
-   (for-each
-    (lambda (bullet)
-      (set-bullet-speed! bullet 100)
-      (set-bullet-acceleration! bullet 100)
-      (set-bullet-angular-velocity! bullet 20))
-    bullet-list)))
-
-(define (cool-reverse bullet-list)
-  (coroutine
-   (for-each
-    (lambda (bullet)
-      (set-bullet-sprite! bullet 2)
-      (set-bullet-speed! bullet 0))
-    bullet-list)
-   (wait 1)
-   (for-each
-    (lambda (bullet)
-      (change-bullet-direction! bullet -180)
-      (set-bullet-acceleration! bullet 200))
-    bullet-list)))
 
 (define (splosion-bullet bullet-list)
   (coroutine
-   (for-each
-    (lambda (bullet)
-      (set-bullet-sprite! bullet 2)
-      (set-bullet-speed! bullet 80))
-    bullet-list)
    (wait 1)
    (for-each
     (lambda (bullet)
       (let loop ((i 0))
-	(let ((new-bullet (make-bullet bullets)))
-	  (when (< i 8)
-	    (set-bullet-sprite! new-bullet 0)
-	    (set-bullet-speed! new-bullet 120)
-	    (set-bullet-position! new-bullet (bullet-x bullet) (bullet-y bullet))
-	    (set-bullet-direction! new-bullet (+ (bullet-direction bullet) (- (random 20) 10)))
-	    (set-bullet-angular-velocity! new-bullet (random 15))
-	    (set-bullet-acceleration! new-bullet (random 40))
-	    (loop (1+ i)))))
+	(when (< i 8)
+	  (emit-bullet bullets (bullet-x bullet) (bullet-y bullet) 120
+		       (+ (bullet-direction bullet) (- (random 20) 10))
+		       (random 40) (random 15) 'medium-blue)
+	    (loop (1+ i))))
       (kill-bullet bullet))
     bullet-list)))
-
-(define (blue-bullet bullet-list)
-  (for-each 
-   (lambda (bullet)
-     (set-bullet-sprite! bullet 0)
-     (set-bullet-speed! bullet 100))
-   bullet-list))
-
-(define (large-bullet bullet-list)
-  (for-each 
-   (lambda (bullet)
-     (set-bullet-sprite! bullet 2)
-     (set-bullet-speed! bullet 100))
-   bullet-list))
-
-(define (diamond-bullet bullet-list)
-  (for-each 
-   (lambda (bullet)
-     (set-bullet-sprite! bullet 1)
-     (set-bullet-speed! bullet 100))
-   bullet-list))
-
-(define (chess-hell x y)
-  (define bullet-list '())
-  (coroutine
-   (let rows ((row 0))
-     (when (< row 16)
-       (let ((offset (if (odd? row) 32 0)))
-	 (let columns ((column 0))
-	   (when (< column 8)
-	     (set!
-	      bullet-list
-	      (cons
-	       (emit-bullet
-		bullets
-		(+ x offset (* column 64))
-		(+ y (* row 32))
-		0 0 0 0 2)
-	       bullet-list))
-	     (wait (/ 1.0 120))
-	     (columns (1+ column)))))
-       (rows (1+ row))))
-   (wait 1)
-   (for-each
-    (lambda (bullet)
-      (set-bullet-speed! bullet 100)
-      (set-bullet-direction! bullet (random 360)))
-    bullet-list)))
-
-(define (inward-spiral x y rotate-step delay)
-  (coroutine
-   (let repeat ((rotate 0)
-		(radius 150))
-     (when (> radius 0)
-       (emit-circle x y radius 8 rotate diamond-bullet)
-       (emit-circle x y radius 8 (- rotate (random 16)) diamond-bullet)
-       (emit-circle x y radius 8 (- rotate (random 16)) diamond-bullet)
-       (wait delay)
-       (repeat (+ rotate rotate-step) (- radius 10))))))
 
 (define (player-shot)
   (coroutine
@@ -192,9 +76,9 @@
      (let ((x (player-x player))
 	   (y (player-y player))
 	   (speed 800))
-       (emit-bullet bullets (- x 16) y speed 260 0 0 1)
-       (emit-bullet bullets x (- y 20) speed 270 0 0 0)
-       (emit-bullet bullets (+ x 16) y speed 280 0 0 1))
+       (emit-bullet bullets (- x 16) y speed 260 0 0 'small-diamond)
+       (emit-bullet bullets x (- y 20) speed 270 0 0 'medium-blue)
+       (emit-bullet bullets (+ x 16) y speed 280 0 0 'small-diamond))
      (wait .07)
      (player-shot))))
 
@@ -229,6 +113,8 @@
  game
  (lambda ()
    (draw-bullet-system bullets)
+   (when debug-mode
+     (draw-bullet-system-hitboxes bullets))
    (draw-player player)
    (draw-enemy enemy)))
 
