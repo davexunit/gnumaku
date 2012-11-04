@@ -14,12 +14,20 @@ Through the power of Guile, it is possible to write very awesome bullet patterns
 Using a simple implementation of coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
 Here's what a bullet script might look like:
 
-    (define (emit-circle-forever x y radius num-bullets delay callback)
+    (define (player-shot)
       (coroutine
-       (let repeat ()
-         (emit-circle bullets x y radius num-bullets 0 callback)
-         (wait delay)
-         (repeat))))
+       (when (player-shooting? player)
+         (let ((x (player-x player))
+    	   (y (player-y player))
+    	   (speed 800))
+           (emit-bullet bullets (- x 16) y speed 260 0 0 'small-diamond)
+           (emit-bullet bullets x (- y 20) speed 270 0 0 'medium-blue)
+           (emit-bullet bullets (+ x 16) y speed 280 0 0 'small-diamond))
+         (wait .07)
+         (player-shot))))
+
+This script checks if the player's shooting flag is currently true. If so, 3 bullets are fired.
+The procedure then waits for .07 seconds and does it all over again until the player is no longer in the shooting state.
     
 Dependencies
 ------------
