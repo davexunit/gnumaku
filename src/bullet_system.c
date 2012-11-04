@@ -3,6 +3,9 @@
 static scm_t_bits bullet_system_tag;
 static scm_t_bits bullet_ref_tag;
 
+static SCM
+make_bullet_ref (SCM bullet_system_smob);
+
 static BulletSystem*
 check_bullet_system (SCM bullet_system_smob)
 {
@@ -110,7 +113,7 @@ free_bullet_index (BulletSystem *bullet_system)
 {
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	if (!get_bullet_at_index(bullet_system, i)->alive)
+	if (!get_bullet_at_index (bullet_system, i)->alive)
 	    return i;
     }
 
@@ -120,13 +123,13 @@ free_bullet_index (BulletSystem *bullet_system)
 static Bullet*
 get_free_bullet (BulletSystem *bullet_system)
 {
-    return get_bullet_at_index(bullet_system, free_bullet_index(bullet_system));
+    return get_bullet_at_index (bullet_system, free_bullet_index (bullet_system));
 }
      
 static SCM
 clear_bullet_system (SCM bullet_system_smob)
 {
-    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -152,7 +155,7 @@ update_bullet(Bullet *bullet, float dt) {
 }
 
 static void
-remove_out_of_bounds_bullet(Bullet *bullet)
+remove_out_of_bounds_bullet (Bullet *bullet)
 {
     // hard-coded values for now
     static float x = -400;
@@ -172,8 +175,8 @@ remove_out_of_bounds_bullet(Bullet *bullet)
 static SCM
 update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 {
-    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
-    float dt = scm_to_double(s_dt);
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
+    float dt = scm_to_double (s_dt);
     
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -194,10 +197,10 @@ update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 static SCM
 draw_bullet_system (SCM bullet_system_smob)
 {
-    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
-    SpriteSheet *sprite_sheet = check_sprite_sheet(bullet_system->sprite_sheet);
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
+    SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
 
-    al_hold_bitmap_drawing(true);
+    al_hold_bitmap_drawing (true);
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -205,11 +208,11 @@ draw_bullet_system (SCM bullet_system_smob)
 
 	if (bullet->alive && bullet->image)
 	{
-	    al_draw_rotated_bitmap(bullet->image, sprite_sheet->tile_width / 2, sprite_sheet->tile_height / 2, bullet->x, bullet->y, deg2rad(bullet->direction), 0);
+	    al_draw_rotated_bitmap (bullet->image, sprite_sheet->tile_width / 2, sprite_sheet->tile_height / 2, bullet->x, bullet->y, deg2rad(bullet->direction), 0);
 	}
     }
 
-    al_hold_bitmap_drawing(false);
+    al_hold_bitmap_drawing (false);
     scm_remember_upto_here_1 (bullet_system_smob);
 
     return SCM_UNSPECIFIED;
@@ -218,7 +221,7 @@ draw_bullet_system (SCM bullet_system_smob)
 static SCM
 draw_bullet_system_hitboxes (SCM bullet_system_smob)
 {
-    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -233,6 +236,42 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob)
     }
 
     scm_remember_upto_here_1 (bullet_system_smob);
+
+    return SCM_UNSPECIFIED;
+}
+
+static bool
+bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback)
+{
+    Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
+
+    if (rect_collide_rect (&hitbox, rect))
+    {
+	if (scm_procedure_p (callback))
+	{
+	    /* The callback can return true if the bullet should be removed from the system */
+	    return scm_to_bool (scm_call_0 (callback));
+	}
+    }
+
+    return false;
+}
+
+static SCM
+bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
+{
+    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
+    Rect *rect = check_rect (rect_smob);
+
+    for (int i = 0; i < bullet_system->max_bullets; ++i)
+    {
+	Bullet *bullet = bullet_system->bullets + i;
+
+	if (bullet->alive && bullet_collision_check (bullet, rect, callback))
+	{
+	    bullet->alive = false;
+	}
+    }
 
     return SCM_UNSPECIFIED;
 }
@@ -512,6 +551,7 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("draw-bullet-system-hitboxes", 1, 0, 0, draw_bullet_system_hitboxes);
     scm_c_define_gsubr ("update-bullet-system!", 2, 0, 0, update_bullet_system);
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet!", 2, 0, 0, set_bullet_system_sprite_sheet);
+    scm_c_define_gsubr ("bullet-system-collide-rect", 3, 0, 0, bullet_system_collide_rect);
 
     bullet_ref_tag = scm_make_smob_type ("BulletRef", sizeof (BulletRef));
     scm_set_smob_mark (bullet_ref_tag, 0);

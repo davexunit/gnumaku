@@ -38,7 +38,7 @@ rect_move (Rect *rect, float dx, float dy)
     return new_rect;
 }
 
-static Rect*
+Rect*
 check_rect (SCM rect_smob)
 {
     scm_assert_smob_type (rect_tag, rect_smob);
