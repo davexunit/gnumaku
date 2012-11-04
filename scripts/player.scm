@@ -9,6 +9,7 @@
   (move-right player-moving-right? player-move-right!)
   (move-up player-moving-up? player-move-up!)
   (move-down player-moving-down? player-move-down!)
+  (shooting player-shooting? set-player-shooting!)
   (score player-score set-player-score!)
   (lives player-lives set-player-lives!))
 

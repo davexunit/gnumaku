@@ -177,6 +177,18 @@
        (wait delay)
        (repeat (+ rotate rotate-step) (- radius 10))))))
 
+(define (player-shot)
+  (coroutine
+   (when (player-shooting? player)
+     (let ((x (player-x player))
+	   (y (player-y player))
+	   (speed 700))
+       (emit-bullet bullets (- x 16) y speed 250 0 0 1)
+       (emit-bullet bullets x (- y 20) speed 270 0 0 0)
+       (emit-bullet bullets (+ x 16) y speed 290 0 0 1))
+     (wait .1)
+     (player-shot))))
+
 (game-on-start-hook
  game
  (lambda ()
@@ -185,7 +197,7 @@
    (set-bullet-system-sprite-sheet! bullets bullet-sheet)
    (set-sprite-sheet! (player-sprite player) player-sheet 0)
    (set-player-position! player 400 300)
-   (set-player-speed! player 250)))
+   (set-player-speed! player 350)))
 
 (game-on-update-hook
  game
@@ -211,6 +223,9 @@
      (player-move-left! player #t))
    (when (eq? key (keycode 'right))
      (player-move-right! player #t))
+   (when (eq? key (keycode 'z))
+     (set-player-shooting! player #t)
+     (player-shot))
 
 
    (display "Key pressed: ")
@@ -228,6 +243,8 @@
      (player-move-left! player #f))
    (when (eq? key (keycode 'right))
      (player-move-right! player #f))
+   (when (eq? key (keycode 'z))
+     (set-player-shooting! player #f))
    (when (eq? key (keycode 'escape))
      (game-stop game))
   (when (eq? key (keycode 'space))
