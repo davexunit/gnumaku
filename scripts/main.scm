@@ -14,6 +14,7 @@
 (define game (make-game))
 (define max-bullets 10000)
 (define bullets (make-bullet-system max-bullets))
+(define player-sprite (make-sprite))
 
 (define (clear-everything)
   (set-segments! agenda '())
@@ -177,8 +178,11 @@
 (game-on-start-hook
  game
  (lambda ()
-   (define sprite-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
-   (set-bullet-system-sprite-sheet! bullets sprite-sheet)))
+   (define bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
+   (define player-sheet (make-sprite-sheet "data/images/player.png" 64 64 0 0))
+   (set-bullet-system-sprite-sheet! bullets bullet-sheet)
+   (set-sprite-sheet! player-sprite player-sheet 0)
+   (set-sprite-position! player-sprite 100 100)))
 
 (game-on-update-hook
  game
@@ -189,7 +193,15 @@
 (game-on-draw-hook
  game
  (lambda ()
-   (draw-bullet-system bullets)))
+   (draw-bullet-system bullets)
+   (draw-sprite player-sprite)))
+
+(game-on-key-pressed-hook
+ game
+ (lambda (key)
+   (display "Key pressed: ")
+   (display key)
+   (newline)))
 
 (game-on-key-released-hook
  game
