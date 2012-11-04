@@ -9,12 +9,14 @@
 (primitive-load "scripts/scheduler.scm")
 (primitive-load "scripts/yield.scm")
 (primitive-load "scripts/primitives.scm")
+(primitive-load "scripts/player.scm")
+
 (primitive-load "scripts/spiders-nest.scm")
 
 (define game (make-game))
 (define max-bullets 10000)
 (define bullets (make-bullet-system max-bullets))
-(define player-sprite (make-sprite))
+(define player (make-player))
 
 (define (clear-everything)
   (set-segments! agenda '())
@@ -71,7 +73,7 @@
    (for-each
     (lambda (bullet)
       (set-bullet-sprite! bullet 2)
-      (set-bullet-speed! bullet 120))
+      (set-bullet-speed! bunllet 120))
     bullet-list)
    (wait 1)
    (for-each
@@ -111,9 +113,9 @@
    (for-each
     (lambda (bullet)
       (let loop ((i 0))
-	(let ((new-bullet (make-bullet system)))
+	(let ((new-bullet (make-bullet bullets)))
 	  (when (< i 8)
-	    (set-bullet-sprite! new-bullet 0)
+	    (set-bullet-sprite! new-bullet 3)
 	    (set-bullet-speed! new-bullet 120)
 	    (set-bullet-position! new-bullet (bullet-x bullet) (bullet-y bullet))
 	    (set-bullet-direction! new-bullet (random 360))
@@ -179,26 +181,38 @@
  game
  (lambda ()
    (define bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
-   (define player-sheet (make-sprite-sheet "data/images/player.png" 64 64 0 0))
+   (define player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
    (set-bullet-system-sprite-sheet! bullets bullet-sheet)
-   (set-sprite-sheet! player-sprite player-sheet 0)
-   (set-sprite-position! player-sprite 100 100)))
+   (set-sprite-sheet! (player-sprite player) player-sheet 0)
+   (set-player-position! player 400 300)
+   (set-player-speed! player 250)))
 
 (game-on-update-hook
  game
  (lambda (dt)
    (update-agenda agenda dt)
-   (update-bullet-system! bullets dt)))
+   (update-bullet-system! bullets dt)
+   (update-player! player dt)))
 
 (game-on-draw-hook
  game
  (lambda ()
    (draw-bullet-system bullets)
-   (draw-sprite player-sprite)))
+   (draw-player player)))
 
 (game-on-key-pressed-hook
  game
  (lambda (key)
+   (when (eq? key (keycode 'up))
+     (player-move-up! player #t))
+   (when (eq? key (keycode 'down))
+     (player-move-down! player #t))
+   (when (eq? key (keycode 'left))
+     (player-move-left! player #t))
+   (when (eq? key (keycode 'right))
+     (player-move-right! player #t))
+
+
    (display "Key pressed: ")
    (display key)
    (newline)))
@@ -206,6 +220,14 @@
 (game-on-key-released-hook
  game
  (lambda (key)
+   (when (eq? key (keycode 'up))
+     (player-move-up! player #f))
+   (when (eq? key (keycode 'down))
+     (player-move-down! player #f))
+   (when (eq? key (keycode 'left))
+     (player-move-left! player #f))
+   (when (eq? key (keycode 'right))
+     (player-move-right! player #f))
    (when (eq? key (keycode 'escape))
      (game-stop game))
   (when (eq? key (keycode 'space))
