@@ -10,6 +10,7 @@
 (primitive-load "scripts/yield.scm")
 (primitive-load "scripts/primitives.scm")
 (primitive-load "scripts/player.scm")
+(primitive-load "scripts/enemy.scm")
 
 (primitive-load "scripts/spiders-nest.scm")
 
@@ -17,12 +18,13 @@
 (define max-bullets 10000)
 (define bullets (make-bullet-system max-bullets))
 (define player (make-player))
+(define enemy (make-enemy 100))
 
 (define (clear-everything)
   (set-segments! agenda '())
   (clear-bullet-system! bullets))
 
-(define (emit-arc x y radius  num-bullets callback)
+(define (emit-arc x y radius num-bullets callback)
   (define bullet-list '())
   (let iterate ((i 0))
     (when (< i num-bullets)
@@ -36,10 +38,10 @@
 	  (iterate (1+ i))))))
   (callback bullet-list))
 
-(define (emit-spiral-forever x y rotate-step delay callback)
+(define (emit-spiral-forever enemy rotate-step delay callback)
   (coroutine
    (let repeat ((rotate 0))
-     (emit-circle bullets x y 40 8 rotate callback)
+     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 40 8 rotate callback)
      (wait delay)
      (repeat (+ rotate rotate-step)))))
 
@@ -50,12 +52,12 @@
      (wait delay)
      (repeat))))
 
-(define (emit-splosion x y delay callback)
+(define (emit-splosion enemy delay callback)
   (coroutine
    (let repeat ()
-     (emit-circle bullets x y 0 6 0 callback)
+     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 0 callback)
      (wait (/ delay 2))
-     (emit-circle bullets x y 0 6 (/ 360 12) callback)
+     (emit-circle bullets (enemy-x enemy) (enemy-y enemy) 0 6 (/ 360 12) callback)
      (wait (/ delay 2))
      (repeat))))
 
@@ -125,6 +127,13 @@
       (kill-bullet bullet))
     bullet-list)))
 
+(define (blue-bullet bullet-list)
+  (for-each 
+   (lambda (bullet)
+     (set-bullet-sprite! bullet 0)
+     (set-bullet-speed! bullet 100))
+   bullet-list))
+
 (define (large-bullet bullet-list)
   (for-each 
    (lambda (bullet)
@@ -182,35 +191,46 @@
    (when (player-shooting? player)
      (let ((x (player-x player))
 	   (y (player-y player))
-	   (speed 700))
-       (emit-bullet bullets (- x 16) y speed 250 0 0 1)
+	   (speed 800))
+       (emit-bullet bullets (- x 16) y speed 260 0 0 1)
        (emit-bullet bullets x (- y 20) speed 270 0 0 0)
-       (emit-bullet bullets (+ x 16) y speed 290 0 0 1))
+       (emit-bullet bullets (+ x 16) y speed 280 0 0 1))
      (wait .07)
      (player-shot))))
+
+(define (enemy-ai enemy)
+  (coroutine
+   (enemy-move-to enemy 0 100 200)
+   (enemy-move-to enemy 800 100 200)
+   (enemy-ai enemy)))
 
 (game-on-start-hook
  game
  (lambda ()
    (define bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
    (define player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
+   (define enemy-sheet (make-sprite-sheet "data/images/eye.png" 64 64 0 0))
    (set-bullet-system-sprite-sheet! bullets bullet-sheet)
    (set-sprite-sheet! (player-sprite player) player-sheet 0)
-   (set-player-position! player 400 300)
-   (set-player-speed! player 350)))
+   (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
+   (set-player-position! player 400 550)
+   (set-player-speed! player 350)
+   (set-enemy-position! enemy 400 100)))
 
 (game-on-update-hook
  game
  (lambda (dt)
    (update-agenda agenda dt)
    (update-bullet-system! bullets dt)
-   (update-player! player dt)))
+   (update-player! player dt)
+   (update-enemy! enemy dt)))
 
 (game-on-draw-hook
  game
  (lambda ()
    (draw-bullet-system bullets)
-   (draw-player player)))
+   (draw-player player)
+   (draw-enemy enemy)))
 
 (game-on-key-pressed-hook
  game
@@ -225,12 +245,7 @@
      (player-move-right! player #t))
    (when (eq? key (keycode 'z))
      (set-player-shooting! player #t)
-     (player-shot))
-
-
-   (display "Key pressed: ")
-   (display key)
-   (newline)))
+     (player-shot))))
 
 (game-on-key-released-hook
  game
