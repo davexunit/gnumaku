@@ -1,7 +1,7 @@
 (use-modules (srfi srfi-9))
 
 (define-record-type Player
-  (%make-player sprite speed score lives)
+  (%make-player sprite hitbox speed score lives)
   player?
   (sprite player-sprite)
   (speed player-speed set-player-speed!)
@@ -11,13 +11,19 @@
   (move-down player-moving-down? player-move-down!)
   (shooting player-shooting? set-player-shooting!)
   (score player-score set-player-score!)
-  (lives player-lives set-player-lives!))
+  (lives player-lives set-player-lives!)
+  (hitbox player-hitbox))
 
 (define (make-player)
-  (%make-player (make-sprite) 0 0 0))
+  (%make-player (make-sprite) (make-rect 0 0 6 6) 0 0 0))
 
 (define (set-player-position! player x y)
   (set-sprite-position! (player-sprite player) x y))
+
+(define (set-player-hitbox-size! player width height)
+  (let ((hitbox (player-hitbox player)))
+    (set-hitbox-width! width)
+    (set-hitbox-height! height)))
 
 (define (player-x player)
   (sprite-x (player-sprite player)))
