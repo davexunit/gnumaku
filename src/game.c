@@ -1,4 +1,3 @@
-
 #include "game.h"
 
 static scm_t_bits game_tag;
@@ -169,10 +168,13 @@ game_run(SCM game_smob) {
 
 	    if (scm_is_true (game->on_update))
 		scm_call_1 (game->on_update, scm_from_double(timestep));
-	}
-	else if(event.type == ALLEGRO_EVENT_KEY_UP) {
+	} else if(event.type == ALLEGRO_EVENT_KEY_UP) {
 	    if (scm_is_true (game->on_key_released)) {
 		scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
+	    }
+	} else if(event.type == ALLEGRO_EVENT_KEY_DOWN) {
+	    if (scm_is_true (game->on_key_pressed)) {
+		scm_call_1 (game->on_key_pressed, scm_from_int (event.keyboard.keycode));
 	    }
 	}
 
