@@ -115,11 +115,11 @@
       (let loop ((i 0))
 	(let ((new-bullet (make-bullet bullets)))
 	  (when (< i 8)
-	    (set-bullet-sprite! new-bullet 3)
+	    (set-bullet-sprite! new-bullet 0)
 	    (set-bullet-speed! new-bullet 120)
 	    (set-bullet-position! new-bullet (bullet-x bullet) (bullet-y bullet))
-	    (set-bullet-direction! new-bullet (random 360))
-	    (set-bullet-angular-velocity! new-bullet (random 10))
+	    (set-bullet-direction! new-bullet (+ (bullet-direction bullet) (- (random 20) 10)))
+	    (set-bullet-angular-velocity! new-bullet (random 15))
 	    (set-bullet-acceleration! new-bullet (random 40))
 	    (loop (1+ i)))))
       (kill-bullet bullet))
@@ -186,7 +186,7 @@
        (emit-bullet bullets (- x 16) y speed 250 0 0 1)
        (emit-bullet bullets x (- y 20) speed 270 0 0 0)
        (emit-bullet bullets (+ x 16) y speed 290 0 0 1))
-     (wait .1)
+     (wait .07)
      (player-shot))))
 
 (game-on-start-hook
