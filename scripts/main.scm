@@ -209,7 +209,7 @@
  (lambda ()
    (define bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
    (define player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
-   (define enemy-sheet (make-sprite-sheet "data/images/eye.png" 64 64 0 0))
+   (define enemy-sheet (make-sprite-sheet "data/images/girl.png" 64 64 0 0))
    (set-bullet-system-sprite-sheet! bullets bullet-sheet)
    (set-sprite-sheet! (player-sprite player) player-sheet 0)
    (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
