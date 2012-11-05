@@ -25,10 +25,10 @@
 ** DONE Coroutine macro
 * DONE Add keyboard event callbacks
 ** DONE Map allegro key codes to scheme symbols in a hash table
-* TODO Add player and enemies
+* DONE Add player and enemies
 ** No need for C here, this can be done on the Scheme side
 * TODO Add collision detection
-** TODO Collision between player and enemy bullets
+** DONE Collision between player and enemy bullets
 ** TODO Collision between player bullets and enemies
 * TODO Develop actual gameplay :P
 * TODO Refactor game loop into several smaller functions
