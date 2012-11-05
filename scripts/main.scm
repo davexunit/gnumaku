@@ -19,12 +19,16 @@
 (define max-bullets 10000)
 (define enemy-bullets (make-bullet-system max-bullets))
 (define player-bullets (make-bullet-system 2000))
-(define player (make-player))
-(define enemy (make-enemy 100))
+(define player (make-player 10))
+(define enemies '())
 (define debug-mode #f)
+(define bullet-sheet #f)
+(define player-sheet #f)
+(define enemy-sheet  #f)
 
 (define (clear-everything)
   (set-segments! agenda '())
+  (set! enemies '())
   (clear-bullet-system! enemy-bullets)
   (clear-bullet-system! player-bullets))
 
@@ -45,11 +49,12 @@
 (define (emit-splosion enemy delay)
   (coroutine
    (let repeat ()
-     (splosion-bullet (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) 0 6 0 100 0 0 'large-orange))
-     (wait (/ delay 2))
-     (splosion-bullet (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) 0 6 (/ 360 12) 100 0 0 'large-orange))
-     (wait (/ delay 2))
-     (repeat))))
+     (when (enemy-alive? enemy)
+       (splosion-bullet (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) 0 6 0 100 0 0 'large-orange))
+       (wait (/ delay 2))
+       (splosion-bullet (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) 0 6 (/ 360 12) 100 0 0 'large-orange))
+       (wait (/ delay 2))
+       (repeat)))))
 
 (define (splosion-bullet bullet-list)
   (coroutine
@@ -71,9 +76,9 @@
      (let ((x (player-x player))
 	   (y (player-y player))
 	   (speed 800))
-       (emit-bullet player-bullets (- x 16) y speed 260 0 0 'small-diamond)
+       (emit-bullet player-bullets (- x 16) y speed 265 0 0 'small-diamond)
        (emit-bullet player-bullets x (- y 20) speed 270 0 0 'medium-blue)
-       (emit-bullet player-bullets (+ x 16) y speed 280 0 0 'small-diamond))
+       (emit-bullet player-bullets (+ x 16) y speed 275 0 0 'small-diamond))
      (wait .07)
      (player-shot))))
 
@@ -83,6 +88,17 @@
    (enemy-move-to enemy 800 100 200)
    (enemy-ai enemy)))
 
+(define (sprite-blink sprite duration times)
+  (let ((delay (/ duration times)))
+    (coroutine
+     (let loop ((i 0)
+		(visible #f))
+       (when (< i times)
+	 (set-sprite-visible! sprite visible)
+	 (wait delay)
+	 (loop (1+ i) (not visible))))))
+  (set-sprite-visible! sprite #t))
+
 (define (check-player-collision)
   (let ((hitbox (player-hitbox player)))
     (set-rect-position! hitbox
@@ -90,28 +106,70 @@
 			(- (player-y player) (/ (rect-height hitbox) 2)))
     (bullet-system-collide-rect enemy-bullets hitbox on-player-hit)))
 
+(define (check-enemy-collision enemy)
+  (let ((hitbox (enemy-hitbox enemy)))
+    (set-rect-position! hitbox
+			(- (enemy-x enemy) (/ (rect-width hitbox) 2))
+			(- (enemy-y enemy) (/ (rect-height hitbox) 2)))
+    (bullet-system-collide-rect player-bullets hitbox (on-enemy-hit enemy))))
+
+(define (check-enemies-collision)
+  (let loop ((enemies enemies))
+    (unless (null? enemies)
+      (check-enemy-collision (car enemies))
+      (loop (cdr enemies)))))
+
 (define (on-player-hit)
-  (display "player hit!\n")
+  (sprite-blink (player-sprite player) 3 30)
   ;; Return true so that the bullet that hit the player is removed
   #t)
 
 (define (on-enemy-hit enemy)
-  (lambda (enemy)
-    (display "enemy hit!\n")))
+  (lambda ()
+    (damage-enemy! enemy (player-strength player))
+    (when (<= (enemy-health enemy) 0)
+      (set! enemies (delete enemy enemies))
+      (coroutine
+       (wait 2)
+       (add-test-enemy)))
+    #t))
+
+(define (add-enemy! enemy)
+  (set! enemies (cons enemy enemies)))
+
+(define (update-enemies! dt)
+  (let loop ((enemies enemies))
+    (unless (null? enemies)
+      (update-enemy! (car enemies) dt)
+      (loop (cdr enemies)))))
+
+(define (draw-enemies)
+  (let loop ((enemies enemies))
+    (unless (null? enemies)
+      (draw-enemy (car enemies))
+      (loop (cdr enemies)))))
+
+(define (add-test-enemy)
+  (let ((enemy (make-enemy 30 100)))
+    (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
+    (set-enemy-position! enemy (random 800) (random 200))
+    (set-enemy-hitbox-size! enemy 32 32)
+    (enemy-ai enemy)
+    (emit-splosion enemy 2)
+    (add-enemy! enemy)))
 
 (game-on-start-hook
  game
  (lambda ()
-   (define bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
-   (define player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
-   (define enemy-sheet (make-sprite-sheet "data/images/girl.png" 64 64 0 0))
+   (set! bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
+   (set! player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
+   (set! enemy-sheet (make-sprite-sheet "data/images/girl.png" 64 64 0 0))
    (set-bullet-system-sprite-sheet! enemy-bullets bullet-sheet)
    (set-bullet-system-sprite-sheet! player-bullets bullet-sheet)
    (set-sprite-sheet! (player-sprite player) player-sheet 0)
-   (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
    (set-player-position! player 400 550)
    (set-player-speed! player 350)
-   (set-enemy-position! enemy 400 100)))
+   (add-test-enemy)))
 
 (game-on-update-hook
  game
@@ -120,8 +178,9 @@
    (update-bullet-system! enemy-bullets dt)
    (update-bullet-system! player-bullets dt)
    (update-player! player dt)
-   (update-enemy! enemy dt)
-   (check-player-collision)))
+   (update-enemies! dt)
+   (check-player-collision)
+   (check-enemies-collision)))
 
 (game-on-draw-hook
  game
@@ -132,7 +191,7 @@
      (draw-bullet-system-hitboxes player-bullets)
      (draw-bullet-system-hitboxes enemy-bullets))
    (draw-player player)
-   (draw-enemy enemy)))
+   (draw-enemies)))
 
 (game-on-key-pressed-hook
  game
