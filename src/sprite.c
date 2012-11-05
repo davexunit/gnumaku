@@ -24,6 +24,7 @@ make_sprite ()
      */
     sprite->sprite_sheet_smob = SCM_BOOL_F;
     sprite->image = NULL;
+    sprite->color = al_map_rgba_f (1, 1, 1, 1);
     sprite->x = 0;
     sprite->y = 0;
     sprite->center_x = 0;
@@ -31,7 +32,7 @@ make_sprite ()
     sprite->scale_x = 1;
     sprite->scale_y = 1;
     sprite->rotation = 0;
-    sprite->color = al_map_rgba_f (1, 1, 1, 1);
+    sprite->visible = true;
      
     /* Step 3: Create the smob.
      */
@@ -99,6 +100,16 @@ sprite_rotation (SCM sprite_smob)
     scm_remember_upto_here_1 (sprite_smob);
 
     return scm_from_double (sprite->rotation);
+}
+
+static SCM
+sprite_visible_p (SCM sprite_smob)
+{
+    Sprite *sprite = check_sprite (sprite_smob);
+
+    scm_remember_upto_here_1 (sprite_smob);
+
+    return scm_from_bool (sprite->visible);
 }
 
 static SCM
@@ -197,6 +208,36 @@ set_sprite_rotation (SCM sprite_smob, SCM s_rotation)
 }
 
 static SCM
+set_sprite_visible (SCM sprite_smob, SCM s_visible)
+{
+    Sprite *sprite = check_sprite (sprite_smob);
+    bool visible = scm_to_bool (s_visible);
+
+    sprite->visible = visible;
+
+    scm_remember_upto_here_1 (sprite_smob);
+
+    return SCM_UNSPECIFIED;
+}
+
+
+static SCM
+set_sprite_color (SCM sprite_smob, SCM s_r, SCM s_g, SCM s_b, SCM s_a)
+{
+    Sprite *sprite = check_sprite (sprite_smob);
+    float r = scm_to_double (s_r);
+    float g = scm_to_double (s_g);
+    float b = scm_to_double (s_b);
+    float a = scm_to_double (s_a);
+
+    sprite->color = al_map_rgba_f(r, g, b, a);
+
+    scm_remember_upto_here_1 (sprite_smob);
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
 set_sprite_sheet (SCM sprite_smob, SCM sprite_sheet_smob, SCM s_tile)
 {
     Sprite *sprite = check_sprite (sprite_smob);
@@ -218,7 +259,7 @@ sprite_draw (SCM sprite_smob)
 {
     Sprite *sprite = check_sprite (sprite_smob);
 
-    if (sprite->image)
+    if (sprite->visible && sprite->image)
     {
 	al_draw_tinted_scaled_rotated_bitmap (sprite->image, sprite->color, sprite->center_x, sprite->center_y,
 					      sprite->x, sprite->y, sprite->scale_x, sprite->scale_y,
@@ -284,6 +325,7 @@ init_sprite_type (void)
     scm_c_define_gsubr ("sprite-scale-x", 1, 0, 0, sprite_scale_x);
     scm_c_define_gsubr ("sprite-scale-y", 1, 0, 0, sprite_scale_y);
     scm_c_define_gsubr ("sprite-rotation", 1, 0, 0, sprite_rotation);
+    scm_c_define_gsubr ("sprite-visible?", 1, 0, 0, sprite_visible_p);
     scm_c_define_gsubr ("set-sprite-x!", 2, 0, 0, set_sprite_x);
     scm_c_define_gsubr ("set-sprite-y!", 2, 0, 0, set_sprite_y);
     scm_c_define_gsubr ("set-sprite-position!", 3, 0, 0, set_sprite_position);
@@ -291,6 +333,8 @@ init_sprite_type (void)
     scm_c_define_gsubr ("set-sprite-scale-y!", 2, 0, 0, set_sprite_scale_y);
     scm_c_define_gsubr ("set-sprite-scale!", 3, 0, 0, set_sprite_scale);
     scm_c_define_gsubr ("set-sprite-rotation!", 2, 0, 0, set_sprite_rotation);
+    scm_c_define_gsubr ("set-sprite-visible!", 2, 0, 0, set_sprite_visible);
+    scm_c_define_gsubr ("set-sprite-color!", 5, 0, 0, set_sprite_color);
     scm_c_define_gsubr ("set-sprite-sheet!", 3, 0, 0, set_sprite_sheet);
     scm_c_define_gsubr ("draw-sprite", 1, 0, 0, sprite_draw);
 }

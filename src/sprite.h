@@ -9,11 +9,12 @@ typedef struct
 {
     SCM sprite_sheet_smob;
     ALLEGRO_BITMAP *image;
+    ALLEGRO_COLOR color;
     float x, y;
     float center_x, center_y;
     float scale_x, scale_y;
     float rotation;
-    ALLEGRO_COLOR color;
+    bool visible;
 } Sprite;
 
 void init_sprite_type (void);
