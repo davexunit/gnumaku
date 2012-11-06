@@ -19,12 +19,13 @@
 (define max-bullets 10000)
 (define enemy-bullets (make-bullet-system max-bullets))
 (define player-bullets (make-bullet-system 2000))
-(define player (make-player 10))
+(define player (make-player 3 10 350))
 (define enemies '())
 (define debug-mode #f)
 (define bullet-sheet #f)
 (define player-sheet #f)
 (define enemy-sheet  #f)
+(define font #f)
 
 (define (clear-everything)
   (set-segments! agenda '())
@@ -120,7 +121,10 @@
       (loop (cdr enemies)))))
 
 (define (on-player-hit)
-  (sprite-blink (player-sprite player) 3 30)
+  (unless (player-invincible? player)
+    (sprite-blink (player-sprite player) 3 30)
+    (player-dec-lives! player)
+    (player-invincible-mode! player 3))
   ;; Return true so that the bullet that hit the player is removed
   #t)
 
@@ -128,6 +132,7 @@
   (lambda ()
     (damage-enemy! enemy (player-strength player))
     (when (<= (enemy-health enemy) 0)
+      (player-add-points! player (enemy-points enemy))
       (set! enemies (delete enemy enemies))
       (coroutine
        (wait 2)
@@ -164,11 +169,11 @@
    (set! bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
    (set! player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
    (set! enemy-sheet (make-sprite-sheet "data/images/girl.png" 64 64 0 0))
+   (set! font (make-font "data/fonts/CarroisGothic-Regular.ttf" 18))
    (set-bullet-system-sprite-sheet! enemy-bullets bullet-sheet)
    (set-bullet-system-sprite-sheet! player-bullets bullet-sheet)
    (set-sprite-sheet! (player-sprite player) player-sheet 0)
    (set-player-position! player 400 550)
-   (set-player-speed! player 350)
    (add-test-enemy)))
 
 (game-on-update-hook
@@ -191,7 +196,9 @@
      (draw-bullet-system-hitboxes player-bullets)
      (draw-bullet-system-hitboxes enemy-bullets))
    (draw-player player)
-   (draw-enemies)))
+   (draw-enemies)
+   (font-draw-text font 10 10 #f (string-append "Lives: " (number->string (player-lives player))))
+   (font-draw-text font 100 10 #f (string-append "Score: " (number->string (player-score player))))))
 
 (game-on-key-pressed-hook
  game

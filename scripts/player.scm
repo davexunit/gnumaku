@@ -1,7 +1,7 @@
 (use-modules (srfi srfi-9))
 
 (define-record-type Player
-  (%make-player sprite hitbox strength speed score lives)
+  (%make-player sprite hitbox strength speed score lives invincible)
   player?
   (sprite player-sprite)
   (speed player-speed set-player-speed!)
@@ -13,10 +13,11 @@
   (score player-score set-player-score!)
   (lives player-lives set-player-lives!)
   (hitbox player-hitbox)
-  (strength player-strength))
+  (strength player-strength)
+  (invincible player-invincible? set-player-invincible!))
 
-(define (make-player strength)
-  (%make-player (make-sprite) (make-rect 0 0 6 6) strength 0 0 0))
+(define (make-player lives strength speed)
+  (%make-player (make-sprite) (make-rect 0 0 6 6) strength speed 0 lives #f))
 
 (define (set-player-position! player x y)
   (set-sprite-position! (player-sprite player) x y))
@@ -24,6 +25,18 @@
 (define (set-player-hitbox-size! player width height)
   (let ((hitbox (player-hitbox player)))
     (set-rect-size! hitbox width height)))
+
+(define (player-dec-lives! player)
+  (set-player-lives! player (1- (player-lives player))))
+
+(define (player-add-points! player points)
+  (set-player-score! player (+ (player-score player) points)))
+
+(define (player-invincible-mode! player duration)
+  (coroutine
+   (set-player-invincible! player #t)
+   (wait duration)
+   (set-player-invincible! player #f)))
 
 (define (player-x player)
   (sprite-x (player-sprite player)))
