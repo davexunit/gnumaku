@@ -16,7 +16,12 @@
     (hash-set! bullet-types 'large-orange
 	       (lambda (bullet)
 		 (set-bullet-sprite! bullet 2)
-		 (set-bullet-hitbox! bullet -5 -5 10 10))))
+		 (set-bullet-hitbox! bullet -5 -5 10 10)))
+
+    (hash-set! bullet-types 'small-green
+	       (lambda (bullet)
+		 (set-bullet-sprite! bullet 5)
+		 (set-bullet-hitbox! bullet -2 -2 4 4))))
 
   ;; initalize bullet types the first time this procedure is called
   (unless (hash-ref bullet-types 'medium-blue)

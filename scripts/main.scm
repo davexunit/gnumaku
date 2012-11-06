@@ -77,9 +77,9 @@
      (let ((x (player-x player))
 	   (y (player-y player))
 	   (speed 800))
-       (emit-bullet player-bullets (- x 16) y speed 265 0 0 'small-diamond)
-       (emit-bullet player-bullets x (- y 20) speed 270 0 0 'medium-blue)
-       (emit-bullet player-bullets (+ x 16) y speed 275 0 0 'small-diamond))
+       (emit-bullet player-bullets (- x 16) y speed 268 0 0 'small-diamond)
+       (emit-bullet player-bullets x (- y 20) speed 270 0 0 'small-green)
+       (emit-bullet player-bullets (+ x 16) y speed 272 0 0 'small-diamond))
      (wait .07)
      (player-shot))))
 
