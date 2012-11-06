@@ -36,9 +36,10 @@
 (define (emit-spiral-forever enemy radius num-bullets rotate-step delay speed acceleration angular-velocity type)
   (coroutine
    (let repeat ((rotate 0))
-     (change-type (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) radius num-bullets rotate speed acceleration angular-velocity type))
-     (wait delay)
-     (repeat (+ rotate rotate-step)))))
+     (when (enemy-alive? enemy)
+       (change-type (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) radius num-bullets rotate speed acceleration angular-velocity type))
+       (wait delay)
+       (repeat (+ rotate rotate-step))))))
 
 (define (change-type bullets)
   (coroutine
@@ -84,10 +85,12 @@
      (player-shot))))
 
 (define (enemy-ai enemy)
+  (set-enemy-position! enemy 400 150)
   (coroutine
-   (enemy-move-to enemy 0 100 200)
-   (enemy-move-to enemy 800 100 200)
-   (enemy-ai enemy)))
+   (let loop ()
+     (enemy-move-to enemy 300 150 100)
+     (enemy-move-to enemy 500 150 100)
+     (loop))))
 
 (define (sprite-blink sprite duration times)
   (let ((delay (/ duration times)))
@@ -159,8 +162,8 @@
     (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
     (set-enemy-position! enemy (random 800) (random 200))
     (set-enemy-hitbox-size! enemy 32 32)
-    (enemy-ai enemy)
-    (emit-splosion enemy 2)
+    (enemy-ai enemy)23
+    (emit-spiral-forever enemy 32 4 8 .07 120 10 5 'small-diamond)
     (add-enemy! enemy)))
 
 (game-on-start-hook
