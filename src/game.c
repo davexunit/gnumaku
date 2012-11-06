@@ -88,8 +88,9 @@ on_key_released_hook (SCM game_smob, SCM callback)
 
 /* TODO: Refactor this into a few smaller, easier to follow functions */
 static SCM
-game_run(SCM game_smob) {
-    Game *game = check_game(game_smob);
+game_run(SCM game_smob)
+{
+    Game *game = check_game (game_smob);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_FONT *font = NULL;
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;
@@ -140,62 +141,70 @@ game_run(SCM game_smob) {
     al_register_event_source (event_queue, al_get_timer_event_source (timer));
     al_register_event_source (event_queue, al_get_keyboard_event_source ());
 
-    al_start_timer(timer);
-    last_time = al_get_time();
+    al_start_timer (timer);
+    last_time = al_get_time ();
 
-    while(game->running) {
+    while(game->running)
+    {
 	// Handle events
 	ALLEGRO_EVENT event;
 				
 	al_wait_for_event(event_queue, &event);
 				
-	if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+	{
 	    game->running = false;
 	}
-
-	else if(event.type == ALLEGRO_EVENT_TIMER) {
+	else if (event.type == ALLEGRO_EVENT_TIMER)
+	{
 	    redraw = true;
 
 	    // FPS
-	    float time = al_get_time();
+	    float time = al_get_time ();
 	    fpsbank += time - last_time;
 	    last_time = time;
-	    if(fpsbank >= 1) {
-		sprintf(fps_string, "%d fps", frames);
+	    if (fpsbank >= 1)
+	    {
+		sprintf (fps_string, "%d fps", frames);
 		frames = 0;
 		fpsbank -= 1;
 	    }
 
 	    if (scm_is_true (game->on_update))
 		scm_call_1 (game->on_update, scm_from_double(timestep));
-	} else if(event.type == ALLEGRO_EVENT_KEY_UP) {
-	    if (scm_is_true (game->on_key_released)) {
+	} else if (event.type == ALLEGRO_EVENT_KEY_UP)
+	{
+	    if (scm_is_true (game->on_key_released))
+	    {
 		scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
 	    }
-	} else if(event.type == ALLEGRO_EVENT_KEY_DOWN) {
-	    if (scm_is_true (game->on_key_pressed)) {
+	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
+	{
+	    if (scm_is_true (game->on_key_pressed))
+	    {
 		scm_call_1 (game->on_key_pressed, scm_from_int (event.keyboard.keycode));
 	    }
 	}
 
 	// Draw
-	if(redraw && al_is_event_queue_empty(event_queue)) {
+	if (redraw && al_is_event_queue_empty (event_queue)) {
 	    redraw = false;
 	    frames += 1;
-	    al_clear_to_color(al_map_rgb(0,0,0));
+	    al_clear_to_color (al_map_rgb(0, 0, 0));
 
 	    if (scm_is_true (game->on_draw))
 		scm_call_0 (game->on_draw);
 
-	    al_draw_text(font, al_map_rgb(255, 255, 255), 790, 570, ALLEGRO_ALIGN_RIGHT, fps_string);
+	    al_draw_text (font, al_map_rgb (255, 255, 255), 790, 570, ALLEGRO_ALIGN_RIGHT, fps_string);
 
-	    al_flip_display();
+	    al_flip_display ();
 	}
     }
 
-    al_destroy_timer(timer);
-    al_destroy_event_queue(event_queue);
-    al_destroy_display(display);
+    al_destroy_font (font);
+    al_destroy_timer (timer);
+    al_destroy_event_queue (event_queue);
+    al_destroy_display (display);
 
     return SCM_UNSPECIFIED;
 }
@@ -203,7 +212,7 @@ game_run(SCM game_smob) {
 static SCM
 game_stop(SCM game_smob)
 {
-    Game *game = check_game(game_smob);
+    Game *game = check_game (game_smob);
     
     game->running = false;
 
