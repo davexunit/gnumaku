@@ -34,5 +34,10 @@
 * TODO Refactor game loop into several smaller functions
 * TODO Control FPS rendering from Scheme
 ** It's hard-coded in the game loop right now
+* DONE Create font smob
 * TODO Pick a C code formatting style and STICK TO IT FFS
 * TODO Get rid of those annoying compiler warnings for scm_c_define_gsubr
+* TODO Improve bullet pool code
+** Use a more efficient method to find unused bullets in the pool.
+* TODO Refactor scheduler
+** Use the srfi-9 records module
