@@ -41,3 +41,4 @@
 ** Use a more efficient method to find unused bullets in the pool.
 * TODO Refactor scheduler
 ** Use the srfi-9 records module
+* TODO Add GPL snippet to every source file
