@@ -8,7 +8,13 @@
 #include <allegro5/allegro_ttf.h>
 #include <libguile.h>
 
-typedef struct {
+typedef struct
+{
+    ALLEGRO_DISPLAY *display;
+    ALLEGRO_FONT *font;
+    ALLEGRO_EVENT_QUEUE *event_queue;
+    ALLEGRO_TIMER *timer;
+    float timestep;
     bool running;
     SCM on_start;
     SCM on_update;

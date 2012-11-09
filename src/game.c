@@ -22,6 +22,11 @@ make_game ()
 
     /* Step 2: Initialize it with straight code.
      */
+    game->display = NULL;
+    game->font = NULL;
+    game->event_queue = NULL;
+    game->timer = NULL;
+    game->timestep = 1.0 / 60.0;
     game->on_start = SCM_BOOL_F;
     game->on_update = SCM_BOOL_F;
     game->on_draw = SCM_BOOL_F;
@@ -86,22 +91,9 @@ on_key_released_hook (SCM game_smob, SCM callback)
     return SCM_UNSPECIFIED;
 }
 
-/* TODO: Refactor this into a few smaller, easier to follow functions */
-static SCM
-game_run(SCM game_smob)
+static void
+game_init (Game *game)
 {
-    Game *game = check_game (game_smob);
-    ALLEGRO_DISPLAY *display = NULL;
-    ALLEGRO_FONT *font = NULL;
-    ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-    ALLEGRO_TIMER *timer = NULL;
-    const float timestep = 1.0 / 60.0;
-    float last_time = 0;
-    float fpsbank = 0;
-    char fps_string[16] = "0 fps";
-    int frames = 0;
-    bool redraw = true;
-
     /* Initialize Allegro things */
     if(!al_init())
     {
@@ -120,28 +112,76 @@ game_run(SCM game_smob)
 	fprintf (stderr, "failed to initialize keyboard!\n");
     }
 
-    display = al_create_display (800, 600);
-    if (!display) {
+    game->display = al_create_display (800, 600);
+    if (!game->display) {
 	fprintf (stderr, "failed to create display!\n");
     }
 
     /* Temporary hard-coded font for showing FPS */
-    font = al_load_ttf_font ("data/fonts/CarroisGothic-Regular.ttf", 24, 0);
+    game->font = al_load_ttf_font ("data/fonts/CarroisGothic-Regular.ttf", 24, 0);
 
-    if (!font) {
+    if (!game->font) {
 	fprintf(stderr, "failed to load font\n");
     }
+
+    game->timer = al_create_timer (game->timestep);
+    game->event_queue = al_create_event_queue ();
+    al_register_event_source (game->event_queue, al_get_display_event_source (game->display));
+    al_register_event_source (game->event_queue, al_get_timer_event_source (game->timer));
+    al_register_event_source (game->event_queue, al_get_keyboard_event_source ());
+}
+
+static void
+game_destroy (Game *game)
+{
+    al_destroy_font (game->font);
+    al_destroy_timer (game->timer);
+    al_destroy_event_queue (game->event_queue);
+    al_destroy_display (game->display);
+}
+
+static void
+game_process_event (Game *game, ALLEGRO_EVENT event)
+{
+
+}
+
+static void
+game_update (Game *game)
+{
+    
+}
+
+static void
+game_draw (Game *game, const char *fps_string)
+{
+    al_clear_to_color (al_map_rgb(0, 0, 0));
+
+    if (scm_is_true (game->on_draw))
+	scm_call_0 (game->on_draw);
+
+    al_draw_text (game->font, al_map_rgb (255, 255, 255), 790, 570, ALLEGRO_ALIGN_RIGHT, fps_string);
+
+    al_flip_display ();
+}
+
+/* TODO: Refactor this into a few smaller, easier to follow functions */
+static SCM
+game_run(SCM game_smob)
+{
+    Game *game = check_game (game_smob);
+    float last_time = 0;
+    float fpsbank = 0;
+    char fps_string[16] = "0 fps";
+    int frames = 0;
+    bool redraw = true;
+
+    game_init (game);
 
     if (scm_is_true (game->on_start))
 	scm_call_0 (game->on_start);
 
-    timer = al_create_timer (timestep);
-    event_queue = al_create_event_queue ();
-    al_register_event_source (event_queue, al_get_display_event_source (display));
-    al_register_event_source (event_queue, al_get_timer_event_source (timer));
-    al_register_event_source (event_queue, al_get_keyboard_event_source ());
-
-    al_start_timer (timer);
+    al_start_timer (game->timer);
     last_time = al_get_time ();
 
     while(game->running)
@@ -149,8 +189,8 @@ game_run(SCM game_smob)
 	// Handle events
 	ALLEGRO_EVENT event;
 				
-	al_wait_for_event(event_queue, &event);
-				
+	al_wait_for_event(game->event_queue, &event);
+
 	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 	{
 	    game->running = false;
@@ -171,7 +211,7 @@ game_run(SCM game_smob)
 	    }
 
 	    if (scm_is_true (game->on_update))
-		scm_call_1 (game->on_update, scm_from_double(timestep));
+		scm_call_1 (game->on_update, scm_from_double(game->timestep));
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP)
 	{
 	    if (scm_is_true (game->on_key_released))
@@ -187,24 +227,14 @@ game_run(SCM game_smob)
 	}
 
 	// Draw
-	if (redraw && al_is_event_queue_empty (event_queue)) {
+	if (redraw && al_is_event_queue_empty (game->event_queue)) {
 	    redraw = false;
 	    frames += 1;
-	    al_clear_to_color (al_map_rgb(0, 0, 0));
-
-	    if (scm_is_true (game->on_draw))
-		scm_call_0 (game->on_draw);
-
-	    al_draw_text (font, al_map_rgb (255, 255, 255), 790, 570, ALLEGRO_ALIGN_RIGHT, fps_string);
-
-	    al_flip_display ();
+	    game_draw (game, fps_string);
 	}
     }
 
-    al_destroy_font (font);
-    al_destroy_timer (timer);
-    al_destroy_event_queue (event_queue);
-    al_destroy_display (display);
+    game_destroy (game);
 
     return SCM_UNSPECIFIED;
 }
