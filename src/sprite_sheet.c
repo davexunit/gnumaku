@@ -75,7 +75,7 @@ free_sprite_sheet (SCM sprite_sheet_smob)
 
     for (int i = 0; i < sprite_sheet->num_tiles; ++i)
     {
-	al_destroy_bitmap (sprite_sheet->tiles + i);
+	al_destroy_bitmap (sprite_sheet->tiles[i]);
     }
 
     scm_gc_free (sprite_sheet->tiles, sizeof (ALLEGRO_BITMAP **) * sprite_sheet->num_tiles, "tiles");
