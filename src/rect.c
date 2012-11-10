@@ -72,7 +72,6 @@ make_rect (SCM s_x, SCM s_y, SCM s_width, SCM s_height)
     SCM_NEWSMOB (smob, rect_tag, rect);
 
     return smob;
-
 }
 
 static SCM
