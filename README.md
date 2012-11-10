@@ -34,13 +34,18 @@ Dependencies
 GNU Guile >= 2.0  
 Allegro >= 5.0
 
+Try the Demo!
+------------------
+make
+./demo.scm
+
 License
 -------
 GNU GPL v3
 
 Thanks
 ------
-Thanks to mark_weaver for helping me with everything Scheme and Guile related on a regular basis.
+Thanks to mark_weaver and ijp for helping me with everything Scheme and Guile related on a regular basis.
 Thanks to wingo for his coroutine implementation.
 Thanks to MIT Press for SICP.
 Thanks to the fine folks on the #guile and #allegro rooms on freenode.
