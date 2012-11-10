@@ -36,7 +36,7 @@
 ** It's hard-coded in the game loop right now
 * DONE Create font smob
 * TODO Pick a C code formatting style and STICK TO IT FFS
-* TODO Get rid of those annoying compiler warnings for scm_c_define_gsubr
+* DONE Get rid of those annoying compiler warnings for scm_c_define_gsubr
 ** Need to talk to the folks on #guile about this
 * TODO Improve bullet pool code
 ** Use a more efficient method to find unused bullets in the pool.
