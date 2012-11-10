@@ -12,6 +12,7 @@
 (primitive-load "scripts/primitives.scm")
 (primitive-load "scripts/player.scm")
 (primitive-load "scripts/enemy.scm")
+(primitive-load "scripts/fps.scm")
 
 (primitive-load "scripts/spiders-nest.scm")
 
@@ -26,6 +27,7 @@
 (define player-sheet #f)
 (define enemy-sheet  #f)
 (define font #f)
+(define fps (make-fps game))
 
 (define (clear-everything)
   (set-segments! agenda '())
@@ -182,6 +184,7 @@
 (game-on-update-hook
  game
  (lambda (dt)
+   (fps-update! fps)
    (update-agenda agenda dt)
    (update-bullet-system! enemy-bullets dt)
    (update-bullet-system! player-bullets dt)
@@ -201,7 +204,8 @@
    (draw-player player)
    (draw-enemies)
    (font-draw-text font 10 10 #f (string-append "Lives: " (number->string (player-lives player))))
-   (font-draw-text font 100 10 #f (string-append "Score: " (number->string (player-score player))))))
+   (font-draw-text font 100 10 #f (string-append "Score: " (number->string (player-score player))))
+   (font-draw-text font 730 575 #f (string-append "FPS: " (number->string (fps-last-frames fps))))))
 
 (game-on-key-pressed-hook
  game
