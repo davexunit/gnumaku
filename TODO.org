@@ -46,3 +46,8 @@
 * DONE Implement reference counting for bullets to prevent weird bugs
 * TODO Write unit tests
 ** Need a good way to do this with Guile
+* TODO Animated sprites
+* TODO Expand font bindingsp
+** Bind more of Allegro's font functions with Guile.
+* TODO Add bindings for Allegro audio addon
+** Need some minimal bindings for background music and short sound effects
