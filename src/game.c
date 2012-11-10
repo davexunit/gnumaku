@@ -33,6 +33,7 @@ make_game ()
     game->on_key_pressed = SCM_BOOL_F;
     game->on_key_released = SCM_BOOL_F;
     game->running = true;
+    game->redraw = true;
      
     /* Step 3: Create the smob.
      */
@@ -141,40 +142,60 @@ game_destroy (Game *game)
 }
 
 static void
-game_process_event (Game *game, ALLEGRO_EVENT event)
-{
-
-}
-
-static void
 game_update (Game *game)
 {
-    
+    game->redraw = true;
+
+    if (scm_is_true (game->on_update))
+	scm_call_1 (game->on_update, scm_from_double(game->timestep));
 }
 
 static void
-game_draw (Game *game, const char *fps_string)
+game_process_event (Game *game)
+{
+    static ALLEGRO_EVENT event;
+				
+    al_wait_for_event(game->event_queue, &event);
+
+    if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+    {
+	game->running = false;
+    }
+    else if (event.type == ALLEGRO_EVENT_TIMER)
+    {
+	game_update (game);
+    }
+    else if (event.type == ALLEGRO_EVENT_KEY_UP)
+    {
+	if (scm_is_true (game->on_key_released))
+	{
+	    scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
+	}
+    }
+    else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
+    {
+	if (scm_is_true (game->on_key_pressed))
+	{
+	    scm_call_1 (game->on_key_pressed, scm_from_int (event.keyboard.keycode));
+	}
+    }
+}
+
+static void
+game_draw (Game *game)
 {
     al_clear_to_color (al_map_rgb(0, 0, 0));
 
     if (scm_is_true (game->on_draw))
 	scm_call_0 (game->on_draw);
 
-    al_draw_text (game->font, al_map_rgb (255, 255, 255), 790, 570, ALLEGRO_ALIGN_RIGHT, fps_string);
-
     al_flip_display ();
 }
 
-/* TODO: Refactor this into a few smaller, easier to follow functions */
 static SCM
 game_run(SCM game_smob)
 {
     Game *game = check_game (game_smob);
-    float last_time = 0;
-    float fpsbank = 0;
-    char fps_string[16] = "0 fps";
-    int frames = 0;
-    bool redraw = true;
 
     game_init (game);
 
@@ -182,55 +203,15 @@ game_run(SCM game_smob)
 	scm_call_0 (game->on_start);
 
     al_start_timer (game->timer);
-    last_time = al_get_time ();
 
     while(game->running)
     {
-	// Handle events
-	ALLEGRO_EVENT event;
-				
-	al_wait_for_event(game->event_queue, &event);
-
-	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-	{
-	    game->running = false;
-	}
-	else if (event.type == ALLEGRO_EVENT_TIMER)
-	{
-	    redraw = true;
-
-	    // FPS
-	    float time = al_get_time ();
-	    fpsbank += time - last_time;
-	    last_time = time;
-	    if (fpsbank >= 1)
-	    {
-		sprintf (fps_string, "%d fps", frames);
-		frames = 0;
-		fpsbank -= 1;
-	    }
-
-	    if (scm_is_true (game->on_update))
-		scm_call_1 (game->on_update, scm_from_double(game->timestep));
-	} else if (event.type == ALLEGRO_EVENT_KEY_UP)
-	{
-	    if (scm_is_true (game->on_key_released))
-	    {
-		scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
-	    }
-	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
-	{
-	    if (scm_is_true (game->on_key_pressed))
-	    {
-		scm_call_1 (game->on_key_pressed, scm_from_int (event.keyboard.keycode));
-	    }
-	}
+	game_process_event (game);
 
 	// Draw
-	if (redraw && al_is_event_queue_empty (game->event_queue)) {
-	    redraw = false;
-	    frames += 1;
-	    game_draw (game, fps_string);
+	if (game->redraw && al_is_event_queue_empty (game->event_queue)) {
+	    game->redraw = false;
+	    game_draw (game);
 	}
     }
 

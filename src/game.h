@@ -16,6 +16,7 @@ typedef struct
     ALLEGRO_TIMER *timer;
     float timestep;
     bool running;
+    bool redraw;
     SCM on_start;
     SCM on_update;
     SCM on_draw;
