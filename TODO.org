@@ -42,3 +42,4 @@
 * TODO Refactor scheduler
 ** Use the srfi-9 records module
 * TODO Add GPL snippet to every source file
+* TODO Implement reference counting for bullets to prevent weird bugs
