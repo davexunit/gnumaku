@@ -238,8 +238,6 @@
    (when (eq? key (keycode 'escape))
      (game-stop game))
    (when (eq? key (keycode 'd))
-     (set! debug-mode (not debug-mode)))
-   (when (eq? key (keycode 'space))
-     (cave-spiders-nest enemy-bullets 400 150))))
+     (set! debug-mode (not debug-mode)))))
 
 (game-run game)
