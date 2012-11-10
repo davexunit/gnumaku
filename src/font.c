@@ -46,7 +46,7 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     float b = scm_to_double (scm_caddr (s_color));
     float a = scm_to_double (scm_cadddr (s_color));
 
-    al_draw_text (font->font, al_map_rgba_f (r, g, b, a), x, y, 0, text);
+    al_draw_text (font->font, al_map_rgba_f (r * a, g * a, b * a, a), x, y, 0, text);
 
     return SCM_UNSPECIFIED;
 }
