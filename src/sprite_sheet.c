@@ -24,7 +24,7 @@ init_sprite_sheet_tiles (SpriteSheet *sprite_sheet)
 
     sprite_sheet->num_tiles = rows * columns;
     sprite_sheet->tiles = (ALLEGRO_BITMAP **) scm_gc_malloc (sizeof (ALLEGRO_BITMAP **) * sprite_sheet->num_tiles, "tiles");
-    
+
     for (int y = 0; y < rows; ++y)
     {
 	for (int x = 0; x < columns; ++x)
@@ -72,7 +72,7 @@ free_sprite_sheet (SCM sprite_sheet_smob)
     SpriteSheet *sprite_sheet = (SpriteSheet *) SCM_SMOB_DATA (sprite_sheet_smob);
 
     al_destroy_bitmap(sprite_sheet->image);
-    
+
     for (int i = 0; i < sprite_sheet->num_tiles; ++i)
     {
 	al_destroy_bitmap (sprite_sheet->tiles + i);
@@ -88,7 +88,7 @@ static int
 print_sprite_sheet (SCM sprite_sheet_smob, SCM port, scm_print_state *pstate)
 {
     SpriteSheet *sprite_sheet = (SpriteSheet *) SCM_SMOB_DATA (sprite_sheet_smob);
-     
+
     scm_puts ("#<SpriteSheet ", port);
     scm_display (scm_from_int(sprite_sheet->tile_width), port);
     scm_puts (" ", port);
@@ -98,7 +98,7 @@ print_sprite_sheet (SCM sprite_sheet_smob, SCM port, scm_print_state *pstate)
     scm_puts (" ", port);
     scm_display (scm_from_int(sprite_sheet->margin), port);
     scm_puts (">", port);
-     
+
     /* non-zero means success */
     return 1;
 }

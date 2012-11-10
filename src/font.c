@@ -6,7 +6,7 @@ static Font*
 check_font (SCM font_smob)
 {
     scm_assert_smob_type (font_tag, font_smob);
-     
+
     return (Font *) SCM_SMOB_DATA (font_smob);
 }
 
@@ -41,7 +41,7 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
     const char *text = scm_to_locale_string (s_text);
-    
+
     al_draw_text (font->font, al_map_rgba_f (1, 1, 1, 1), x, y, 0, text);
 
     return SCM_UNSPECIFIED;
@@ -57,7 +57,7 @@ free_font (SCM font_smob)
 
     return 0;
 }
-     
+
 static int
 print_font (SCM font_smob, SCM port, scm_print_state *pstate)
 {

@@ -6,7 +6,7 @@ static Game*
 check_game (SCM game_smob)
 {
     scm_assert_smob_type (game_tag, game_smob);
-     
+
     return (Game *) SCM_SMOB_DATA (game_smob);
 }
 
@@ -34,7 +34,7 @@ make_game ()
     game->on_key_released = SCM_BOOL_F;
     game->running = true;
     game->redraw = true;
-     
+
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, game_tag, game);
@@ -46,7 +46,7 @@ static SCM
 on_start_hook (SCM game_smob, SCM callback)
 {
     Game *game = check_game(game_smob);
-    
+
     game->on_start = callback;
 
     return SCM_UNSPECIFIED;
@@ -56,7 +56,7 @@ static SCM
 on_update_hook (SCM game_smob, SCM callback)
 {
     Game *game = check_game(game_smob);
-    
+
     game->on_update = callback;
 
     return SCM_UNSPECIFIED;
@@ -66,7 +66,7 @@ static SCM
 on_draw_hook (SCM game_smob, SCM callback)
 {
     Game *game = check_game(game_smob);
-    
+
     game->on_draw = callback;
 
     return SCM_UNSPECIFIED;
@@ -76,7 +76,7 @@ static SCM
 on_key_pressed_hook (SCM game_smob, SCM callback)
 {
     Game *game = check_game(game_smob);
-    
+
     game->on_key_pressed = callback;
 
     return SCM_UNSPECIFIED;
@@ -86,7 +86,7 @@ static SCM
 on_key_released_hook (SCM game_smob, SCM callback)
 {
     Game *game = check_game(game_smob);
-    
+
     game->on_key_released = callback;
 
     return SCM_UNSPECIFIED;
@@ -154,7 +154,7 @@ static void
 game_process_event (Game *game)
 {
     static ALLEGRO_EVENT event;
-				
+
     al_wait_for_event(game->event_queue, &event);
 
     if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -233,7 +233,7 @@ static SCM
 game_stop (SCM game_smob)
 {
     Game *game = check_game (game_smob);
-    
+
     game->running = false;
 
     return SCM_UNSPECIFIED;
@@ -243,7 +243,7 @@ static SCM
 mark_game (SCM game_smob)
 {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
-    
+
     // Mark callbacks
     scm_gc_mark (game->on_start);
     scm_gc_mark (game->on_update);
@@ -258,19 +258,19 @@ static size_t
 free_game (SCM game_smob)
 {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
-     
+
     scm_gc_free (game, sizeof (Game), "game");
-     
+
     return 0;
 }
-     
+
 static int
 print_game (SCM game_smob, SCM port, scm_print_state *pstate)
 {
     //Game *game = (Game *) SCM_SMOB_DATA (game_smob);
-     
+
     scm_puts ("#<Game>", port);
-     
+
     /* non-zero means success */
     return 1;
 }

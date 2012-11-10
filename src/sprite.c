@@ -1,12 +1,12 @@
 #include "sprite.h"
 
 static scm_t_bits sprite_tag;
-
+nn
 static Sprite*
 check_sprite (SCM sprite_smob)
 {
     scm_assert_smob_type (sprite_tag, sprite_smob);
-     
+
     return (Sprite *) SCM_SMOB_DATA (sprite_smob);
 }
 
@@ -33,7 +33,7 @@ make_sprite ()
     sprite->scale_y = 1;
     sprite->rotation = 0;
     sprite->visible = true;
-     
+
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, sprite_tag, sprite);
@@ -283,17 +283,17 @@ static size_t
 free_sprite (SCM sprite_smob)
 {
     Sprite *sprite = (Sprite *) SCM_SMOB_DATA (sprite_smob);
-     
+
     scm_gc_free (sprite, sizeof (Sprite), "sprite");
-     
+
     return 0;
 }
-     
+
 static int
 print_sprite (SCM sprite_smob, SCM port, scm_print_state *pstate)
 {
     Sprite *sprite = (Sprite *) SCM_SMOB_DATA (sprite_smob);
-     
+
     scm_puts ("#<Sprite ", port);
     scm_display (scm_from_double (sprite->x), port);
     scm_puts (" ", port);
@@ -305,7 +305,7 @@ print_sprite (SCM sprite_smob, SCM port, scm_print_state *pstate)
     scm_puts (" ", port);
     scm_display (scm_from_double (sprite->rotation), port);
     scm_puts (">", port);
-     
+
     /* non-zero means success */
     return 1;
 }

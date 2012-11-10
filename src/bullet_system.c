@@ -10,7 +10,7 @@ static BulletSystem*
 check_bullet_system (SCM bullet_system_smob)
 {
     scm_assert_smob_type (bullet_system_tag, bullet_system_smob);
-     
+
     return (BulletSystem *) SCM_SMOB_DATA (bullet_system_smob);
 }
 
@@ -18,7 +18,7 @@ static BulletRef*
 check_bullet_ref (SCM bullet_ref_smob)
 {
     scm_assert_smob_type (bullet_ref_tag, bullet_ref_smob);
-     
+
     return (BulletRef *) SCM_SMOB_DATA (bullet_ref_smob);
 }
 
@@ -44,30 +44,30 @@ make_bullet_system (SCM s_max_bullets)
     SCM smob;
     BulletSystem *bullet_system;
     int max_bullets = scm_to_int (s_max_bullets);
-     
+
     /* Step 1: Allocate the memory block.
      */
     bullet_system = (BulletSystem *) scm_gc_malloc (sizeof (BulletSystem), "bullet_system");
-     
+
     /* Step 2: Initialize it with straight code.
      */
     bullet_system->max_bullets = max_bullets;
     bullet_system->bullets = NULL;
     bullet_system->sprite_sheet = SCM_BOOL_F;
-     
+
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, bullet_system_tag, bullet_system);
-     
+
     /* Step 4: Finish the initialization.
      */
     bullet_system->bullets = (Bullet *) scm_gc_malloc (sizeof (Bullet) * max_bullets, "bullets");
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	init_bullet (bullet_system->bullets + i);
+        init_bullet (bullet_system->bullets + i);
     }
-     
+
     return smob;
 }
 
@@ -83,22 +83,22 @@ static size_t
 free_bullet_system (SCM bullet_system_smob)
 {
     BulletSystem *bullet_system = (BulletSystem *) SCM_SMOB_DATA (bullet_system_smob);
-     
+
     scm_gc_free (bullet_system->bullets, sizeof (Bullet) * bullet_system->max_bullets, "bullets");
     scm_gc_free (bullet_system, sizeof (BulletSystem), "bullet_system");
-     
+
     return 0;
 }
-     
+
 static int
 print_bullet_system (SCM bullet_system_smob, SCM port, scm_print_state *pstate)
 {
     BulletSystem *bullet_system = (BulletSystem *) SCM_SMOB_DATA (bullet_system_smob);
-     
+
     scm_puts ("#<BulletSystem ", port);
     scm_display (scm_from_int(bullet_system->max_bullets), port);
     scm_puts (">", port);
-     
+
     /* non-zero means success */
     return 1;
 }
@@ -114,8 +114,8 @@ free_bullet_index (BulletSystem *bullet_system)
 {
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	if (!get_bullet_at_index (bullet_system, i)->alive)
-	    return i;
+        if (!get_bullet_at_index (bullet_system, i)->alive)
+            return i;
     }
 
     return -1;
@@ -126,17 +126,17 @@ get_free_bullet (BulletSystem *bullet_system)
 {
     return get_bullet_at_index (bullet_system, free_bullet_index (bullet_system));
 }
-     
+
 static SCM
 clear_bullet_system (SCM bullet_system_smob)
 {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    
+
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	Bullet *bullet = bullet_system->bullets + i;
-	init_bullet(bullet);
-	
+        Bullet *bullet = bullet_system->bullets + i;
+        init_bullet(bullet);
+
     }
 
     scm_remember_upto_here_1 (bullet_system_smob);
@@ -170,7 +170,7 @@ remove_out_of_bounds_bullet (Bullet *bullet)
          bullet->y > y + height) &&
         !bullet->referenced)
     {
-	bullet->alive = false;
+        bullet->alive = false;
     }
 }
 
@@ -179,16 +179,16 @@ update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     float dt = scm_to_double (s_dt);
-    
+
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	Bullet *bullet = bullet_system->bullets + i;
-	
-	if (bullet->alive)
-	{
-	    update_bullet (bullet, dt);
-	    remove_out_of_bounds_bullet (bullet);
-	}
+        Bullet *bullet = bullet_system->bullets + i;
+
+        if (bullet->alive)
+        {
+            update_bullet (bullet, dt);
+            remove_out_of_bounds_bullet (bullet);
+        }
     }
 
     scm_remember_upto_here_1 (bullet_system_smob);
@@ -206,12 +206,12 @@ draw_bullet_system (SCM bullet_system_smob)
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_system->bullets + i;
 
-	if (bullet->alive && bullet->image)
-	{
-	    al_draw_rotated_bitmap (bullet->image, sprite_sheet->tile_width / 2, sprite_sheet->tile_height / 2, bullet->x, bullet->y, deg2rad(bullet->direction), 0);
-	}
+        if (bullet->alive && bullet->image)
+        {
+            al_draw_rotated_bitmap (bullet->image, sprite_sheet->tile_width / 2, sprite_sheet->tile_height / 2, bullet->x, bullet->y, deg2rad(bullet->direction), 0);
+        }
     }
 
     al_hold_bitmap_drawing (false);
@@ -227,14 +227,14 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob)
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_system->bullets + i;
 
-	if (bullet->alive && bullet->image)
-	{
-	    Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
-	    al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
-			       al_map_rgba_f (1, 0, 1, 1), 2);
-	}
+        if (bullet->alive && bullet->image)
+        {
+            Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
+            al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
+                               al_map_rgba_f (1, 0, 1, 1), 2);
+        }
     }
 
     scm_remember_upto_here_1 (bullet_system_smob);
@@ -249,11 +249,11 @@ bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback)
 
     if (rect_collide_rect (&hitbox, rect))
     {
-	if (scm_procedure_p (callback))
-	{
-	    /* The callback can return true if the bullet should be removed from the system */
-	    return scm_to_bool (scm_call_0 (callback));
-	}
+        if (scm_procedure_p (callback))
+        {
+            /* The callback can return true if the bullet should be removed from the system */
+            return scm_to_bool (scm_call_0 (callback));
+        }
     }
 
     return false;
@@ -267,12 +267,12 @@ bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-	Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_system->bullets + i;
 
-	if (bullet->alive && bullet_collision_check (bullet, rect, callback))
-	{
-	    bullet->alive = false;
-	}
+        if (bullet->alive && bullet_collision_check (bullet, rect, callback))
+        {
+            bullet->alive = false;
+        }
     }
 
     return SCM_UNSPECIFIED;
@@ -296,20 +296,20 @@ make_bullet_ref (SCM bullet_system_smob)
     BulletRef *bullet_ref;
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Bullet *bullet = get_free_bullet (bullet_system);
-     
+
     /* Step 1: Allocate the memory block.
      */
     bullet_ref = (BulletRef *) scm_gc_malloc (sizeof (BulletRef), "bullet_ref");
-     
+
     /* Step 2: Initialize it with straight code.
      */
     bullet_ref->bullet_system = NULL;
     bullet_ref->bullet = NULL;
-     
+
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, bullet_ref_tag, bullet_ref);
-     
+
     /* Step 4: Finish the initialization.
      */
     init_bullet(bullet);
@@ -333,7 +333,7 @@ free_bullet_ref (SCM bullet_ref_smob)
 
     return 0;
 }
-     
+
 static int
 print_bullet_ref (SCM bullet_ref_smob, SCM port, scm_print_state *pstate)
 {
@@ -383,7 +383,7 @@ set_bullet_speed (SCM bullet_ref_smob, SCM s_speed)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -396,7 +396,7 @@ set_bullet_acceleration (SCM bullet_ref_smob, SCM s_acceleration)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -409,7 +409,7 @@ set_bullet_direction (SCM bullet_ref_smob, SCM s_direction)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -422,7 +422,7 @@ change_bullet_direction (SCM bullet_ref_smob, SCM s_direction)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -435,7 +435,7 @@ set_bullet_angular_velocity (SCM bullet_ref_smob, SCM s_angular_velocity)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -449,7 +449,7 @@ set_bullet_sprite (SCM bullet_ref_smob, SCM s_sprite_index)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -468,7 +468,7 @@ set_bullet_hitbox (SCM bullet_ref_smob, SCM s_x, SCM s_y, SCM s_width, SCM s_hei
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -480,7 +480,7 @@ kill_bullet (SCM bullet_ref_smob)
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
-    return SCM_UNSPECIFIED;    
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
