@@ -44,3 +44,5 @@
 ** Use the srfi-9 records module
 * TODO Add GPL snippet to every source file
 * DONE Implement reference counting for bullets to prevent weird bugs
+* TODO Write unit tests
+** Need a good way to do this with Guile
