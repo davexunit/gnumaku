@@ -193,7 +193,7 @@ game_draw (Game *game)
 }
 
 static SCM
-game_run(SCM game_smob)
+game_run (SCM game_smob)
 {
     Game *game = check_game (game_smob);
 
@@ -221,7 +221,16 @@ game_run(SCM game_smob)
 }
 
 static SCM
-game_stop(SCM game_smob)
+game_get_time (SCM game_smob)
+{
+    // We don't actually need to use the game struct here.
+    check_game (game_smob);
+
+    return scm_from_double (al_get_time ());
+}
+
+static SCM
+game_stop (SCM game_smob)
 {
     Game *game = check_game (game_smob);
     
@@ -282,4 +291,5 @@ init_game_type (void)
     scm_c_define_gsubr ("game-on-key-released-hook", 2, 0, 0, on_key_released_hook);
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
+    scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
 }
