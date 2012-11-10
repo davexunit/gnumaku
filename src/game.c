@@ -292,4 +292,14 @@ init_game_type (void)
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
     scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
+
+    scm_c_export ("make-game", NULL);
+    scm_c_export ("game-on-start-hook", NULL);
+    scm_c_export ("game-on-update-hook", NULL);
+    scm_c_export ("game-on-draw-hook", NULL);
+    scm_c_export ("game-on-key-pressed-hook", NULL);
+    scm_c_export ("game-on-key-released-hook", NULL);
+    scm_c_export ("game-run", NULL);
+    scm_c_export ("game-stop", NULL);
+    scm_c_export ("game-get-time", NULL);
 }
