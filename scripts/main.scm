@@ -203,9 +203,9 @@
      (draw-bullet-system-hitboxes enemy-bullets))
    (draw-player player)
    (draw-enemies)
-   (font-draw-text font 10 10 #f (string-append "Lives: " (number->string (player-lives player))))
-   (font-draw-text font 100 10 #f (string-append "Score: " (number->string (player-score player))))
-   (font-draw-text font 730 575 #f (string-append "FPS: " (number->string (fps-last-frames fps))))))
+   (font-draw-text font 10 10 '(1 1 1 1) (string-append "Lives: " (number->string (player-lives player))))
+   (font-draw-text font 100 10 '(1 1 1 1) (string-append "Score: " (number->string (player-score player))))
+   (font-draw-text font 730 575 '(1 1 1 0.2) (string-append "FPS: " (number->string (fps-last-frames fps))))))
 
 (game-on-key-pressed-hook
  game
