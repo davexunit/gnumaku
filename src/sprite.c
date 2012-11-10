@@ -1,7 +1,7 @@
 #include "sprite.h"
 
 static scm_t_bits sprite_tag;
-nn
+
 static Sprite*
 check_sprite (SCM sprite_smob)
 {
