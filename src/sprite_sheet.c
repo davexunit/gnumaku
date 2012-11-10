@@ -112,4 +112,6 @@ init_sprite_sheet_type (void)
     scm_set_smob_print (sprite_sheet_tag, print_sprite_sheet);
 
     scm_c_define_gsubr ("make-sprite-sheet", 5, 0, 0, make_sprite_sheet);
+    
+    scm_c_export ("make-sprite-sheet", NULL);
 }

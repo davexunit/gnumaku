@@ -559,6 +559,14 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet!", 2, 0, 0, set_bullet_system_sprite_sheet);
     scm_c_define_gsubr ("bullet-system-collide-rect", 3, 0, 0, bullet_system_collide_rect);
 
+    scm_c_export ("make-bullet-system", NULL);
+    scm_c_export ("clear-bullet-system!", NULL);
+    scm_c_export ("draw-bullet-system", NULL);
+    scm_c_export ("draw-bullet-system-hitboxes", NULL);
+    scm_c_export ("update-bullet-system!", NULL);
+    scm_c_export ("set-bullet-system-sprite-sheet!", NULL);
+    scm_c_export ("bullet-system-collide-rect", NULL);
+
     bullet_ref_tag = scm_make_smob_type ("BulletRef", sizeof (BulletRef));
     scm_set_smob_mark (bullet_ref_tag, 0);
     scm_set_smob_free (bullet_ref_tag, free_bullet_ref);
@@ -581,4 +589,23 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("set-bullet-sprite!", 2, 0, 0, set_bullet_sprite);
     scm_c_define_gsubr ("set-bullet-hitbox!", 5, 0, 0, set_bullet_hitbox);
     scm_c_define_gsubr ("change-bullet-direction!", 2, 0, 0, change_bullet_direction);
+
+    scm_c_export ("make-bullet", NULL);
+    scm_c_export ("kill-bullet", NULL);
+    scm_c_export ("bullet-x", NULL);
+    scm_c_export ("bullet-y", NULL);
+    scm_c_export ("bullet-y", NULL);
+    scm_c_export ("bullet-speed", NULL);
+    scm_c_export ("bullet-direction", NULL);
+    scm_c_export ("bullet-acceleration", NULL);
+    scm_c_export ("bullet-angular-velocity", NULL);
+    scm_c_export ("set-bullet-position!", NULL);
+    scm_c_export ("set-bullet-speed!", NULL);
+    scm_c_export ("set-bullet-direction!", NULL);
+    scm_c_export ("set-bullet-acceleration!", NULL);
+    scm_c_export ("set-bullet-angular-velocity!", NULL);
+    scm_c_export ("set-bullet-sprite!", NULL);
+    scm_c_export ("set-bullet-hitbox!", NULL);
+    scm_c_export ("change-bullet-direction!", NULL);
+
 }

@@ -289,4 +289,19 @@ init_rect_type (void)
     scm_c_define_gsubr ("rect-move", 3, 0, 0, scm_rect_move);
     scm_c_define_gsubr ("rect-collide-point", 3, 0, 0, scm_rect_collide_point);
     scm_c_define_gsubr ("rect-collide-rect", 2, 0, 0, scm_rect_collide_rect);
+
+    scm_c_export ("make-rect", NULL);
+    scm_c_export ("rect-x", NULL);
+    scm_c_export ("rect-y", NULL);
+    scm_c_export ("rect-width", NULL);
+    scm_c_export ("rect-height", NULL);
+    scm_c_export ("set-rect-x!", NULL);
+    scm_c_export ("set-rect-y!", NULL);
+    scm_c_export ("set-rect-position!",NULL); 
+    scm_c_export ("set-rect-width!", NULL);
+    scm_c_export ("set-rect-height!", NULL);
+    scm_c_export ("set-rect-size!", NULL);
+    scm_c_export ("rect-move", NULL);
+    scm_c_export ("rect-collide-point", NULL);
+    scm_c_export ("rect-collide-rect", NULL);
 }

@@ -81,4 +81,7 @@ init_font_type (void)
 
     scm_c_define_gsubr ("make-font", 2, 0, 0, make_font);
     scm_c_define_gsubr ("font-draw-text", 5, 0, 0, font_draw_text);
+
+    scm_c_export ("make-font", NULL);
+    scm_c_export ("font-draw-text", NULL);
 }

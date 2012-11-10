@@ -337,4 +337,24 @@ init_sprite_type (void)
     scm_c_define_gsubr ("set-sprite-color!", 5, 0, 0, set_sprite_color);
     scm_c_define_gsubr ("set-sprite-sheet!", 3, 0, 0, set_sprite_sheet);
     scm_c_define_gsubr ("draw-sprite", 1, 0, 0, sprite_draw);
+
+    scm_c_export ("make-sprite", NULL);
+    scm_c_export ("sprite-sheet", NULL);
+    scm_c_export ("sprite-x", NULL);
+    scm_c_export ("sprite-y", NULL);
+    scm_c_export ("sprite-scale-x", NULL);
+    scm_c_export ("sprite-scale-y", NULL);
+    scm_c_export ("sprite-rotation", NULL);
+    scm_c_export ("sprite-visible?", NULL);
+    scm_c_export ("set-sprite-x!", NULL);
+    scm_c_export ("set-sprite-y!", NULL);
+    scm_c_export ("set-sprite-position!",NULL); 
+    scm_c_export ("set-sprite-scale-x!", NULL);
+    scm_c_export ("set-sprite-scale-y!", NULL);
+    scm_c_export ("set-sprite-scale!", NULL);
+    scm_c_export ("set-sprite-rotation!", NULL);
+    scm_c_export ("set-sprite-visible!", NULL);
+    scm_c_export ("set-sprite-color!", NULL);
+    scm_c_export ("set-sprite-sheet!", NULL);
+    scm_c_export ("draw-sprite", NULL);
 }
