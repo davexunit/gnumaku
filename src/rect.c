@@ -42,7 +42,7 @@ Rect*
 check_rect (SCM rect_smob)
 {
     scm_assert_smob_type (rect_tag, rect_smob);
-     
+
     return (Rect *) SCM_SMOB_DATA (rect_smob);
 }
 
@@ -66,7 +66,7 @@ make_rect (SCM s_x, SCM s_y, SCM s_width, SCM s_height)
     rect->y = y;
     rect->width = width;
     rect->height = height;
-     
+
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, rect_tag, rect);
@@ -243,17 +243,17 @@ static size_t
 free_rect (SCM rect_smob)
 {
     Rect *rect = (Rect *) SCM_SMOB_DATA (rect_smob);
-     
+
     scm_gc_free (rect, sizeof (Rect), "rect");
-     
+
     return 0;
 }
-     
+
 static int
 print_rect (SCM rect_smob, SCM port, scm_print_state *pstate)
 {
     Rect *rect = (Rect *) SCM_SMOB_DATA (rect_smob);
-     
+
     scm_puts ("#<Rect x: ", port);
     scm_display (scm_from_double (rect->x), port);
     scm_puts (" y: ", port);
@@ -263,7 +263,7 @@ print_rect (SCM rect_smob, SCM port, scm_print_state *pstate)
     scm_puts (" height: ", port);
     scm_display (scm_from_double (rect->width), port);
     scm_puts (">", port);
-     
+
     /* non-zero means success */
     return 1;
 }
