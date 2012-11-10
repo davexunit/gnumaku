@@ -32,7 +32,7 @@
 ** TODO Collision between player bullets and enemies
 * TODO Develop actual gameplay :P
 * DONE Refactor game loop into several smaller functions
-* TODO Control FPS rendering from Scheme
+* DONE Control FPS rendering from Scheme
 ** It's hard-coded in the game loop right now
 * DONE Create font smob
 * TODO Pick a C code formatting style and STICK TO IT FFS
