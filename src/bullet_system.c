@@ -32,6 +32,7 @@ init_bullet (Bullet *bullet)
     bullet->x = 0;
     bullet->y = 0;
     bullet->alive = false;
+    bullet->referenced = false;
     bullet->image = NULL;
     bullet->color = al_map_rgba_f (1, 1, 1, 1);
     init_rect (&bullet->hitbox, 0, 0, 0, 0);
@@ -163,10 +164,11 @@ remove_out_of_bounds_bullet (Bullet *bullet)
     static float width = 1000;
     static float height = 800;
 
-    if (bullet->x < x ||
-	bullet->x > x + width ||
-	bullet->y < y ||
-	bullet->y > y + height)
+    if ((bullet->x < x ||
+         bullet->x > x + width ||
+         bullet->y < y ||
+         bullet->y > y + height) &&
+        !bullet->referenced)
     {
 	bullet->alive = false;
     }
@@ -292,8 +294,8 @@ make_bullet_ref (SCM bullet_system_smob)
 {
     SCM smob;
     BulletRef *bullet_ref;
-    BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
-    Bullet *bullet = get_free_bullet(bullet_system);
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
+    Bullet *bullet = get_free_bullet (bullet_system);
      
     /* Step 1: Allocate the memory block.
      */
@@ -312,6 +314,7 @@ make_bullet_ref (SCM bullet_system_smob)
      */
     init_bullet(bullet);
     bullet->alive = true;
+    bullet->referenced = true;
     bullet_ref->bullet_system = bullet_system;
     bullet_ref->bullet = bullet;
 
@@ -322,6 +325,9 @@ static size_t
 free_bullet_ref (SCM bullet_ref_smob)
 {
     BulletRef *bullet_ref = (BulletRef *) SCM_SMOB_DATA (bullet_ref_smob);
+
+    // Flip referenced flag so that the bullet system can kill this bullet.
+    bullet_ref->bullet->referenced = false;
 
     scm_gc_free (bullet_ref, sizeof (BulletRef), "bullet_ref");
 

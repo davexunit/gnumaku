@@ -17,6 +17,7 @@ typedef struct {
     float angular_velocity;
     float x, y;
     bool alive;
+    bool referenced;
     Rect hitbox;
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
