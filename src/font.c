@@ -41,8 +41,12 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
     const char *text = scm_to_locale_string (s_text);
+    float r = scm_to_double (scm_car (s_color));
+    float g = scm_to_double (scm_cadr (s_color));
+    float b = scm_to_double (scm_caddr (s_color));
+    float a = scm_to_double (scm_cadddr (s_color));
 
-    al_draw_text (font->font, al_map_rgba_f (1, 1, 1, 1), x, y, 0, text);
+    al_draw_text (font->font, al_map_rgba_f (r, g, b, a), x, y, 0, text);
 
     return SCM_UNSPECIFIED;
 }
