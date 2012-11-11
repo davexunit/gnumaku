@@ -27,9 +27,9 @@
 ** DONE Map allegro key codes to scheme symbols in a hash table
 * DONE Add player and enemies
 ** No need for C here, this can be done on the Scheme side
-* TODO Add collision detection
+* DONE Add collision detection
 ** DONE Collision between player and enemy bullets
-** TODO Collision between player bullets and enemies
+** DONE Collision between player bullets and enemies
 * TODO Develop actual gameplay :P
 * DONE Refactor game loop into several smaller functions
 * DONE Control FPS rendering from Scheme
@@ -47,7 +47,7 @@
 * TODO Write unit tests
 ** Need a good way to do this with Guile
 * TODO Animated sprites
-* TODO Expand font bindingsp
+* TODO Expand font bindings
 ** Bind more of Allegro's font functions with Guile.
 * TODO Add bindings for Allegro audio addon
 ** Need some minimal bindings for background music and short sound effects
