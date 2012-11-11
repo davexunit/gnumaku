@@ -1,16 +1,13 @@
 (define-module (demo main))
 (export main)
 
-;; Make a server for remote REPL
-(use-modules (system repl server))
-(spawn-server)
-
 (load-extension "./gnumaku.so" "init_gnumaku_module")
-(use-modules (gnumaku core) (gnumaku fps) (gnumaku coroutine) (gnumaku keycodes)
+(use-modules (system repl server) (gnumaku core) (gnumaku fps) (gnumaku coroutine) (gnumaku keycodes)
              (gnumaku scheduler) (gnumaku yield) (gnumaku primitives) (gnumaku bullet-types)
-             (demo player) (demo enemy))
+             (demo player) (demo enemy) (demo spiders-nest))
 
-;; (primitive-load "scripts/spiders-nest.scm")
+;; Make a server for remote REPL
+(spawn-server)
 
 (define game (make-game))
 (define max-bullets 10000)
