@@ -51,3 +51,7 @@
 ** Bind more of Allegro's font functions with Guile.
 * TODO Add bindings for Allegro audio addon
 ** Need some minimal bindings for background music and short sound effects
+* TODO Custom window resolutions and fullscreen mode
+* TODO Scenes and layers
+** Break up game into a series of Scenes
+** Layers will be ALLEGRO_BITMAPs that can be drawn to, rather than drawing to screen.
