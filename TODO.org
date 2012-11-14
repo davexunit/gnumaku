@@ -36,6 +36,7 @@
 ** It's hard-coded in the game loop right now
 * DONE Create font smob
 * TODO Pick a C code formatting style and STICK TO IT FFS
+** I keep switching brace styles for no good reason...
 * DONE Get rid of those annoying compiler warnings for scm_c_define_gsubr
 ** Need to talk to the folks on #guile about this
 * TODO Improve bullet pool code
@@ -52,6 +53,8 @@
 * TODO Add bindings for Allegro audio addon
 ** Need some minimal bindings for background music and short sound effects
 * TODO Custom window resolutions and fullscreen mode
+** DONE Specify window size and fullscreen mode when initializing
+** TODO Allow user to change screen size and fullscreen mode after initializing
 * TODO Scenes and layers
 ** Break up game into a series of Scenes
 ** Layers will be ALLEGRO_BITMAPs that can be drawn to, rather than drawing to screen.
