@@ -262,6 +262,53 @@ game_stop (SCM game_smob)
 }
 
 static SCM
+game_display_width (SCM game_smob)
+{
+    Game *game = check_game (game_smob);
+
+    return scm_from_int (al_get_display_width (game->display));
+}
+
+static SCM
+game_display_height (SCM game_smob)
+{
+    Game *game = check_game (game_smob);
+
+    return scm_from_int (al_get_display_height (game->display));
+}
+
+static SCM
+game_resize_display (SCM game_smob, SCM s_width, SCM s_height)
+{
+    Game *game = check_game (game_smob);
+    int width = scm_to_int (s_width);
+    int height = scm_to_int (s_height);
+
+    al_resize_display (game->display, width, height);
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
+game_fullscreen (SCM game_smob)
+{
+    Game *game = check_game (game_smob);
+
+    return scm_from_bool (al_get_display_flags (game->display) &  ALLEGRO_FULLSCREEN);
+}
+
+static SCM
+set_game_fullscreen (SCM game_smob, SCM s_fullscreen)
+{
+    Game *game = check_game (game_smob);
+    bool fullscreen = scm_to_bool (s_fullscreen);
+
+    al_set_display_flag (game->display, ALLEGRO_FULLSCREEN, fullscreen);
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
 mark_game (SCM game_smob)
 {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
@@ -315,6 +362,11 @@ init_game_type (void)
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
     scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
+    scm_c_define_gsubr ("game-display-width", 1, 0, 0, game_display_width);
+    scm_c_define_gsubr ("game-display-height", 1, 0, 0, game_display_height);
+    scm_c_define_gsubr ("game-resize-display", 3, 0, 0, game_resize_display);
+    scm_c_define_gsubr ("game-fullscreen?", 1, 0, 0, game_fullscreen);
+    scm_c_define_gsubr ("set-game-fullscreen", 1, 0, 0, set_game_fullscreen);
 
     scm_c_export ("make-game", NULL);
     scm_c_export ("game-on-start-hook", NULL);
@@ -326,4 +378,9 @@ init_game_type (void)
     scm_c_export ("game-run", NULL);
     scm_c_export ("game-stop", NULL);
     scm_c_export ("game-get-time", NULL);
+    scm_c_export ("game-display-width", NULL);
+    scm_c_export ("game-display-height", NULL);
+    scm_c_export ("game-resize-display", NULL);
+    scm_c_export ("game-fullscreen?", NULL);
+    scm_c_export ("set-game-fullscreen", NULL);
 }
