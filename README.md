@@ -34,10 +34,12 @@ Dependencies
 GNU Guile >= 2.0  
 Allegro >= 5.0
 
+*Note:* Guile currently has issues compiling on Windows with MinGW. Until that is resolved, Gnumaku cannot run on Windows.
+
 Try the Demo!
 ------------------
-make
-./demo.scm
+    make
+    ./demo.scm
 
 License
 -------
