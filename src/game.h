@@ -15,6 +15,8 @@ typedef struct
     ALLEGRO_EVENT_QUEUE *event_queue;
     ALLEGRO_TIMER *timer;
     float timestep;
+    float last_update_time;
+    float time_accumulator;
     bool running;
     bool redraw;
     SCM on_start;

@@ -27,6 +27,8 @@ make_game ()
     game->event_queue = NULL;
     game->timer = NULL;
     game->timestep = 1.0 / 60.0;
+    game->time_accumulator = 0;
+    game->last_update_time = 0;
     game->on_start = SCM_BOOL_F;
     game->on_update = SCM_BOOL_F;
     game->on_draw = SCM_BOOL_F;
@@ -92,10 +94,16 @@ on_key_released_hook (SCM game_smob, SCM callback)
     return SCM_UNSPECIFIED;
 }
 
-static void
-game_init (Game *game)
+static SCM
+game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
 {
+    Game *game = check_game(game_smob);
+    int width = scm_to_int (s_width);
+    int height = scm_to_int (s_height);
+    bool fullscreen = scm_to_bool (s_fullscreen);
+
     /* Initialize Allegro things */
+    /* TODO: Handle these errors in a proper way */
     if(!al_init())
     {
 	fprintf (stderr, "failed to initialize allegro!\n");
@@ -113,7 +121,12 @@ game_init (Game *game)
 	fprintf (stderr, "failed to initialize keyboard!\n");
     }
 
-    game->display = al_create_display (800, 600);
+    
+    if (fullscreen) {
+        al_set_new_display_flags (ALLEGRO_FULLSCREEN);
+    }
+
+    game->display = al_create_display (width, height);
     if (!game->display) {
 	fprintf (stderr, "failed to create display!\n");
     }
@@ -130,6 +143,8 @@ game_init (Game *game)
     al_register_event_source (game->event_queue, al_get_display_event_source (game->display));
     al_register_event_source (game->event_queue, al_get_timer_event_source (game->timer));
     al_register_event_source (game->event_queue, al_get_keyboard_event_source ());
+
+    return SCM_UNSPECIFIED;
 }
 
 static void
@@ -144,10 +159,19 @@ game_destroy (Game *game)
 static void
 game_update (Game *game)
 {
-    game->redraw = true;
+    float time = al_get_time();
+    float dt = time - game->last_update_time;
 
-    if (scm_is_true (game->on_update))
-	scm_call_1 (game->on_update, scm_from_double(game->timestep));
+    game->redraw = true;
+    game->last_update_time = time;
+    game->time_accumulator += dt;
+
+    while (game->time_accumulator >= game->timestep) {
+        game->time_accumulator -= game->timestep;
+        if (scm_is_true (game->on_update)) {
+            scm_call_1 (game->on_update, scm_from_double(game->timestep));
+        }
+    }
 }
 
 static void
@@ -197,18 +221,16 @@ game_run (SCM game_smob)
 {
     Game *game = check_game (game_smob);
 
-    game_init (game);
-
-    if (scm_is_true (game->on_start))
+    if (scm_is_true (game->on_start)) {
 	scm_call_0 (game->on_start);
+    }
 
     al_start_timer (game->timer);
+    game->last_update_time = al_get_time ();
 
-    while(game->running)
-    {
+    while (game->running) {
 	game_process_event (game);
 
-	// Draw
 	if (game->redraw && al_is_event_queue_empty (game->event_queue)) {
 	    game->redraw = false;
 	    game_draw (game);
@@ -289,6 +311,7 @@ init_game_type (void)
     scm_c_define_gsubr ("game-on-draw-hook", 2, 0, 0, on_draw_hook);
     scm_c_define_gsubr ("game-on-key-pressed-hook", 2, 0, 0, on_key_pressed_hook);
     scm_c_define_gsubr ("game-on-key-released-hook", 2, 0, 0, on_key_released_hook);
+    scm_c_define_gsubr ("game-init", 4, 0, 0, game_init);
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
     scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
@@ -299,6 +322,7 @@ init_game_type (void)
     scm_c_export ("game-on-draw-hook", NULL);
     scm_c_export ("game-on-key-pressed-hook", NULL);
     scm_c_export ("game-on-key-released-hook", NULL);
+    scm_c_export ("game-init", NULL);
     scm_c_export ("game-run", NULL);
     scm_c_export ("game-stop", NULL);
     scm_c_export ("game-get-time", NULL);
