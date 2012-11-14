@@ -234,4 +234,5 @@
      (set! debug-mode (not debug-mode)))))
 
 (define (main)
+  (game-init game 800 600 #f)
   (game-run game))
