@@ -58,3 +58,5 @@
 * TODO Scenes and layers
 ** Break up game into a series of Scenes
 ** Layers will be ALLEGRO_BITMAPs that can be drawn to, rather than drawing to screen.
+* TODO Prefix all C functions with gnumaku_
+** I was lazy and didn't do this, but now Gnumaku is a shared lib so it's necessary.
