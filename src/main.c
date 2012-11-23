@@ -7,17 +7,20 @@
 #include "font.h"
 #include "game.h"
 #include "bullet_system.h"
+#include "draw.h"
 
 void
 init_gnumaku ()
 {
     // Create smobs so we can call C code from Scheme
     init_sprite_sheet_type ();
+    init_image_type ();
     init_sprite_type ();
     init_rect_type ();
     init_font_type ();
     init_game_type ();
     init_bullet_system_type ();
+    bind_draw_funcs ();
 }
 
 void
