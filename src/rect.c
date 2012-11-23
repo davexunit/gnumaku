@@ -46,7 +46,7 @@ check_rect (SCM rect_smob)
     return (Rect *) SCM_SMOB_DATA (rect_smob);
 }
 
-static SCM
+SCM
 make_rect (SCM s_x, SCM s_y, SCM s_width, SCM s_height)
 {
     SCM smob;
