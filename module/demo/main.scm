@@ -4,7 +4,7 @@
 (load-extension "./gnumaku.so" "init_gnumaku_module")
 (use-modules (system repl server) (gnumaku core) (gnumaku fps) (gnumaku coroutine) (gnumaku keycodes)
              (gnumaku scheduler) (gnumaku yield) (gnumaku primitives) (gnumaku bullet-types)
-             (demo player) (demo enemy) (demo spiders-nest))
+             (gnumaku math) (gnumaku layer) (demo player) (demo enemy) (demo spiders-nest))
 
 ;; Make a server for remote REPL
 (spawn-server)
@@ -21,6 +21,7 @@
 (define enemy-sheet  #f)
 (define font #f)
 (define fps (make-fps game))
+(define game-layer #f)
 
 (define (clear-everything)
   (clear-agenda! wait-scheduler)
@@ -35,6 +36,19 @@
        (change-type (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) radius num-bullets rotate speed acceleration angular-velocity type))
        (wait delay)
        (repeat (+ rotate rotate-step))))))
+
+(define (crazy-spiral enemy)
+  (define num-times 5)
+  (define num-bullets 16)
+  (define rotate-step 10)
+  (define delay .07)
+  (define arc-length 10)
+  (coroutine
+   (let repeat ((angle 0))
+     (when (enemy-alive? enemy)
+       (emit-circle enemy-bullets (enemy-x enemy) (enemy-y enemy) 0 num-bullets (+ (random 8) (* arc-length (sin-deg angle))) 150 0 0 'small-diamond)
+       (wait delay)
+       (repeat (+ angle rotate-step))))))
 
 (define (change-type bullets)
   (coroutine
@@ -131,10 +145,7 @@
     (damage-enemy! enemy (player-strength player))
     (when (<= (enemy-health enemy) 0)
       (player-add-points! player (enemy-points enemy))
-      (set! enemies (delete enemy enemies))
-      (coroutine
-       (wait 2)
-       (add-test-enemy)))
+      (set! enemies (delete enemy enemies)))
     #t))
 
 (define (add-enemy! enemy)
@@ -154,12 +165,34 @@
 
 (define (add-test-enemy)
   (let ((enemy (make-enemy 30 100)))
-    (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
+    (set-sprite-image! (enemy-sprite enemy) (sprite-sheet-tile enemy-sheet 0))
     (set-enemy-position! enemy (random 800) (random 200))
     (set-enemy-hitbox-size! enemy 32 32)
-    (enemy-ai enemy)23
-    (emit-spiral-forever enemy 32 4 8 .07 120 10 5 'small-diamond)
+    ;;(enemy-ai enemy)
+    ;;(emit-spiral-forever enemy 32 4 8 .07 120 10 5 'small-diamond)
+    (crazy-spiral enemy)
     (add-enemy! enemy)))
+
+(define (wave-1)
+  (let loop ((i 0))
+    (when (< i 5)
+      (let ((enemy (make-enemy 30 100)))
+        (set-sprite-sheet! (enemy-sprite enemy) enemy-sheet 0)
+        (set-enemy-position! enemy (+ 60 (* i 150)) -80)
+        (set-enemy-hitbox-size! enemy 32 32)
+        (coroutine (enemy-move-to enemy (+ 60 (* i 150)) 300 150))
+        (crazy-spiral enemy)
+        (add-enemy! enemy)
+        (loop (1+ i))))))
+
+(define (draw-game-layer)
+  (draw-bullet-system player-bullets)
+  (draw-bullet-system enemy-bullets)
+  (when debug-mode
+    (draw-bullet-system-hitboxes player-bullets)
+    (draw-bullet-system-hitboxes enemy-bullets))
+  (draw-player player)
+  (draw-enemies))
 
 (game-on-start-hook
  game
@@ -170,9 +203,9 @@
    (set! font (make-font "data/fonts/CarroisGothic-Regular.ttf" 18))
    (set-bullet-system-sprite-sheet! enemy-bullets bullet-sheet)
    (set-bullet-system-sprite-sheet! player-bullets bullet-sheet)
-   (set-sprite-sheet! (player-sprite player) player-sheet 0)
+   (set-sprite-image! (player-sprite player) (sprite-sheet-tile player-sheet 0))
    (set-player-position! player 400 550)
-   (add-test-enemy)))
+   (set! game-layer (make-layer (make-rect 50 50 400 500) draw-game-layer))))
 
 (game-on-update-hook
  game
@@ -189,13 +222,7 @@
 (game-on-draw-hook
  game
  (lambda ()
-   (draw-bullet-system player-bullets)
-   (draw-bullet-system enemy-bullets)
-   (when debug-mode
-     (draw-bullet-system-hitboxes player-bullets)
-     (draw-bullet-system-hitboxes enemy-bullets))
-   (draw-player player)
-   (draw-enemies)
+   (draw-game-layer)
    (font-draw-text font 10 10 '(1 1 1 1) (string-append "Lives: " (number->string (player-lives player))))
    (font-draw-text font 100 10 '(1 1 1 1) (string-append "Score: " (number->string (player-score player))))
    (font-draw-text font 730 575 '(1 1 1 0.7) (string-append "FPS: " (number->string (fps-last-frames fps))))))
