@@ -1,4 +1,5 @@
 #include "sprite_sheet.h"
+#include "image.h"
 
 static scm_t_bits sprite_sheet_tag;
 
@@ -66,6 +67,15 @@ make_sprite_sheet (SCM s_file, SCM s_tile_width, SCM s_tile_height, SCM s_spacin
     return smob;
 }
 
+static SCM
+get_sprite_sheet_tile (SCM sprite_sheet_smob, SCM s_index)
+{
+    SpriteSheet *sprite_sheet = check_sprite_sheet (sprite_sheet_smob);
+    int index = scm_to_int (s_index);
+    
+    return make_image_from_bitmap (sprite_sheet->tiles[index]);
+}
+
 static size_t
 free_sprite_sheet (SCM sprite_sheet_smob)
 {
@@ -112,6 +122,8 @@ init_sprite_sheet_type (void)
     scm_set_smob_print (sprite_sheet_tag, print_sprite_sheet);
 
     scm_c_define_gsubr ("make-sprite-sheet", 5, 0, 0, make_sprite_sheet);
+    scm_c_define_gsubr ("sprite-sheet-tile", 2, 0, 0, get_sprite_sheet_tile);
     
     scm_c_export ("make-sprite-sheet", NULL);
+    scm_c_export ("sprite-sheet-tile", NULL);
 }
