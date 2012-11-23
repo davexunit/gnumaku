@@ -11,7 +11,7 @@ check_image (SCM image_smob)
 }
 
 static SCM
-make_image (SCM s_file)
+load_image (SCM s_file)
 {
     SCM smob;
     const char *file = scm_to_locale_string (s_file);
@@ -87,11 +87,11 @@ init_image_type (void)
     scm_set_smob_free (image_tag, free_image);
     scm_set_smob_print (image_tag, print_image);
 
-    scm_c_define_gsubr ("make-image", 1, 0, 0, make_image);
+    scm_c_define_gsubr ("load-image", 1, 0, 0, load_image);
     scm_c_define_gsubr ("image-width", 1, 0, 0, get_image_width);
     scm_c_define_gsubr ("image-height", 1, 0, 0, get_image_height);
 
-    scm_c_export ("make-image", NULL);
+    scm_c_export ("load-image", NULL);
     scm_c_export ("image-width", NULL);
     scm_c_export ("image-height", NULL);
 }
