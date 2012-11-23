@@ -3,12 +3,11 @@
 
 #include <allegro5/allegro.h>
 
-#include "sprite_sheet.h"
+#include "image.h"
 
 typedef struct
 {
-    SCM sprite_sheet_smob;
-    ALLEGRO_BITMAP *image;
+    SCM image;
     ALLEGRO_COLOR color;
     float x, y;
     float center_x, center_y;

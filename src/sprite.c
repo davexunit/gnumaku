@@ -11,7 +11,7 @@ check_sprite (SCM sprite_smob)
 }
 
 static SCM
-make_sprite ()
+make_sprite (SCM image_smob)
 {
     SCM smob;
     Sprite *sprite;
@@ -22,8 +22,7 @@ make_sprite ()
 
     /* Step 2: Initialize it with straight code.
      */
-    sprite->sprite_sheet_smob = SCM_BOOL_F;
-    sprite->image = NULL;
+    sprite->image = SCM_BOOL_F;
     sprite->color = al_map_rgba_f (1, 1, 1, 1);
     sprite->x = 0;
     sprite->y = 0;
@@ -38,18 +37,20 @@ make_sprite ()
      */
     SCM_NEWSMOB (smob, sprite_tag, sprite);
 
+    sprite->image = image_smob;
+
     return smob;
 
 }
 
 static SCM
-sprite_sheet (SCM sprite_smob)
+sprite_image (SCM sprite_smob)
 {
     Sprite *sprite = check_sprite (sprite_smob);
 
     scm_remember_upto_here_1 (sprite_smob);
 
-    return sprite->sprite_sheet_smob;
+    return sprite->image;
 }
 
 static SCM
@@ -238,16 +239,14 @@ set_sprite_color (SCM sprite_smob, SCM s_r, SCM s_g, SCM s_b, SCM s_a)
 }
 
 static SCM
-set_sprite_sheet (SCM sprite_smob, SCM sprite_sheet_smob, SCM s_tile)
+set_sprite_image (SCM sprite_smob, SCM image_smob)
 {
     Sprite *sprite = check_sprite (sprite_smob);
-    SpriteSheet *sprite_sheet = check_sprite_sheet (sprite_sheet_smob);
-    int tile = scm_to_int (s_tile);
+    Image *image = check_image (image_smob);
 
-    sprite->sprite_sheet_smob = sprite_sheet_smob;
-    sprite->image = sprite_sheet->tiles[tile];
-    sprite->center_x = al_get_bitmap_width (sprite->image) / 2;
-    sprite->center_y = al_get_bitmap_height (sprite->image) / 2;
+    sprite->image = image_smob;
+    sprite->center_x = al_get_bitmap_width (image->bitmap) / 2;
+    sprite->center_y = al_get_bitmap_height (image->bitmap) / 2;
 
     scm_remember_upto_here_1 (sprite_smob);
 
@@ -258,10 +257,11 @@ static SCM
 sprite_draw (SCM sprite_smob)
 {
     Sprite *sprite = check_sprite (sprite_smob);
+    Image *image = check_image (sprite->image);
 
-    if (sprite->visible && sprite->image)
+    if (sprite->visible)
     {
-	al_draw_tinted_scaled_rotated_bitmap (sprite->image, sprite->color, sprite->center_x, sprite->center_y,
+	al_draw_tinted_scaled_rotated_bitmap (image->bitmap, sprite->color, sprite->center_x, sprite->center_y,
 					      sprite->x, sprite->y, sprite->scale_x, sprite->scale_y,
 					      sprite->rotation, 0);
     }
@@ -276,7 +276,7 @@ mark_sprite (SCM sprite_smob)
 {
     Sprite *sprite = (Sprite *) SCM_SMOB_DATA (sprite_smob);
 
-    return sprite->sprite_sheet_smob;
+    return sprite->image;
 }
 
 static size_t
@@ -319,13 +319,14 @@ init_sprite_type (void)
     scm_set_smob_print (sprite_tag, print_sprite);
 
     scm_c_define_gsubr ("make-sprite", 0, 0, 0, make_sprite);
-    scm_c_define_gsubr ("sprite-sheet", 1, 0, 0, sprite_sheet);
+    scm_c_define_gsubr ("sprite-image", 1, 0, 0, sprite_image);
     scm_c_define_gsubr ("sprite-x", 1, 0, 0, sprite_x);
     scm_c_define_gsubr ("sprite-y", 1, 0, 0, sprite_y);
     scm_c_define_gsubr ("sprite-scale-x", 1, 0, 0, sprite_scale_x);
     scm_c_define_gsubr ("sprite-scale-y", 1, 0, 0, sprite_scale_y);
     scm_c_define_gsubr ("sprite-rotation", 1, 0, 0, sprite_rotation);
     scm_c_define_gsubr ("sprite-visible?", 1, 0, 0, sprite_visible_p);
+    scm_c_define_gsubr ("set-sprite-image!", 2, 0, 0, set_sprite_image);
     scm_c_define_gsubr ("set-sprite-x!", 2, 0, 0, set_sprite_x);
     scm_c_define_gsubr ("set-sprite-y!", 2, 0, 0, set_sprite_y);
     scm_c_define_gsubr ("set-sprite-position!", 3, 0, 0, set_sprite_position);
@@ -335,17 +336,17 @@ init_sprite_type (void)
     scm_c_define_gsubr ("set-sprite-rotation!", 2, 0, 0, set_sprite_rotation);
     scm_c_define_gsubr ("set-sprite-visible!", 2, 0, 0, set_sprite_visible);
     scm_c_define_gsubr ("set-sprite-color!", 5, 0, 0, set_sprite_color);
-    scm_c_define_gsubr ("set-sprite-sheet!", 3, 0, 0, set_sprite_sheet);
     scm_c_define_gsubr ("draw-sprite", 1, 0, 0, sprite_draw);
 
     scm_c_export ("make-sprite", NULL);
-    scm_c_export ("sprite-sheet", NULL);
+    scm_c_export ("sprite-image", NULL);
     scm_c_export ("sprite-x", NULL);
     scm_c_export ("sprite-y", NULL);
     scm_c_export ("sprite-scale-x", NULL);
     scm_c_export ("sprite-scale-y", NULL);
     scm_c_export ("sprite-rotation", NULL);
     scm_c_export ("sprite-visible?", NULL);
+    scm_c_export ("set-sprite-image!", NULL);
     scm_c_export ("set-sprite-x!", NULL);
     scm_c_export ("set-sprite-y!", NULL);
     scm_c_export ("set-sprite-position!",NULL); 
