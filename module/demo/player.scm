@@ -26,8 +26,8 @@
   (strength player-strength)
   (invincible player-invincible? set-player-invincible!))
 
-(define (make-player lives strength speed)
-  (%make-player (make-sprite) (make-rect 0 0 6 6) strength speed 0 lives #f))
+(define (make-player image lives strength speed)
+  (%make-player (make-sprite image) (make-rect 0 0 6 6) strength speed 0 lives #f))
 
 (define (set-player-position! player x y)
   (set-sprite-position! (player-sprite player) x y))

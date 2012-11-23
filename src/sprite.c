@@ -318,7 +318,7 @@ init_sprite_type (void)
     scm_set_smob_free (sprite_tag, free_sprite);
     scm_set_smob_print (sprite_tag, print_sprite);
 
-    scm_c_define_gsubr ("make-sprite", 0, 0, 0, make_sprite);
+    scm_c_define_gsubr ("make-sprite", 1, 0, 0, make_sprite);
     scm_c_define_gsubr ("sprite-image", 1, 0, 0, sprite_image);
     scm_c_define_gsubr ("sprite-x", 1, 0, 0, sprite_x);
     scm_c_define_gsubr ("sprite-y", 1, 0, 0, sprite_y);

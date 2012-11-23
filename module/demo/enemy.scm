@@ -16,8 +16,8 @@
   (hitbox enemy-hitbox)
   (health enemy-health set-enemy-health!))
 
-(define (make-enemy health points)
-  (%make-enemy (make-sprite) (make-rect 0 0 0 0) health 0 0 points))
+(define (make-enemy image health points)
+  (%make-enemy (make-sprite image) (make-rect 0 0 0 0) health 0 0 points))
 
 (define (set-enemy-position! enemy x y)
   (set-sprite-position! (enemy-sprite enemy) x y))
