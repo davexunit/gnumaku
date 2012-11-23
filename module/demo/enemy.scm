@@ -17,7 +17,9 @@
   (health enemy-health set-enemy-health!))
 
 (define (make-enemy image health points)
-  (%make-enemy (make-sprite image) (make-rect 0 0 0 0) health 0 0 points))
+  (let ((sprite (make-sprite image)))
+    (center-sprite-image! sprite)
+    (%make-enemy sprite (make-rect 0 0 0 0) health 0 0 points)))
 
 (define (set-enemy-position! enemy x y)
   (set-sprite-position! (enemy-sprite enemy) x y))

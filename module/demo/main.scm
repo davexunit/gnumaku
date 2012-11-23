@@ -9,16 +9,22 @@
 ;; Make a server for remote REPL
 (spawn-server)
 
+(define field-width 480)
+(define field-height 560)
 (define game (make-game))
 (define max-bullets 10000)
 (define enemy-bullets (make-bullet-system max-bullets))
 (define player-bullets (make-bullet-system 2000))
-(define player (make-player 3 10 350))
+(define player #f)
 (define enemies '())
 (define debug-mode #f)
 (define bullet-sheet #f)
 (define player-sheet #f)
 (define enemy-sheet  #f)
+(define background-image #f)
+(define background #f)
+(define field-background-image #f)
+(define field-background #f)
 (define font #f)
 (define fps (make-fps game))
 (define game-layer #f)
@@ -164,9 +170,8 @@
       (loop (cdr enemies)))))
 
 (define (add-test-enemy)
-  (let ((enemy (make-enemy 30 100)))
-    (set-sprite-image! (enemy-sprite enemy) (sprite-sheet-tile enemy-sheet 0))
-    (set-enemy-position! enemy (random 800) (random 200))
+  (let ((enemy (make-enemy (sprite-sheet-tile enemy-sheet 0) 30 100)))
+    (set-enemy-position! enemy (random field-width) (random 200))
     (set-enemy-hitbox-size! enemy 32 32)
     ;;(enemy-ai enemy)
     ;;(emit-spiral-forever enemy 32 4 8 .07 120 10 5 'small-diamond)
@@ -186,6 +191,7 @@
         (loop (1+ i))))))
 
 (define (draw-game-layer)
+  (draw-sprite field-background)
   (draw-bullet-system player-bullets)
   (draw-bullet-system enemy-bullets)
   (when debug-mode
@@ -197,15 +203,23 @@
 (game-on-start-hook
  game
  (lambda ()
+   ;; Load images
    (set! bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
    (set! player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
    (set! enemy-sheet (make-sprite-sheet "data/images/girl.png" 64 64 0 0))
+   (set! background-image (load-image "data/images/background.png"))
+   (set! background (make-sprite background-image))
+   (set! field-background-image (load-image "data/images/space.png"))
+   (set! field-background (make-sprite field-background-image))
    (set! font (make-font "data/fonts/CarroisGothic-Regular.ttf" 18))
+   ;; Init bullet stuff
    (set-bullet-system-sprite-sheet! enemy-bullets bullet-sheet)
    (set-bullet-system-sprite-sheet! player-bullets bullet-sheet)
-   (set-sprite-image! (player-sprite player) (sprite-sheet-tile player-sheet 0))
-   (set-player-position! player 400 550)
-   (set! game-layer (make-layer (make-rect 50 50 400 500) draw-game-layer))))
+   (set! player (make-player (sprite-sheet-tile player-sheet 0) 3 10 350))
+   (set-player-position! player (/ 375 2) 450)
+   ;; Game layer
+   (set! game-layer (make-layer (make-rect 20 20 field-width field-height) draw-game-layer))
+   (set-layer-clip! game-layer #t)))
 
 (game-on-update-hook
  game
@@ -222,9 +236,10 @@
 (game-on-draw-hook
  game
  (lambda ()
-   (draw-game-layer)
-   (font-draw-text font 10 10 '(1 1 1 1) (string-append "Lives: " (number->string (player-lives player))))
-   (font-draw-text font 100 10 '(1 1 1 1) (string-append "Score: " (number->string (player-score player))))
+   (draw-sprite background)
+   (draw-layer game-layer)
+   (font-draw-text font (+ 40 field-width) 20 '(1 1 1 1) (string-append "Lives: " (number->string (player-lives player))))
+   (font-draw-text font (+ 40 field-width) 40 '(1 1 1 1) (string-append "Score: " (number->string (player-score player))))
    (font-draw-text font 730 575 '(1 1 1 0.7) (string-append "FPS: " (number->string (fps-last-frames fps))))))
 
 (game-on-key-pressed-hook
