@@ -63,7 +63,9 @@
 ** A concept lifted from cocos2d. the director manages the scenes in the game.
 * TODO Prefix all C functions with gnumaku_
 ** I was lazy and didn't do this, but now Gnumaku is a shared lib so it's necessary.
-* TODO Level format
+* DONE Level format
 ** A proc + a Level record
 * TODO Add a register procedure to bullet-types module
 ** Allow user to register bullet types instead of having hardcoded ones
+* DONE Switch to frame-based timing
+** Every time the update hook is called, a timer should be incremented by one and the game should use this to time events.
