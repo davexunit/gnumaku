@@ -68,10 +68,10 @@
 (game-on-draw-hook
  director-game
  (lambda ()
-   (when director-show-fps
-     (director-draw-fps))
    (when (director-current-scene)
-     (draw-scene (director-current-scene)))))
+     (draw-scene (director-current-scene)))
+   (when director-show-fps
+     (director-draw-fps))))
 
 (game-on-key-pressed-hook
  director-game
