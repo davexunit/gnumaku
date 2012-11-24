@@ -4,7 +4,7 @@ static scm_t_bits bullet_system_tag;
 static scm_t_bits bullet_ref_tag;
 
 static SCM
-make_bullet_ref (SCM bullet_system_smob);
+nnnmake_bullet_ref (SCM bullet_system_smob);
 
 static BulletSystem*
 check_bullet_system (SCM bullet_system_smob)
@@ -33,6 +33,7 @@ init_bullet (Bullet *bullet)
     bullet->y = 0;
     bullet->alive = false;
     bullet->referenced = false;
+    bullet->killable = true;
     bullet->image = NULL;
     bullet->color = al_map_rgba_f (1, 1, 1, 1);
     init_rect (&bullet->hitbox, 0, 0, 0, 0);
@@ -168,7 +169,7 @@ remove_out_of_bounds_bullet (Bullet *bullet)
          bullet->x > x + width ||
          bullet->y < y ||
          bullet->y > y + height) &&
-        !bullet->referenced)
+        (bullet->killable || !bullet->referenced))
     {
         bullet->alive = false;
     }

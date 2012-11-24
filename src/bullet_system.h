@@ -18,6 +18,7 @@ typedef struct {
     float x, y;
     bool alive;
     bool referenced;
+    bool killable;
     Rect hitbox;
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
