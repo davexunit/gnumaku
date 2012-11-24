@@ -6,11 +6,7 @@
 
 (define field-width 480)
 (define field-height 560)
-(define max-bullets 10000)
-(define enemy-bullets (make-bullet-system max-bullets))
-(define player-bullets (make-bullet-system 2000))
 (define player #f)
-(define enemies '())
 (define debug-mode #f)
 (define bullet-sheet #f)
 (define player-sheet #f)
@@ -22,7 +18,8 @@
 
 (define (load-assets)
   (set! player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
-  (set! bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0)))
+  (set! bullet-sheet (make-sprite-sheet "data/images/bullets.png" 32 32 0 0))
+  (set! background-image (load-image "data/images/background.png")))
 
 (define (load-level)
   (let ((level (make-level field-width field-height demo-level player (load-image "data/images/space.png"))))
@@ -46,13 +43,14 @@
        (emit-bullet bullets (- x 16) y speed 268 0 0 'small-diamond)
        (emit-bullet bullets x (- y 20) speed 270 0 0 'small-green)
        (emit-bullet bullets (+ x 16) y speed 272 0 0 'small-diamond))
-     (player-wait player .07)
+     (player-wait player 3)
      (player-shot-1 player))))
 
 (define (on-start)
   (display "started")
   (newline)
   (load-assets)
+  (set! background (make-sprite background-image))
   (init-player)
   (set! current-level (load-level))
   (run-level current-level))
@@ -73,6 +71,7 @@
   (update-level! current-level dt))
 
 (define (on-draw)
+  (draw-sprite background)
   (draw-layer (level-layer current-level)))
 
 (define (on-key-pressed key)

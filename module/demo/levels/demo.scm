@@ -8,7 +8,11 @@
 
 (define (emit-test level)
   (coroutine
-   (let ((system (level-enemy-bullets level)))
-     (emit-circle system 200 200 30 12 0 100 0 0 'medium-blue)
-     (level-wait level 2)
-     (emit-circle system 200 200 30 12 0 100 0 0 'medium-blue))))
+   (let loop ((system (level-enemy-bullets level))
+              (rotate 0))
+     (emit-circle system 300 200 30 12 (* -1 rotate) 100 0 -10 'large-orange)
+     (level-wait level 15)
+     (emit-circle system 300 200 30 12 rotate 100 0 10 'medium-blue)
+     (level-wait level 15)
+     (loop system (+ rotate 5)))))
+
