@@ -1,6 +1,7 @@
 (define-module (gnumaku layer)
   #:export (make-layer layer? layer-rect set-layer-rect! layer-draw-proc set-layer-draw-proc!
-                       layer-children layer-clip? set-layer-clip! draw-layer draw-layers))
+                       layer-children layer-clip? set-layer-clip! draw-layer draw-layers
+                       layer-x layer-y set-layer-position!))
 
 (use-modules (srfi srfi-9) (gnumaku core))
 
@@ -21,6 +22,9 @@
 
 (define (layer-y layer)
   (rect-y (layer-rect layer)))
+
+(define (set-layer-position! layer x y)
+  (set-rect-position! (layer-rect layer) x y))
 
 (define (layer-add-child layer child-layer)
   (set-layer-parent! child-layer layer)
