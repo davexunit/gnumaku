@@ -1,4 +1,4 @@
-(define-module (demo enemy)
+(define-module (gnumaku enemy)
   #:export (make-enemy enemy? enemy-sprite enemy-speed set-enemy-speed! enemy-direction
                        set-enemy-direction! enemy-points set-enemy-points! enemy-hitbox
                        enemy-health set-enemy-health! set-enemy-position! set-enemy-hitbox-size!
