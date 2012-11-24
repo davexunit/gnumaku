@@ -62,7 +62,11 @@ free_image (SCM image_smob)
 {
     Image *image = (Image *) SCM_SMOB_DATA (image_smob);
 
-    al_destroy_bitmap (image->bitmap);
+    // Do not free sub bitmaps
+    if (!al_is_sub_bitmap (image->bitmap)) {
+        al_destroy_bitmap (image->bitmap);
+    }
+
     scm_gc_free (image, sizeof (Image), "image");
 
     return 0;
