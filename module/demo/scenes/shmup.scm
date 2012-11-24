@@ -2,7 +2,7 @@
   #:export (make-shmup-scene))
 (use-modules (srfi srfi-9) (gnumaku core) (gnumaku director) (gnumaku scene) (gnumaku keycodes)
              (gnumaku coroutine) (gnumaku level) (gnumaku primitives) (gnumaku player) (gnumaku enemy)
-             (gnumaku layer) (demo enemies) (demo levels demo))
+             (gnumaku layer) (demo enemies) (demo hud) (demo levels demo))
 
 (define field-width 480)
 (define field-height 560)
@@ -15,6 +15,7 @@
 (define background #f)
 (define font #f)
 (define current-level #f)
+(define hud #f)
 
 (define (load-assets)
   (set! player-sheet (make-sprite-sheet "data/images/player.png" 32 48 0 0))
@@ -58,6 +59,7 @@
   (load-assets)
   (set! background (make-sprite background-image))
   (init-player)
+  (set! hud (make-hud 800 600 player))
   (set! current-level (load-level))
   (run-level current-level))
 
@@ -78,7 +80,8 @@
 
 (define (on-draw)
   (draw-sprite background)
-  (draw-layer (level-layer current-level)))
+  (draw-layer (level-layer current-level))
+  (draw-hud hud))
 
 (define (on-key-pressed key)
   (when (eq? key (keycode 'up))
