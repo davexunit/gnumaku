@@ -6,7 +6,7 @@
                         player-score set-player-score! player-lives set-player-lives!
                         player-hitbox player-strength player-invincible? set-player-invincible!
                         set-player-bounds! set-player-position! set-player-hitbox-size! player-dec-lives!
-                        player-shot set-player-shot! player-bullets set-player-bullets!
+                        player-shot set-player-shot! player-bullet-system set-player-bullet-system!
                         player-add-points! player-invincible-mode! player-x player-y
                         player-direction update-player! draw-player player-wait))
 (use-modules (srfi srfi-9) (gnumaku core) (gnumaku coroutine) (gnumaku scheduler))
@@ -29,7 +29,7 @@
   (bounds player-bounds set-player-bounds!)
   (agenda player-agenda)
   (shot player-shot set-player-shot!)
-  (bullet-system player-bullets set-player-bullets!))
+  (bullet-system player-bullet-system set-player-bullet-system!))
 
 (define (make-player image lives strength speed)
   (let ((sprite (make-sprite image)))
