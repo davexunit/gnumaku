@@ -36,7 +36,9 @@
                      (add-to-agenda! (level-agenda level) delay resume))))
 
 (define (update-level! level dt)
-  (update-agenda! (level-agenda level) dt)
+  ;; Tick agenda by 1
+  ;; We time things based upon number of updates, not time in seconds
+  (update-agenda! (level-agenda level) 1)
   (update-bullet-system! (level-player-bullets level) dt)
   (update-bullet-system! (level-enemy-bullets level) dt)
   (update-player! (level-player level) dt))

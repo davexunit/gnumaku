@@ -119,7 +119,7 @@
       (set-player-position! player x y))))
 
 (define (update-player! player dt)
-  (update-agenda! (player-agenda player) dt)
+  (update-agenda! (player-agenda player) 1)
   (when (player-moving? player)
     (let ((direction (player-direction player)))
       (set-player-position!
