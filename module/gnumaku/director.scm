@@ -1,7 +1,9 @@
 (define-module (gnumaku director)
+  #:use-module (oop goops)
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku scene)
+  #:use-module (gnumaku fps)
   #:export (director-init director-run director-show-fps director-push-scene director-pop-scene director-replace-scene))
-
-(use-modules (gnumaku core) (gnumaku fps) (gnumaku scene))
 
 (define director-game (make-game))
 (define director-scenes '())
@@ -17,29 +19,29 @@
 (define (director-push-scene scene)
   ;; Stop current scene
   (when (director-current-scene)
-    (scene-stop (director-current-scene)))
+    (on-stop (director-current-scene)))
   ;; Add new scene
   (set! director-scenes (cons scene director-scenes))
   ;; Start new scene
-  (scene-start scene))
+  (on-start scene))
 
 (define (director-replace-scene scene)
   ;; Stop current scene
   (when (director-current-scene)
-    (scene-stop (director-current-scene)))
+    (on-stop (director-current-scene)))
   ;; Replace current scene with new one
   (set! director-scenes (cons scene (cdr director-scenes)))
   ;; Start new scene
-  (scene-start scene))
+  (on-start scene))
 
 (define (director-pop-scene)
   ;; Stop current scene
   (when (director-current-scene)
-    (scene-stop (director-current-scene)))
+    (on-stop (director-current-scene)))
   ;; Remove scene
   (set! director-scenes (cdr director-scenes))
   (when (director-current-scene)
-    (scene-start (director-current-scene))))
+    (on-start (director-current-scene))))
 
 (define* (director-init width height #:optional (fullscreen #f))
   (game-init director-game width height fullscreen))
@@ -62,14 +64,14 @@
    (update-fps! director-fps)
    ;; Update current scene. If the scene stack is empty, exit the game.
    (if (director-current-scene)
-       ((scene-on-update (director-current-scene)) dt)
+       (update (director-current-scene) dt)
        (game-stop director-game))))
 
 (game-on-draw-hook
  director-game
  (lambda ()
    (when (director-current-scene)
-     (draw-scene (director-current-scene)))
+     (draw (director-current-scene)))
    (when director-show-fps
      (director-draw-fps))))
 
@@ -77,11 +79,11 @@
  director-game
  (lambda (key)
    (when (director-current-scene)
-     ((scene-on-key-pressed (director-current-scene)) key))))
+     (on-key-pressed (director-current-scene) key))))
 
 (game-on-key-released-hook
  director-game
  (lambda (key)
    (when (director-current-scene)
-     ((scene-on-key-released (director-current-scene)) key))))
+     (on-key-released (director-current-scene) key))))
 
