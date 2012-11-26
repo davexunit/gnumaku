@@ -10,8 +10,8 @@
        (let ((x (enemy-x enemy))
              (y (enemy-y enemy))
              (system (enemy-bullet-system enemy)))
-         (emit-circle system x y 32 16 rotate 50 5 5 'small-diamond)
-         (emit-circle system x y 32 16 (+ rotate 4) 50 5 5 'small-diamond)
+         (emit-circle system x y 32 16 rotate 50 5 5 'medium-blue)
+         ;; (emit-circle system x y 32 16 (+ rotate 4) 50 5 5 'small-diamond)
          (enemy-wait enemy 15)
          (loop (+ rotate 10))))))
 

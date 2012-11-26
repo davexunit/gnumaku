@@ -1,8 +1,10 @@
-(define-module (demo main))
-(export main)
-
-(load-extension "./gnumaku.so" "init_gnumaku_module")
-(use-modules (system repl server) (gnumaku core) (gnumaku director) (gnumaku scene) (demo scenes shmup))
+(define-module (demo main)
+  #:use-module (oop goops)
+  #:use-module (system repl server)
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku director)
+  #:use-module (demo scenes shmup)
+  #:export (main))
 
 ;; Seed random number generator
 (set! *random-state* (random-state-from-platform))
@@ -14,4 +16,4 @@
   ;; Start up director
   (director-init 800 600)
   (set! director-show-fps #t)
-  (director-run (make-shmup-scene)))
+  (director-run (make <shmup-scene>)))
