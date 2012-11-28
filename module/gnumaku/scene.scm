@@ -1,17 +1,18 @@
 (define-module (gnumaku scene)
   #:use-module (oop goops)
-  #:export (<scene> name draw update on-start on-stop on-pause on-resume on-key-pressed on-key-released))
+  #:use-module (gnumaku generics)
+  #:export (<scene> name on-start on-stop on-pause on-resume on-key-pressed on-key-released))
 
 (define-class <scene> ()
   (name #:accessor name #:init-keyword #:name #:init-value "untitled"))
 
 (define-method (draw (scene <scene>))
   ;; no-op
-  #t)
+  #f)
 
 (define-method (update (scene <scene>) dt)
   ;; no-op
-  #t)
+  #f)
 
 (define-method (on-start (scene <scene>))
   ;; no-op

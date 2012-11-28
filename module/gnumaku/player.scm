@@ -1,107 +1,98 @@
 (define-module (gnumaku player)
-  #:export (make-player player? player-sprite player-speed set-player-speed!
-                        player-moving-up? player-moving-down? player-moving-left?
-                        player-moving-right? player-moving? player-move-up! player-move-down! 
-                        player-move-left! player-move-right! player-shooting? set-player-shooting!
-                        player-score set-player-score! player-lives set-player-lives!
-                        player-hitbox player-strength player-invincible? set-player-invincible!
-                        set-player-bounds! set-player-position! set-player-hitbox-size! player-dec-lives!
-                        player-shot set-player-shot! player-bullet-system set-player-bullet-system!
-                        player-add-points! player-invincible-mode! player-x player-y
-                        player-direction update-player! draw-player player-wait))
-(use-modules (srfi srfi-9) (gnumaku core) (gnumaku coroutine) (gnumaku scheduler))
+  #:use-module (oop goops)
+  #:use-module (gnumaku generics)
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku coroutine)
+  #:use-module (gnumaku scheduler)
+  #:use-module (gnumaku actor)
+  #:export (<player> make-player sprite speed movement shooting score lives strength hitbox
+                     invincible bounds shot bullet-system set-movement))
 
-(define-record-type Player
-  (%make-player sprite bounds hitbox strength speed score lives invincible agenda bullet-system)
-  player?
-  (sprite player-sprite)
-  (speed player-speed set-player-speed!)
-  (move-left player-moving-left? player-move-left!)
-  (move-right player-moving-right? player-move-right!)
-  (move-up player-moving-up? player-move-up!)
-  (move-down player-moving-down? player-move-down!)
-  (shooting player-shooting? %set-player-shooting!)
-  (score player-score set-player-score!)
-  (lives player-lives set-player-lives!)
-  (hitbox player-hitbox)
-  (strength player-strength)
-  (invincible player-invincible? set-player-invincible!)
-  (bounds player-bounds set-player-bounds!)
-  (agenda player-agenda)
-  (shot player-shot set-player-shot!)
-  (bullet-system player-bullet-system set-player-bullet-system!))
+(define (make-movement-hash)
+  (let ((hash (make-hash-table)))
+    (hash-set! hash 'up #f)
+    (hash-set! hash 'down #f)
+    (hash-set! hash 'left #f)
+    (hash-set! hash 'right #f)
+    hash))
 
-(define (make-player image lives strength speed)
-  (let ((sprite (make-sprite image)))
-    (center-sprite-image! sprite)
-    (%make-player sprite (make-rect 0 0 800 600) (make-rect 0 0 6 6) strength speed 0 lives #f (make-agenda) #f)))
+(define-class <player> (<actor>)
+  (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
+  (speed #:accessor speed #:init-keyword #:speed #:init-value 300)
+  (movement #:accessor movement #:init-keyword #:movement #:init-value (make-movement-hash))
+  (s #:accessor s #:init-keyword #:s #:init-value #f)
+  (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f
+            #:allocation #:virtual
+            #:slot-ref (lambda (player)
+                         (slot-ref player 's))
+            #:slot-set! (lambda (player new-shooting)
+                          (display "yo")
+                          (slot-set! player 's new-shooting)
+                          ;; SHOOT!
+                          (when (and new-shooting (procedure? (slot-ref player 'shot)))
+                            ((shot player) player))))
+  (score #:accessor score #:init-keyword #:score #:init-value 0)
+  (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
+  (strength #:accessor strength #:init-keyword #:strength #:init-value 10)
+  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-value (make-rect 0 0 6 6))
+  (invincible #:accessor invincible #:init-keyword #:invincible #:init-value #f)
+  (bounds #:accessor bounds #:init-keyword #:bounds #:init-value (make-rect 0 0 800 600))
+  (shot #:accessor shot #:init-keyword #:shot #:init-value #f)
+  (bullet-system #:accessor bullet-system #:init-keyword #:bullet-system #:init-value #f))
 
-(define (set-player-position! player x y)
-  (set-sprite-position! (player-sprite player) x y))
+(define (make-player bounds image)
+  (let ((player (make <player> #:bounds bounds #:sprite (make-sprite image))))
+    (center-sprite-image! (sprite player))
+    player))
 
-(define (set-player-hitbox-size! player width height)
-  (let ((hitbox (player-hitbox player)))
-    (set-rect-size! hitbox width height)))
+(define-method (draw (player <player>))
+  (draw-sprite (sprite player)))
 
-(define (player-dec-lives! player)
-  (set-player-lives! player (1- (player-lives player))))
+(define-method (update (player <player>) dt)
+  (update-agenda! (agenda player) 1)
+  (when (moving? player)
+    (let ((direction (direction player)))
+      (set! (x player) (+ (x player) (dx player direction dt)))
+      (set! (y player) (+ (y player) (dy player direction dt)))
+      (restrict-bounds player)))
+  (set-sprite-position! (sprite player) (x player) (y player)))
 
-(define (player-add-points! player points)
-  (set-player-score! player (+ (player-score player) points)))
+(define-method (dx (player <player>) direction dt)
+  (* (speed player) (cos direction) dt))
 
-(define (player-wait player delay)
-  (abort-to-prompt 'coroutine-prompt
-                   (lambda (resume)
-                     (add-to-agenda! (player-agenda player) delay resume))))
+(define-method (dy (player <player>) direction dt)
+  (* (speed player) (sin direction) dt))
 
-(define (player-invincible-mode! player duration)
-  (coroutine
-   (set-player-invincible! player #t)
-   (player-wait player duration)
-   (set-player-invincible! player #f)))
+(define-method (set-movement (player <player>) direction flag)
+  (hash-set! (movement player) direction flag))
 
-(define (set-player-shooting! player shooting)
-  (%set-player-shooting! player shooting)
-  ;; SHOOT!
-  (when (and shooting (procedure? (player-shot player)))
-   ((player-shot player) player)))
+(define-method (direction? (player <player>) direction)
+  (hash-ref (movement player) direction))
 
-(define (player-x player)
-  (sprite-x (player-sprite player)))
-
-(define (player-y player)
-  (sprite-y (player-sprite player)))
-
-(define (%player-dx player direction dt)
-  (* (player-speed player) (cos direction) dt))
-
-(define (%player-dy player direction dt)
-  (* (player-speed player) (sin  direction) dt))
-
-(define (player-moving? player)
+(define-method (moving? (player <player>))
   (or
-   (player-moving-left?  player)
-   (player-moving-right? player)
-   (player-moving-up?    player)
-   (player-moving-down?  player)))
+   (direction? player 'up)
+   (direction? player 'down)
+   (direction? player 'left)
+   (direction? player 'right)))
 
-(define (player-direction player)
+(define-method (direction (player <player>))
   (let ((x 0)
 	(y 0))
-    (when (player-moving-left? player)
+    (when (direction? player 'left)
       (set! x (- x 1)))
-    (when (player-moving-right? player)
+    (when (direction? player 'right)
       (set! x (+ x 1)))
-    (when (player-moving-up? player)
+    (when (direction? player 'up)
       (set! y (- y 1)))
-    (when (player-moving-down? player)
+    (when (direction? player 'down)
       (set! y (+ y 1)))
     (atan y x)))
 
-(define (restrict-player-bounds player)
-  (let ((bounds (player-bounds player)))
-    (let ((x (player-x player))
-          (y (player-y player))
+(define-method (restrict-bounds (player <player>))
+  (let ((bounds (bounds player)))
+    (let ((x (x player))
+          (y (y player))
           (min-x (rect-x bounds))
           (min-y (rect-y bounds))
           (max-x (+ (rect-x bounds) (rect-width bounds)))
@@ -116,17 +107,30 @@
       (when (> y max-y)
         (set! y max-y))
       ;; Update position
-      (set-player-position! player x y))))
+      (set-position player x y))))
 
-(define (update-player! player dt)
-  (update-agenda! (player-agenda player) 1)
-  (when (player-moving? player)
-    (let ((direction (player-direction player)))
-      (set-player-position!
-       player
-       (+ (player-x player) (%player-dx player direction dt))
-       (+ (player-y player) (%player-dy player direction dt)))
-      (restrict-player-bounds player))))
+;; (define (set-player-hitbox-size! player width height)
+;;   (let ((hitbox (player-hitbox player)))
+;;     (set-rect-size! hitbox width height)))
 
-(define (draw-player player)
-  (draw-sprite (player-sprite player)))
+;; (define (player-dec-lives! player)
+;;   (set-player-lives! player (1- (player-lives player))))
+
+;; (define (player-add-points! player points)
+;;   (set-player-score! player (+ (player-score player) points)))
+
+;; (define (player-wait player delay)
+
+;; (define (player-invincible-mode! player duration)
+;;   (coroutine
+;;    (set-player-invincible! player #t)
+;;    (player-wait player duration)
+;;    (set-player-invincible! player #f)))
+
+
+;; (define (player-x player)
+;;   (sprite-x (player-sprite player)))
+
+;; (define (player-y player)
+;;   (sprite-y (player-sprite player)))
+

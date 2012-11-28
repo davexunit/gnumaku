@@ -1,6 +1,7 @@
 (define-module (gnumaku director)
   #:use-module (oop goops)
   #:use-module (gnumaku core)
+  #:use-module (gnumaku generics)
   #:use-module (gnumaku scene)
   #:use-module (gnumaku fps)
   #:export (director-init director-run director-show-fps director-push-scene director-pop-scene director-replace-scene))
