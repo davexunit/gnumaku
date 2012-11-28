@@ -29,7 +29,7 @@
     (let draw-life-icon ((i 0)
                          (x x)
                          (y (+ y 16)))
-      (when (< i (player-lives (hud-player hud)))
+      (when (< i (lives (hud-player hud)))
         (draw-image image x y)
         (draw-life-icon (1+ i) (+ x (image-width image)) y)))))
 
