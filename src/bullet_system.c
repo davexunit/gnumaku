@@ -4,7 +4,7 @@ static scm_t_bits bullet_system_tag;
 static scm_t_bits bullet_ref_tag;
 
 static SCM
-nnnmake_bullet_ref (SCM bullet_system_smob);
+make_bullet_ref (SCM bullet_system_smob);
 
 static BulletSystem*
 check_bullet_system (SCM bullet_system_smob)
@@ -40,7 +40,7 @@ init_bullet (Bullet *bullet)
 }
 
 static SCM
-make_bullet_system (SCM s_max_bullets)
+make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob)
 {
     SCM smob;
     BulletSystem *bullet_system;
@@ -63,6 +63,7 @@ make_bullet_system (SCM s_max_bullets)
     /* Step 4: Finish the initialization.
      */
     bullet_system->bullets = (Bullet *) scm_gc_malloc (sizeof (Bullet) * max_bullets, "bullets");
+    bullet_system->sprite_sheet = sprite_sheet_smob;
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -277,6 +278,16 @@ bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
     }
 
     return SCM_UNSPECIFIED;
+}
+
+static SCM
+get_bullet_system_sprite_sheet (SCM bullet_system_smob)
+{
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
+
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return bullet_system->sprite_sheet;
 }
 
 static SCM
@@ -552,12 +563,13 @@ init_bullet_system_type (void)
     scm_set_smob_free (bullet_system_tag, free_bullet_system);
     scm_set_smob_print (bullet_system_tag, print_bullet_system);
 
-    scm_c_define_gsubr ("make-bullet-system", 1, 0, 0, make_bullet_system);
+    scm_c_define_gsubr ("make-bullet-system", 2, 0, 0, make_bullet_system);
     scm_c_define_gsubr ("clear-bullet-system!", 1, 0, 0, clear_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system", 1, 0, 0, draw_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system-hitboxes", 1, 0, 0, draw_bullet_system_hitboxes);
     scm_c_define_gsubr ("update-bullet-system!", 2, 0, 0, update_bullet_system);
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet!", 2, 0, 0, set_bullet_system_sprite_sheet);
+    scm_c_define_gsubr ("bullet-system-sprite-sheet", 1, 0, 0, get_bullet_system_sprite_sheet);
     scm_c_define_gsubr ("bullet-system-collide-rect", 3, 0, 0, bullet_system_collide_rect);
 
     scm_c_export ("make-bullet-system", NULL);
@@ -566,6 +578,7 @@ init_bullet_system_type (void)
     scm_c_export ("draw-bullet-system-hitboxes", NULL);
     scm_c_export ("update-bullet-system!", NULL);
     scm_c_export ("set-bullet-system-sprite-sheet!", NULL);
+    scm_c_export ("bullet-system-sprite-sheet", NULL);
     scm_c_export ("bullet-system-collide-rect", NULL);
 
     bullet_ref_tag = scm_make_smob_type ("BulletRef", sizeof (BulletRef));
