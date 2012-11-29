@@ -1,71 +1,46 @@
 (define-module (gnumaku enemy)
-  #:export (make-enemy enemy? enemy-sprite enemy-speed set-enemy-speed! enemy-direction
-                       set-enemy-direction! enemy-points set-enemy-points! enemy-hitbox
-                       enemy-health set-enemy-health! set-enemy-position! set-enemy-hitbox-size!
-                       damage-enemy! enemy-alive? enemy-x enemy-y update-enemy! draw-enemy
-                       enemy-move-to enemy-wait run-enemy-action enemy-bullet-system set-enemy-bullet-system!))
+  #:use-module (oop goops)
+  #:use-module (gnumaku generics)
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku actor)
+  #:use-module (gnumaku scheduler)
+  #:export (<enemy> sprite hitbox speed direction points health))
 
-(use-modules (srfi srfi-9) (gnumaku core) (gnumaku scheduler))
+(define-class <enemy> (<actor>)
+  (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
+  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-form (make-rect 0 0 0 0))
+  (speed #:accessor speed #:init-keyword #:speed #:init-value 0)
+  (direction #:accessor direction #:init-keyword #:direction #:init-value 0)
+  (points #:accessor points #:init-keyword #:points #:init-value 0)
+  (health #:accessor health #:init-keyword #:health #:init-value 0))
 
-(define-record-type Enemy
-  (%make-enemy sprite action hitbox health speed direction points bullets agenda)
-  enemy?
-  (sprite enemy-sprite)
-  (action enemy-action set-enemy-action!)
-  (speed enemy-speed set-enemy-speed!)
-  (direction enemy-direction set-enemy-direction!)
-  (points enemy-points set-enemy-points!)
-  (hitbox enemy-hitbox)
-  (health enemy-health set-enemy-health!)
-  (bullet-system enemy-bullet-system set-enemy-bullet-system!)
-  (agenda enemy-agenda))
+(define-method (hitbox-size (enemy <enemy>) width height)
+  (set-rect-size! (hitbox enemy) width height))
 
-(define (make-enemy image action health points)
-  (let ((sprite (make-sprite image)))
-    (center-sprite-image! sprite)
-    (%make-enemy sprite action (make-rect 0 0 0 0) health 0 0 points #f (make-agenda))))
+(define-method (damage (enemy <enemy>) damage)
+  (set! (health enemy) (- (health enemy) damage)))
 
-(define (set-enemy-position! enemy x y)
-  (set-sprite-position! (enemy-sprite enemy) x y))
-
-(define (set-enemy-hitbox-size! enemy width height)
-  (let ((hitbox (enemy-hitbox enemy)))
-    (set-rect-size! hitbox width height)))
-
-(define (damage-enemy! enemy damage)
-  (set-enemy-health! enemy (- (enemy-health enemy) damage)))
-
-(define (enemy-alive? enemy)
+(define-method (alive? (enemy <enemy>))
   (> (enemy-health enemy) 0))
 
-(define (enemy-x enemy)
-  (sprite-x (enemy-sprite enemy)))
+(define-method (dx (enemy <enemy>) dt)
+  (* (speed enemy) (cos (direction enemy)) dt))
 
-(define (enemy-y enemy)
-  (sprite-y (enemy-sprite enemy)))
-
-(define (%enemy-dx enemy dt)
-  (* (enemy-speed enemy) (cos (enemy-direction enemy)) dt))
-
-(define (%enemy-dy enemy dt)
-  (* (enemy-speed enemy) (sin  (enemy-direction enemy)) dt))
-
-(define (enemy-wait enemy delay)
-  (abort-to-prompt 'coroutine-prompt
-                   (lambda (resume)
-                     (add-to-agenda! (enemy-agenda enemy) delay resume))))
+(define-method (dy (enemy <enemy>) dt)
+  (* (speed enemy) (sin  (direction enemy)) dt))
 
 (define (run-enemy-action enemy)
   ((enemy-action enemy) enemy))
 
-(define (update-enemy! enemy dt)
-  (update-agenda! (enemy-agenda enemy) 1)
-  (set-enemy-position! enemy
-                       (+ (enemy-x enemy) (%enemy-dx enemy dt))
-                       (+ (enemy-y enemy) (%enemy-dy enemy dt))))
+(define-method (update (enemy <enemy>) dt)
+  (update-agenda! (agenda enemy) 1)
+  (set-position enemy
+                (+ (x enemy) (dx enemy dt))
+                (+ (y enemy) (dy enemy dt)))
+  (set-sprite-position! (sprite enemy) (x enemy) (y enemy)))
 
-(define (draw-enemy enemy)
-  (draw-sprite (enemy-sprite enemy)))
+(define-method (draw (enemy <enemy>))
+  (draw-sprite (sprite enemy)))
 
 (define (enemy-move-to enemy x y speed)
   (unless (eq? speed 0)

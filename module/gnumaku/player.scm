@@ -6,7 +6,7 @@
   #:use-module (gnumaku scheduler)
   #:use-module (gnumaku actor)
   #:export (<player> make-player sprite speed movement shooting score lives strength hitbox
-                     invincible bounds shot bullet-system set-movement))
+                     invincible bounds shot set-movement))
 
 (define (make-movement-hash)
   (let ((hash (make-hash-table)))
@@ -19,14 +19,13 @@
 (define-class <player> (<actor>)
   (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
   (speed #:accessor speed #:init-keyword #:speed #:init-value 300)
-  (movement #:accessor movement #:init-keyword #:movement #:init-value (make-movement-hash))
+  (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
   (s #:accessor s #:init-keyword #:s #:init-value #f)
   (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f
             #:allocation #:virtual
             #:slot-ref (lambda (player)
                          (slot-ref player 's))
             #:slot-set! (lambda (player new-shooting)
-                          (display "yo")
                           (slot-set! player 's new-shooting)
                           ;; SHOOT!
                           (when (and new-shooting (procedure? (slot-ref player 'shot)))
@@ -34,11 +33,10 @@
   (score #:accessor score #:init-keyword #:score #:init-value 0)
   (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
   (strength #:accessor strength #:init-keyword #:strength #:init-value 10)
-  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-value (make-rect 0 0 6 6))
+  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-form (make-rect 0 0 6 6))
   (invincible #:accessor invincible #:init-keyword #:invincible #:init-value #f)
-  (bounds #:accessor bounds #:init-keyword #:bounds #:init-value (make-rect 0 0 800 600))
-  (shot #:accessor shot #:init-keyword #:shot #:init-value #f)
-  (bullet-system #:accessor bullet-system #:init-keyword #:bullet-system #:init-value #f))
+  (bounds #:accessor bounds #:init-keyword #:bounds #:init-form (make-rect 0 0 800 600))
+  (shot #:accessor shot #:init-keyword #:shot #:init-value #f))
 
 (define (make-player bounds image)
   (let ((player (make <player> #:bounds bounds #:sprite (make-sprite image))))

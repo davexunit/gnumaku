@@ -10,7 +10,7 @@
   #:use-module (gnumaku enemy)
   #:export (<level> name width height player enemies background agenda
                     player-bullet-system enemy-bullet-system
-                    layer run))
+                    layer run add-enemy clear-enemies))
 
 (define-class <level> ()
   (name #:accessor name #:init-keyword #:name #:init-value "untitled")
@@ -36,7 +36,7 @@
   (update-enemies level dt))
 
 (define-method (update-enemies (level <level>) dt)
-  #f)
+  (for-each (lambda (enemy) (update enemy dt)) (enemies level)))
 
 (define-method (draw (level <level>))
   (draw-image (background level) 0 0)
@@ -46,42 +46,15 @@
   (draw-enemies level))
 
 (define-method (draw-enemies (level <level>))
-  #f)
+  (for-each (lambda (enemy) (draw enemy)) (enemies level)))
 
+(define-method (add-enemy (level <level>) enemy)
+    (set! (enemies level) (cons enemy (enemies level)))
+    (set! (bullet-system enemy) (enemy-bullet-system level)))
+    ;(run-enemy-action enemy))
 
-
-
-;; (define-record-type Level
-;;   (%make-level width height on-run player enemies background agenda player-bullet-system enemy-bullets layer)
-;;   level?
-;;   (width level-width)
-;;   (height level-height)
-;;   (on-run level-on-run) ;; Procedure
-;;   (player level-player)
-;;   (enemies level-enemies set-level-enemies!)
-;;   (background level-background) ;; Sprite
-;;   (agenda level-agenda) ;; Agenda
-;;   (player-bullet-system level-player-bullet-system) ;; Bullet system
-;;   (enemy-bullets level-enemy-bullet-system)
-;;   (layer level-layer))
-
-;; (define (make-level width height on-run player background-image)
-;;   (let ((level (%make-level width height on-run player '() (make-sprite background-image) (make-agenda)
-;;                (make-bullet-system 2000) (make-bullet-system 10000)
-;;                (make-layer (make-rect 0 0 width height) #f))))
-;;     (set-player-bullet-system! player (level-player-bullet-system level))
-;;     (set-layer-draw-proc! (level-layer level) (lambda () (draw-level level)))
-;;     (set-layer-clip! (level-layer level) #t)
-;;     level))
-
-;; (define (level-add-enemy! level enemy)
-;;   (let ((enemies (level-enemies level)))
-;;     (set-level-enemies! level (cons enemy enemies))
-;;     (set-enemy-bullet-system! enemy (level-enemy-bullet-system level))
-;;     (run-enemy-action enemy)))
-
-;; (define (level-clear-enemies! level)
-;;   (set-level-enemies! level '()))
+(define-method (clear-enemies (level <level>))
+  (set! (enemies level) '()))
 
 ;; (define (run-level level)
 ;;   ((level-on-run level) level))

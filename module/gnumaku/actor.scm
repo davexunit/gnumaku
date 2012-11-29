@@ -3,13 +3,14 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku scheduler)
-  #:export (<actor> name agenda x y))
+  #:export (<actor> name agenda x y get-x get-y bullet-system))
 
 (define-class <actor> ()
   (name #:accessor name #:init-keyword #:name #:init-value "untitled")
-  (x #:accessor x #:init-keyword #:x #:init-value 0)
-  (y #:accessor y #:init-keyword #:y #:init-value 0)
-  (agenda #:accessor agenda #:init-keyword #:agenda #:init-value (make-agenda)))
+  (x #:accessor x #:getter get-x #:init-keyword #:x #:init-value 0)
+  (y #:accessor y #:getter get-y #:init-keyword #:y #:init-value 0)
+  (agenda #:accessor agenda #:init-keyword #:agenda #:init-thunk make-agenda)
+  (bullet-system #:accessor bullet-system #:init-keyword #:bullet-system #:init-value #f))
 
 (define-method (update (actor <actor>) dt))
 
