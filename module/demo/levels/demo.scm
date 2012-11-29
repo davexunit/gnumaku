@@ -5,6 +5,7 @@
   #:use-module (gnumaku level)
   #:use-module (gnumaku primitives)
   #:use-module (gnumaku coroutine)
+  #:use-module (gnumaku actor)
   #:use-module (gnumaku player)
   #:use-module (demo enemies)
   #:export (<demo-level> make-demo-level))
