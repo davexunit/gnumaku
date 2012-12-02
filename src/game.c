@@ -23,7 +23,6 @@ make_game ()
     /* Step 2: Initialize it with straight code.
      */
     game->display = NULL;
-    game->font = NULL;
     game->event_queue = NULL;
     game->timer = NULL;
     game->timestep = 1.0 / 60.0;
@@ -150,13 +149,6 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
 	fprintf (stderr, "failed to create display!\n");
     }
 
-    /* Temporary hard-coded font for showing FPS */
-    game->font = al_load_ttf_font ("data/fonts/CarroisGothic-Regular.ttf", 24, 0);
-
-    if (!game->font) {
-	fprintf(stderr, "failed to load font\n");
-    }
-
     game->timer = al_create_timer (game->timestep);
     game->event_queue = al_create_event_queue ();
     al_register_event_source (game->event_queue, al_get_display_event_source (game->display));
@@ -169,7 +161,6 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
 static void
 game_destroy (Game *game)
 {
-    al_destroy_font (game->font);
     al_destroy_timer (game->timer);
     al_destroy_event_queue (game->event_queue);
     al_destroy_display (game->display);
