@@ -104,23 +104,42 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
 
     /* Initialize Allegro things */
     /* TODO: Handle these errors in a proper way */
-    if(!al_init())
-    {
+    if(!al_init ()) {
 	fprintf (stderr, "failed to initialize allegro!\n");
+        exit (-1);
     }
 
-    if (!al_init_image_addon ())
-    {
+    if (!al_init_image_addon ()) {
 	fprintf (stderr, "failed to initialize image addon!\n");
+        exit (-1);
     }
 
     al_init_font_addon ();
-    al_init_ttf_addon ();
+
+    if(!al_init_ttf_addon ()) {
+        fprintf (stderr, "failed to initialize ttf addon!\n");
+        exit (-1);
+    }
+
+    if(!al_install_audio ()) {
+        fprintf (stderr, "failed to initialize audio addon!\n");
+        exit (-1);
+    }
+ 
+    if(!al_init_acodec_addon ()) {
+        fprintf (stderr, "failed to initialize audio codecs addon!\n");
+        exit (-1);
+    }
+ 
+    if (!al_reserve_samples (1)) {
+        fprintf (stderr, "failed to reserve samples!\n");
+        exit (-1);
+    }
 
     if(!al_install_keyboard ()) {
 	fprintf (stderr, "failed to initialize keyboard!\n");
+        exit (-1);
     }
-
     
     if (fullscreen) {
         al_set_new_display_flags (ALLEGRO_FULLSCREEN);
