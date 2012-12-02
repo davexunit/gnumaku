@@ -6,7 +6,7 @@
   #:use-module (gnumaku scheduler)
   #:use-module (demo actor)
   #:export (<player> make-player sprite speed movement shooting score lives strength hitbox
-                     invincible bounds shot set-movement))
+                     invincible bounds shot shot-sound set-movement))
 
 (define (make-movement-hash)
   (let ((hash (make-hash-table)))
@@ -36,7 +36,8 @@
   (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-form (make-rect 0 0 6 6))
   (invincible #:accessor invincible #:init-keyword #:invincible #:init-value #f)
   (bounds #:accessor bounds #:init-keyword #:bounds #:init-form (make-rect 0 0 800 600))
-  (shot #:accessor shot #:init-keyword #:shot #:init-value #f))
+  (shot #:accessor shot #:init-keyword #:shot #:init-value #f)
+  (shot-sound #:accessor shot-sound #:init-keyword #:shot-sound #:init-value #f))
 
 (define (make-player bounds image)
   (let ((player (make <player> #:bounds bounds #:sprite (make-sprite image))))
