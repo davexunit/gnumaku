@@ -309,6 +309,16 @@ set_game_fullscreen (SCM game_smob, SCM s_fullscreen)
 }
 
 static SCM
+reset_draw_target (SCM game_smob)
+{
+    Game *game = check_game (game_smob);
+
+    al_set_target_backbuffer (game->display);
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
 mark_game (SCM game_smob)
 {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
@@ -366,7 +376,8 @@ init_game_type (void)
     scm_c_define_gsubr ("game-display-height", 1, 0, 0, game_display_height);
     scm_c_define_gsubr ("game-resize-display", 3, 0, 0, game_resize_display);
     scm_c_define_gsubr ("game-fullscreen?", 1, 0, 0, game_fullscreen);
-    scm_c_define_gsubr ("set-game-fullscreen", 1, 0, 0, set_game_fullscreen);
+    scm_c_define_gsubr ("set-game-fullscreen", 2, 0, 0, set_game_fullscreen);
+    scm_c_define_gsubr ("game-reset-draw-target", 1, 0, 0, reset_draw_target);
 
     scm_c_export ("make-game", NULL);
     scm_c_export ("game-on-start-hook", NULL);
@@ -383,4 +394,5 @@ init_game_type (void)
     scm_c_export ("game-resize-display", NULL);
     scm_c_export ("game-fullscreen?", NULL);
     scm_c_export ("set-game-fullscreen", NULL);
+    scm_c_export ("game-reset-draw-target", NULL);
 }

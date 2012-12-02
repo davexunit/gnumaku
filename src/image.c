@@ -26,6 +26,23 @@ load_image (SCM s_file)
     return smob;
 }
 
+static SCM
+make_image (SCM s_width, SCM s_height)
+{
+    SCM smob;
+    int width = scm_to_int (s_width);
+    int height = scm_to_int (s_height);
+    Image *image = (Image *) scm_gc_malloc (sizeof (Image), "image");
+
+    image->bitmap = NULL;
+
+    SCM_NEWSMOB (smob, image_tag, image);
+
+    image->bitmap = al_create_bitmap (width, height);
+
+    return smob;
+}
+
 SCM
 make_image_from_bitmap (ALLEGRO_BITMAP *bitmap)
 {
@@ -69,6 +86,16 @@ draw_image (SCM image_smob, SCM s_x, SCM s_y)
     return SCM_UNSPECIFIED;
 }
 
+static SCM
+set_target_image (SCM image_smob)
+{
+    Image *image = check_image (image_smob);
+
+    al_set_target_bitmap (image->bitmap);
+
+    return SCM_UNSPECIFIED;
+}
+
 static size_t
 free_image (SCM image_smob)
 {
@@ -104,12 +131,16 @@ init_image_type (void)
     scm_set_smob_print (image_tag, print_image);
 
     scm_c_define_gsubr ("load-image", 1, 0, 0, load_image);
+    scm_c_define_gsubr ("make-image", 2, 0, 0, make_image);
     scm_c_define_gsubr ("image-width", 1, 0, 0, get_image_width);
     scm_c_define_gsubr ("image-height", 1, 0, 0, get_image_height);
     scm_c_define_gsubr ("draw-image", 3, 0, 0, draw_image);
+    scm_c_define_gsubr ("set-target-image", 1, 0, 0, set_target_image);
 
     scm_c_export ("load-image", NULL);
+    scm_c_export ("make-image", NULL);
     scm_c_export ("image-width", NULL);
     scm_c_export ("image-height", NULL);
     scm_c_export ("draw-image", NULL);
+    scm_c_export ("set-target-image", NULL);
 }
