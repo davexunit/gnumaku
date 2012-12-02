@@ -15,8 +15,8 @@
   #:use-module (demo enemies)
   #:use-module (demo hud)
   #:use-module (demo levels demo)
-  #:export (<shmup-scene> background)
-  #:re-export (update draw))
+  #:duplicates (merge-generics)
+  #:export (<shmup-scene> background))
 
 (define-class <shmup-scene> (<scene>)
   (background #:accessor background #:init-keyword #:background #:init-value #f)
@@ -42,6 +42,7 @@
   (init-player scene)
   (set! (hud scene) (make-hud 800 600 (player scene)))
   (set! (current-level scene) (make-demo-level (player scene) (field-width scene) (field-height scene)))
+  (set-position (current-level scene) 20 20)
   (run (current-level scene)))
 
 (define-method (load-assets (scene <shmup-scene>))
@@ -70,10 +71,10 @@
 	   (y (y player))
 	   (speed 800)
            (bullets (bullet-system player)))
-       (emit-bullet bullets (- x 16) y speed 268 0 0 'small-diamond)
-       (emit-bullet bullets x (- y 20) speed 270 0 0 'small-green)
-       (emit-bullet bullets (+ x 16) y speed 272 0 0 'small-diamond))
-     (wait player 5)
+       (emit-bullet bullets (- x 16) y speed 270 0 0 'small-diamond)
+       (emit-bullet bullets x (- y 20) speed 270 0 0 'small-diamond)
+       (emit-bullet bullets (+ x 16) y speed 270 0 0 'small-diamond))
+     (wait player 6)
      (player-shot-1 player))))
 
 (define-method (add-test-enemy (scene <shmup-scene>))
