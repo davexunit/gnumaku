@@ -29,6 +29,7 @@
   (set! asset-managers (cons (make-asset-manager types load-proc (make-hash-table)) asset-managers)))
 
 (define (load-asset filename)
+  "Loads the asset with the given filename. Returns #f if file type is not supported."
   (let loop ((managers asset-managers))
     (if (null? managers)
         #f
