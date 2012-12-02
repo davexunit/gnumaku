@@ -70,3 +70,5 @@
 ** Every time the update hook is called, a timer should be incremented by one and the game should use this to time events.
 * DONE Use GOOPS
 ** OOP will be nice for generic interfaces
+* TODO Docstrings for EVERYTHING
+** I have been doing a terrible job at documenting this code.
