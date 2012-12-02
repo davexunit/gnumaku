@@ -3,7 +3,7 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku scheduler)
-  #:export (<actor> name agenda x y get-x get-y bullet-system))
+  #:export (<actor> name agenda bullet-system x y get-x get-y))
 
 (define-class <actor> ()
   (name #:accessor name #:init-keyword #:name #:init-value "untitled")
