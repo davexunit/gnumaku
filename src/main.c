@@ -6,6 +6,7 @@
 #include "sprite_sheet.h"
 #include "sprite.h"
 #include "font.h"
+#include "audio.h"
 #include "game.h"
 #include "bullet_system.h"
 #include "draw.h"
@@ -20,6 +21,7 @@ init_gnumaku ()
     init_sprite_type ();
     init_rect_type ();
     init_font_type ();
+    init_sample_type ();
     init_game_type ();
     init_bullet_system_type ();
     bind_draw_funcs ();
