@@ -32,7 +32,7 @@
   "Loads the asset with the given filename. Returns #f if file type is not supported."
   (let loop ((managers asset-managers))
     (if (null? managers)
-        #f
+        #f ;; No manager could load the file
         (begin
           (let ((manager (car managers)))
             (if (asset-manager-match-type? manager filename)
