@@ -4,7 +4,8 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku scene)
   #:use-module (gnumaku fps)
-  #:export (director-init director-run director-show-fps director-push-scene director-pop-scene director-replace-scene))
+  #:export (director-init director-run director-show-fps director-push-scene director-pop-scene
+                          director-replace-scene director-set-draw-target director-reset-draw-target))
 
 (define director-game (make-game))
 (define director-scenes '())
@@ -53,6 +54,12 @@
 
 (define (director-draw-fps)
   (font-draw-text director-font 730 575 '(1 1 1 0.7) (string-append "FPS: " (number->string (fps-last-frames director-fps)))))
+
+(define (director-set-draw-target image)
+  (set-target-image image))
+
+(define (director-reset-draw-target)
+  (game-reset-draw-target director-game))
 
 (game-on-start-hook
  director-game
