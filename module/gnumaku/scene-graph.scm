@@ -1,8 +1,8 @@
-(define-module (gnumaku scene-node)
+(define-module (gnumaku scene-graph)
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
-  #:export (<scene-node> <scene-group> x y scale-x scale-y rotation parent %draw))
+  #:export (<scene-node> <scene-group> x y scale-x scale-y rotation parent %draw add-child remove-child))
 
 (define-class <scene-node> ()
   (x #:accessor x #:init-keyword #:x #:init-value 0)
@@ -34,20 +34,12 @@
 (define-class <scene-group> (<scene-node>)
   (children #:accessor children #:init-keyword #:children #:init-value '()))
 
-;; (define (layer-add-child layer child-layer)
-;;   (set-layer-parent! child-layer layer)
-;;   (let ((children (layer-children layer)))
-;;     (append! children (cons child-layer '()))))
+(define-method (add-child (group <scene-group>) node)
+  (set! (parent node) group)
+  (append! (children group) (list node)))
 
-;; (define (layer-transform layer)
-;;   (let ((transform (current-transform)))
-;;     (translate-transform! transform (layer-x layer) (layer-y layer))
-;;     (use-transform transform)))
+(define-method (remove-child (group <scene-group>) child-node)
+  (delete! child-node (children group)))
 
-;; (define (draw-layer layer)
-
-;; (define* (draw-layers layers #:optional (x 0) (y 0))
-;;   (unless (null? layers)
-;;     (let ((layer (car layers)))
-;;       (draw-layer layer)
-;;       (draw-layers (cdr layers) (+ x (layer-x layer)) (+ y (layer-y layer))))))
+(define-method (%draw (group <scene-group>))
+  (for-each (lambda (node) (draw node)) (children group)))
