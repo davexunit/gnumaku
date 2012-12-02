@@ -4,7 +4,7 @@
 
 (define (emit-bullet system x y speed direction acceleration angular-velocity type)
   (let ((bullet (make-bullet system)))
-    (set-bullet-type! bullet type)
+    (set-bullet-type bullet type)
     (set-bullet-position! bullet x y)
     (set-bullet-speed! bullet speed)
     (set-bullet-direction! bullet direction)
