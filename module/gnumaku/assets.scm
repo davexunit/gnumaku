@@ -16,7 +16,7 @@
                  (asset-manager-file-types manager)))))
 
 (define (asset-manager-load manager filename)
-  "Calls the manager's load procedure with the given filename and extra arguments"
+  "Calls the manager's load procedure with the given filename"
   (let ((dict (asset-manager-dict manager)))
     (if (hash-get-handle dict filename)
         (hash-ref dict filename)
