@@ -7,6 +7,7 @@
   #:use-module (gnumaku keycodes)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku primitives)
+  #:use-module (gnumaku assets)
   #:use-module (demo level)
   #:use-module (demo actor)
   #:use-module (demo player)
@@ -47,8 +48,8 @@
 (define-method (load-assets (scene <shmup-scene>))
   (set! (player-sheet scene) (make-sprite-sheet "data/images/player.png" 48 48 0 0))
   (set! (enemy-sheet scene) (make-sprite-sheet "data/images/enemy.png" 64 48 0 0))
-  (set! (background scene) (load-image "data/images/background.png"))
-  (set! (shot-sound scene) (load-sample "data/sounds/player_shot.wav")))
+  (set! (background scene) (load-asset "data/images/background.png"))
+  (set! (shot-sound scene) (load-asset "data/sounds/player_shot.wav")))
 
 (define-method (init-player (scene <shmup-scene>))
   (set! (player scene) (make-player (make-rect 0 0 (field-width scene) (field-height scene))
