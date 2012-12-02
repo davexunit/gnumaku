@@ -2,7 +2,7 @@
   #:export (make-hud hud-width hud-height hud-player hud-font hud-life-image
                      set-hud-width! set-hud-height! set-hud-font! set-hud-life-image! draw-hud))
 
-(use-modules (srfi srfi-9) (gnumaku core) (gnumaku player))
+(use-modules (srfi srfi-9) (gnumaku core) (demo player))
 
 (define life-icon #f)
 (define font #f)
