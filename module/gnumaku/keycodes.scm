@@ -1,5 +1,5 @@
-(define-module (gnumaku keycodes))
-(export keycode)
+(define-module (gnumaku keycodes)
+  #:export (keycode))
 
 (define (keycode key)
   (define keycodes (make-hash-table))
