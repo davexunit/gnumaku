@@ -29,7 +29,12 @@ make_font (SCM s_filename, SCM s_size)
     /* Step 3: Create the smob.
      */
     SCM_NEWSMOB (smob, font_tag, font);
+
     font->font = al_load_ttf_font (filename, size, 0);
+
+    if (!font->font) {
+        fprintf (stderr, "failed to load font: %s\n", filename);
+    }
 
     return smob;
 }
@@ -45,8 +50,10 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     float g = scm_to_double (scm_cadr (s_color));
     float b = scm_to_double (scm_caddr (s_color));
     float a = scm_to_double (scm_cadddr (s_color));
-
-    al_draw_text (font->font, al_map_rgba_f (r * a, g * a, b * a, a), x, y, 0, text);
+    
+    if (font->font) {
+        al_draw_text (font->font, al_map_rgba_f (r * a, g * a, b * a, a), x, y, 0, text);
+    }
 
     return SCM_UNSPECIFIED;
 }

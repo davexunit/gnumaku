@@ -23,6 +23,10 @@ load_image (SCM s_file)
 
     image->bitmap = al_load_bitmap (file);
 
+    if (!image->bitmap) {
+        fprintf (stderr, "failed to load image: %s\n", file);
+    }
+
     return smob;
 }
 
@@ -81,7 +85,9 @@ draw_image (SCM image_smob, SCM s_x, SCM s_y)
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
 
-    al_draw_bitmap (image->bitmap, x, y, 0);
+    if (image->bitmap) {
+        al_draw_bitmap (image->bitmap, x, y, 0);
+    }
 
     return SCM_UNSPECIFIED;
 }
