@@ -1,6 +1,8 @@
 (define-module (gnumaku primitives)
-  #:export (emit-bullet emit-circle))
-(use-modules (gnumaku core) (gnumaku math) (gnumaku bullet-types))
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku math)
+  #:use-module (gnumaku bullet-types)
+  #:export (emit-bullet emit-towards emit-circle))
 
 (define (emit-bullet system x y speed direction acceleration angular-velocity type)
   (let ((bullet (make-bullet system)))
@@ -11,6 +13,10 @@
     (set-bullet-acceleration! bullet acceleration)
     (set-bullet-angular-velocity! bullet angular-velocity)
     bullet))
+
+(define (emit-towards system x y speed dst-x dst-y acceleration angular-velocity type)
+  (let ((direction (rad2deg (atan (- dst-y y) (- dst-x x)))))
+    (emit-bullet system x y speed direction acceleration angular-velocity type)))
 
 (define (emit-circle system x y radius num-bullets rotate-offset speed acceleration angular-velocity type)
   (define bullets '())
