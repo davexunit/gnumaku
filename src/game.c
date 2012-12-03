@@ -130,7 +130,7 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
         exit (-1);
     }
  
-    if (!al_reserve_samples (1)) {
+    if (!al_reserve_samples (16)) {
         fprintf (stderr, "failed to reserve samples!\n");
         exit (-1);
     }
