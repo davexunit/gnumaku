@@ -46,10 +46,10 @@
   (run (current-level scene)))
 
 (define-method (load-assets (scene <shmup-scene>))
-  (set! (player-sheet scene) (make-sprite-sheet "data/images/player.png" 48 48 0 0))
-  (set! (enemy-sheet scene) (make-sprite-sheet "data/images/enemy.png" 64 48 0 0))
-  (set! (background scene) (load-asset "data/images/background.png"))
-  (set! (shot-sound scene) (load-asset "data/sounds/player_shot.wav")))
+  (set! (player-sheet scene) (make-sprite-sheet "assets/images/player.png" 48 48 0 0))
+  (set! (enemy-sheet scene) (make-sprite-sheet "assets/images/enemy.png" 64 48 0 0))
+  (set! (background scene) (load-asset "background.png"))
+  (set! (shot-sound scene) (load-asset "player_shot.wav")))
 
 (define-method (init-player (scene <shmup-scene>))
   (set! (player scene) (make-player (make-rect 0 0 (field-width scene) (field-height scene))

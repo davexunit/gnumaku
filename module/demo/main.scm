@@ -2,6 +2,7 @@
   #:use-module (oop goops)
   #:use-module (system repl server)
   #:use-module (gnumaku core)
+  #:use-module (gnumaku assets)
   #:use-module (gnumaku director)
   #:use-module (gnumaku bullet-types)
   #:use-module (demo scenes shmup)
@@ -39,7 +40,13 @@
                           (set-bullet-sprite! bullet 5)
                           (set-bullet-hitbox! bullet -2 -2 4 4))))
 
+(define (init-assets-manager)
+  (register-asset-manager "images" load-image)
+  (register-asset-manager "sounds" load-sample)
+  (register-asset-manager "fonts" load-font))
+
 (define (main)
+  (init-assets-manager)
   (init-bullet-types)
   ;; Start up director
   (director-init 800 600)

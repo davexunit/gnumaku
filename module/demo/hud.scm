@@ -1,11 +1,10 @@
 (define-module (demo hud)
+  #:use-module (srfi srfi-9)
+  #:use-module (gnumaku core)
+  #:use-module (gnumaku assets)
+  #:use-module (demo player)
   #:export (make-hud hud-width hud-height hud-player hud-font hud-life-image
                      set-hud-width! set-hud-height! set-hud-font! set-hud-life-image! draw-hud))
-
-(use-modules (srfi srfi-9) (gnumaku core) (demo player))
-
-(define life-icon #f)
-(define font #f)
 
 (define-record-type Hud
   (%make-hud width height player font life-image)
@@ -17,11 +16,7 @@
   (life-image hud-life-image set-hude-life-image!))
 
 (define (make-hud width height player)
-  (unless font
-    (set! font (make-font "data/fonts/CarroisGothic-Regular.ttf" 14)))
-  (unless life-icon
-    (set! life-icon (load-image "data/images/heart.png")))
-  (%make-hud width height player font life-icon))
+  (%make-hud width height player (load-asset "CarroisGothic-Regular.ttf" 14) (load-asset "heart.png")))
 
 (define (draw-lives x y hud)
   (font-draw-text (hud-font hud) x y '(1 1 1 1) "Lives")
