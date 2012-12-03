@@ -38,7 +38,9 @@ play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed)
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
 
-    al_play_sample (sample->sample, gain, pan, speed, ALLEGRO_PLAYMODE_ONCE, NULL);
+    if (sample->sample) {
+        al_play_sample (sample->sample, gain, pan, speed, ALLEGRO_PLAYMODE_ONCE, NULL);
+    }
 
     return SCM_UNSPECIFIED;
 }

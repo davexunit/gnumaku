@@ -11,7 +11,7 @@ check_font (SCM font_smob)
 }
 
 static SCM
-make_font (SCM s_filename, SCM s_size)
+load_font (SCM s_filename, SCM s_size)
 {
     SCM smob;
     Font *font;
@@ -86,9 +86,9 @@ init_font_type (void)
     scm_set_smob_free (font_tag, free_font);
     scm_set_smob_print (font_tag, print_font);
 
-    scm_c_define_gsubr ("make-font", 2, 0, 0, make_font);
+    scm_c_define_gsubr ("load-font", 2, 0, 0, load_font);
     scm_c_define_gsubr ("font-draw-text", 5, 0, 0, font_draw_text);
 
-    scm_c_export ("make-font", NULL);
+    scm_c_export ("load-font", NULL);
     scm_c_export ("font-draw-text", NULL);
 }
