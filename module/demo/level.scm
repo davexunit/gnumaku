@@ -10,7 +10,7 @@
   #:use-module (demo player)
   #:use-module (demo enemy)
   #:export (<level> name width height player enemies background agenda buffer
-                    player-bullet-system enemy-bullet-system
+                    player-bullet-system enemy-bullet-system scroll-speed
                     layer run add-enemy clear-enemies init-buffer))
 
 (define-class <level> (<scene-node>)
@@ -20,6 +20,8 @@
   (player #:accessor player #:init-keyword #:player #:init-value #f)
   (enemies #:accessor enemies #:init-keyword #:enemies #:init-value '())
   (background #:accessor background #:init-keyword #:background #:init-value #f)
+  (background-y #:accessor background-y #:init-keyword #:background-y #:init-value 0)
+  (scroll-speed #:accessor scroll-speed #:init-keyword #:scroll-speed #:init-value 100)
   (buffer #:accessor buffer #:init-keyword #:buffer #:init-value #f)
   (agenda #:accessor agenda #:init-keyword #:agenda #:init-value (make-agenda))
   (player-bullet-system #:accessor player-bullet-system #:init-keyword #:player-bullet-system #:init-value #f)
@@ -37,20 +39,39 @@
   (update-bullet-system! (player-bullet-system level) dt)
   (update-bullet-system! (enemy-bullet-system level) dt)
   (update (player level) dt)
-  (update-enemies level dt))
+  (update-enemies level dt)
+  (update-background level dt))
+
+(define-method (update-background (level <level>) dt)
+  (let ((y (background-y level)))
+    (set! y (+ y (* (scroll-speed level) dt)))
+    (when (> y (height level))
+      (set! y (- y (image-height (background level)))))
+    (set! (background-y level) y)))
 
 (define-method (update-enemies (level <level>) dt)
   (for-each (lambda (enemy) (update enemy dt)) (enemies level)))
 
 (define-method (%draw (level <level>))
   (director-set-draw-target (buffer level))
-  (draw-image (background level) 0 0)
+  (draw-background level)
   (draw-bullet-system (player-bullet-system level))
   (draw (player level))
   (draw-bullet-system (enemy-bullet-system level))
   (draw-enemies level)
   (director-reset-draw-target)
   (draw-image (buffer level) 0 0))
+
+(define-method (draw-background (level <level>))
+  (let ((background (background level)))
+    (let scroll-pos ((y (background-y level)))
+      (when (< y (height level))
+        (draw-image background 0 y)
+        (scroll-pos (+ y (image-height background)))))
+    (let scroll-neg ((y (- (background-y level) (image-height background))))
+      (when (> (+ y (image-height background)) 0)
+        (draw-image background 0 y)
+        (scroll-neg (- y (image-height background)))))))
 
 (define-method (draw-enemies (level <level>))
   (for-each (lambda (enemy) (draw enemy)) (enemies level)))
