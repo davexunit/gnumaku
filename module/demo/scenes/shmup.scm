@@ -53,7 +53,7 @@
 
 (define-method (init-player (scene <shmup-scene>))
   (set! (player scene) (make-player (make-rect 0 0 (field-width scene) (field-height scene))
-                                    (sprite-sheet-tile (player-sheet scene) 0)))
+                                    (sprite-sheet-tile (load-asset "player.png" 48 48 0 0) 0)))
   (set! (shot (player scene)) player-shot-1)
   (set! (shot-sound (player scene)) (shot-sound scene))
   (set-position (player scene) (/ (field-width scene) 2) (- (field-height scene) 32)))
@@ -61,7 +61,7 @@
 (define (player-shot-1 player)
   (coroutine
    (when (shooting player)
-     (play-sample (shot-sound player) 0.5 0.0 1.0)
+     (play-sample (shot-sound player) 1.0 0.0 1.0)
      (let ((x (x player))
 	   (y (y player))
 	   (speed 800)
