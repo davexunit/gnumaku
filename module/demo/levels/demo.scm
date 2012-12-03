@@ -2,6 +2,7 @@
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
+  #:use-module (gnumaku assets)
   #:use-module (gnumaku primitives)
   #:use-module (gnumaku coroutine)
   #:use-module (demo level)
@@ -16,10 +17,10 @@
 
 (define (make-demo-level player width height)
   ;; only load the sprites once
-  (set! bullet-sprites (or bullet-sprites (make-sprite-sheet "assets/images/bullets.png" 32 32 0 0)))
+  (set! bullet-sprites (or bullet-sprites (load-asset "bullets.png" 32 32 0 0)))
 
   (let ((level (make <demo-level> #:player player #:width width #:height height
-                    #:background (load-image "assets/images/space.png")
+                    #:background (load-asset "space.png")
                     #:player-bullet-system (make-bullet-system 2000 bullet-sprites)
                     #:enemy-bullet-system (make-bullet-system 10000 bullet-sprites))))
     (set! (bullet-system player) (player-bullet-system level))

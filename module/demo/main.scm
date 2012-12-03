@@ -42,6 +42,7 @@
 
 (define (init-assets-manager)
   (register-asset-manager "images" load-image)
+  (register-asset-manager "sprite_sheets" load-sprite-sheet)
   (register-asset-manager "sounds" load-sample)
   (register-asset-manager "fonts" load-font))
 
