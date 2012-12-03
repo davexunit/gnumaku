@@ -41,7 +41,7 @@ init_sprite_sheet_tiles (SpriteSheet *sprite_sheet)
 }
 
 static SCM
-make_sprite_sheet (SCM s_file, SCM s_tile_width, SCM s_tile_height, SCM s_spacing, SCM s_margin)
+load_sprite_sheet (SCM s_file, SCM s_tile_width, SCM s_tile_height, SCM s_spacing, SCM s_margin)
 {
     SCM smob;
     SpriteSheet *sprite_sheet;
@@ -121,9 +121,9 @@ init_sprite_sheet_type (void)
     scm_set_smob_free (sprite_sheet_tag, free_sprite_sheet);
     scm_set_smob_print (sprite_sheet_tag, print_sprite_sheet);
 
-    scm_c_define_gsubr ("make-sprite-sheet", 5, 0, 0, make_sprite_sheet);
+    scm_c_define_gsubr ("load-sprite-sheet", 5, 0, 0, load_sprite_sheet);
     scm_c_define_gsubr ("sprite-sheet-tile", 2, 0, 0, get_sprite_sheet_tile);
     
-    scm_c_export ("make-sprite-sheet", NULL);
+    scm_c_export ("load-sprite-sheet", NULL);
     scm_c_export ("sprite-sheet-tile", NULL);
 }
