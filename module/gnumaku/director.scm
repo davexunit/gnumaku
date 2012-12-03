@@ -6,7 +6,8 @@
   #:use-module (gnumaku fps)
   #:use-module (gnumaku assets)
   #:export (director-init director-run director-show-fps director-push-scene director-pop-scene
-                          director-replace-scene director-set-draw-target director-reset-draw-target))
+                          director-replace-scene director-set-draw-target director-reset-draw-target
+                          director-current-scene))
 
 (define director-game (make-game))
 (define director-scenes '())
