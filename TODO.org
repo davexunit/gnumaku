@@ -52,6 +52,8 @@
 ** Bind more of Allegro's font functions with Guile.
 * TODO Add bindings for Allegro audio addon
 ** Need some minimal bindings for background music and short sound effects
+** DONE Sound effects
+** TODO Music streams
 * TODO Custom window resolutions and fullscreen mode
 ** DONE Specify window size and fullscreen mode when initializing
 ** TODO Allow user to change screen size and fullscreen mode after initializing
