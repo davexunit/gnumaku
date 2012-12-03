@@ -24,10 +24,10 @@
                     #:player-bullet-system (make-bullet-system 2000 bullet-sprites)
                     #:enemy-bullet-system (make-bullet-system 10000 bullet-sprites))))
     (set! (bullet-system player) (player-bullet-system level))
+    (init-level level)
     level))
 
 (define-method (run (level <demo-level>))
-  (init-buffer level)
   (display "run demo")(newline))
 
 ;; (define (emit-test level)

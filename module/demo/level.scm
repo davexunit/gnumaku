@@ -9,9 +9,10 @@
   #:use-module (demo actor)
   #:use-module (demo player)
   #:use-module (demo enemy)
+  #:duplicates (merge-generics replace warn last)
   #:export (<level> name width height player enemies background agenda buffer
                     player-bullet-system enemy-bullet-system scroll-speed
-                    layer run add-enemy clear-enemies init-buffer))
+                    layer run add-enemy clear-enemies init-level))
 
 (define-class <level> (<scene-node>)
   (name #:accessor name #:init-keyword #:name #:init-value "untitled")
@@ -27,8 +28,9 @@
   (player-bullet-system #:accessor player-bullet-system #:init-keyword #:player-bullet-system #:init-value #f)
   (enemy-bullet-system #:accessor enemy-bullet-system #:init-keyword #:enemy-bullet-system #:init-value #f))
 
-(define-method (init-buffer (level <level>))
-  (set! (buffer level) (make-image (width level) (height level))))
+(define-method (init-level (lvl <level>))
+  (set! (buffer lvl) (make-image (width lvl) (height lvl)))
+  (set! (level (player lvl)) lvl))
 
 (define-method (run (level <level>)))
 
@@ -40,6 +42,7 @@
   (update-bullet-system! (enemy-bullet-system level) dt)
   (update (player level) dt)
   (update-enemies level dt)
+  (check-player-collision level)
   (update-background level dt))
 
 (define-method (update-background (level <level>) dt)
@@ -50,7 +53,48 @@
     (set! (background-y level) y)))
 
 (define-method (update-enemies (level <level>) dt)
-  (for-each (lambda (enemy) (update enemy dt)) (enemies level)))
+  (for-each (lambda (enemy) (update enemy dt)) (enemies level))
+  (check-enemies-collision level))
+
+(define-method (check-player-collision (level <level>))
+  (let ((hitbox (hitbox (player level)))
+        (player (player level)))
+    (set-rect-position! hitbox
+			(- (x player) (/ (rect-width hitbox) 2))
+			(- (y player) (/ (rect-height hitbox) 2)))
+    (bullet-system-collide-rect (enemy-bullet-system level) hitbox (lambda () (on-player-hit level)))))
+
+(define-method (check-enemy-collision (level <level>) enemy)
+  (let ((hitbox (hitbox enemy)))
+    (set-rect-position! hitbox
+			(- (x enemy) (/ (rect-width hitbox) 2))
+			(- (y enemy) (/ (rect-height hitbox) 2)))
+    (bullet-system-collide-rect (player-bullet-system level) hitbox (lambda () (on-enemy-hit level enemy)))))
+
+(define-method (check-enemies-collision (level <level>))
+  (for-each (lambda (enemy) (check-enemy-collision level enemy)) (enemies level)))
+
+(define-method (on-player-hit (level <level>))
+  (let ((player (player level)))
+    (if (invincible player)
+        #f
+      (begin
+        ;(sprite-blink (player-sprite player) 3 30)
+        (set! (lives player) (1- (lives player)))
+        (invincible-mode player 180)
+        ;; Return true so that the bullet that hit the player is removed
+        #t))))
+
+(define-method (on-enemy-hit (level <level>) enemy)
+  (let ((player (player level)))
+    (damage enemy (power player))
+    (when (<= (health enemy) 0)
+      (add-points player (points enemy))
+      (kill-enemy level enemy))
+    #t))
+
+(define-method (kill-enemy (level <level>) enemy)
+  (set! (enemies level) (delete enemy (enemies level))))
 
 (define-method (%draw (level <level>))
   (director-set-draw-target (buffer level))
@@ -76,10 +120,11 @@
 (define-method (draw-enemies (level <level>))
   (for-each (lambda (enemy) (draw enemy)) (enemies level)))
 
-(define-method (add-enemy (level <level>) enemy)
-    (set! (enemies level) (cons enemy (enemies level)))
-    (set! (bullet-system enemy) (enemy-bullet-system level)))
-    ;(run-enemy-action enemy))
+(define-method (add-enemy (lvl <level>) enemy)
+    (set! (enemies lvl) (cons enemy (enemies lvl)))
+    (set! (bullet-system enemy) (enemy-bullet-system lvl))
+    (set! (level enemy) lvl)
+    ((action enemy) enemy))
 
 (define-method (clear-enemies (level <level>))
   (set! (enemies level) '()))

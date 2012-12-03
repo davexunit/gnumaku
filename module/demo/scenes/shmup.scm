@@ -16,7 +16,7 @@
   #:use-module (demo hud)
   #:use-module (demo levels demo)
   #:duplicates (merge-generics)
-  #:export (<shmup-scene> background))
+  #:export (<shmup-scene> background field-width field-height player hud current-level))
 
 (define-class <shmup-scene> (<scene>)
   (background #:accessor background #:init-keyword #:background #:init-value #f)
@@ -46,8 +46,6 @@
   (run (current-level scene)))
 
 (define-method (load-assets (scene <shmup-scene>))
-  (set! (player-sheet scene) (load-asset "player.png" 48 48 0 0))
-  (set! (enemy-sheet scene) (load-asset "enemy.png" 64 48 0 0))
   (set! (background scene) (load-asset "background.png"))
   (set! (shot-sound scene) (load-asset "player_shot.wav")))
 
@@ -73,8 +71,7 @@
      (player-shot-1 player))))
 
 (define-method (add-test-enemy (scene <shmup-scene>))
-  (let ((enemy (make-enemy-1 (random (field-width scene)) (random 150)
-                             (sprite-sheet-tile (enemy-sheet scene) 0))))
+  (let ((enemy (make-enemy-1 (random (field-width scene)) (random 150))))
     (add-enemy (current-level scene) enemy)))
 
 (define-method (on-key-pressed (scene <shmup-scene>) key)

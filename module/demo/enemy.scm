@@ -4,15 +4,15 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku scheduler)
   #:use-module (demo actor)
-  #:export (<enemy> sprite hitbox speed direction points health))
+  #:export (<enemy> sprite speed direction points health damage action))
 
 (define-class <enemy> (<actor>)
   (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
-  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-form (make-rect 0 0 0 0))
   (speed #:accessor speed #:init-keyword #:speed #:init-value 0)
   (direction #:accessor direction #:init-keyword #:direction #:init-value 0)
   (points #:accessor points #:init-keyword #:points #:init-value 0)
-  (health #:accessor health #:init-keyword #:health #:init-value 0))
+  (health #:accessor health #:init-keyword #:health #:init-value 0)
+  (action #:accessor action #:init-keyword #:action #:init-value (lambda () #f)))
 
 (define-method (hitbox-size (enemy <enemy>) width height)
   (set-rect-size! (hitbox enemy) width height))

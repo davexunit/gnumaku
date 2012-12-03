@@ -5,8 +5,8 @@
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku scheduler)
   #:use-module (demo actor)
-  #:export (<player> make-player sprite speed movement shooting score lives strength hitbox
-                     invincible bounds shot set-movement))
+  #:export (<player> make-player sprite speed movement shooting score lives power
+                     invincible bounds shot set-movement invincible-mode add-points))
 
 (define (make-movement-hash)
   (let ((hash (make-hash-table)))
@@ -32,8 +32,7 @@
                             ((shot player) player))))
   (score #:accessor score #:init-keyword #:score #:init-value 0)
   (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
-  (strength #:accessor strength #:init-keyword #:strength #:init-value 10)
-  (hitbox #:accessor hitbox #:init-keyword #:hitbox #:init-form (make-rect 0 0 6 6))
+  (power #:accessor power #:init-keyword #:power #:init-value 10)
   (invincible #:accessor invincible #:init-keyword #:invincible #:init-value #f)
   (bounds #:accessor bounds #:init-keyword #:bounds #:init-form (make-rect 0 0 800 600))
   (shot #:accessor shot #:init-keyword #:shot #:init-value #f))
@@ -41,6 +40,7 @@
 (define (make-player bounds image)
   (let ((player (make <player> #:bounds bounds #:sprite (make-sprite image))))
     (center-sprite-image! (sprite player))
+    (set! (hitbox player) (make-rect 0 0 8 8))
     player))
 
 (define-method (draw (player <player>))
@@ -107,28 +107,10 @@
       ;; Update position
       (set-position player x y))))
 
-;; (define (set-player-hitbox-size! player width height)
-;;   (let ((hitbox (player-hitbox player)))
-;;     (set-rect-size! hitbox width height)))
+(define-method (add-points (player <player>) points)
+  (set! (score player) (+ (score player) points)))
 
-;; (define (player-dec-lives! player)
-;;   (set-player-lives! player (1- (player-lives player))))
-
-;; (define (player-add-points! player points)
-;;   (set-player-score! player (+ (player-score player) points)))
-
-;; (define (player-wait player delay)
-
-;; (define (player-invincible-mode! player duration)
-;;   (coroutine
-;;    (set-player-invincible! player #t)
-;;    (player-wait player duration)
-;;    (set-player-invincible! player #f)))
-
-
-;; (define (player-x player)
-;;   (sprite-x (player-sprite player)))
-
-;; (define (player-y player)
-;;   (sprite-y (player-sprite player)))
-
+(define-method (invincible-mode (player <player>) duration)
+  (coroutine (set! (invincible player) #t)
+             (wait player duration)
+             (set! (invincible player) #f)))
