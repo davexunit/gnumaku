@@ -62,37 +62,3 @@
 
 (define-method (clear-enemies (level <level>))
   (set! (enemies level) '()))
-
-;; (define (run-level level)
-;;   ((level-on-run level) level))
-
-;; (define (level-wait level delay)
-;;   (abort-to-prompt 'coroutine-prompt
-;;                    (lambda (resume)
-;;                      (add-to-agenda! (level-agenda level) delay resume))))
-
-;; (define (update-level-enemies! level dt)
-;;   (for-each (lambda (enemy) (update-enemy! enemy dt)) (level-enemies level)))
-
-;; (define (draw-level-enemies level)
-;;   (for-each (lambda (enemy) (draw-enemy enemy)) (level-enemies level)))
-
-;; (define (update-level! level dt)
-;;   ;; Tick agenda by 1
-;;   ;; We time things based upon number of updates, not time in seconds
-;;   (update-agenda! (level-agenda level) 1)
-;;   (update-bullet-system! (level-player-bullet-system level) dt)
-;;   (update-bullet-system! (level-enemy-bullet-system level) dt)
-;;   (update-player! (level-player level) dt)
-;;   (update-level-enemies! level dt))
-
-;; (define (draw-player level)
-;;   (let ((player (level-player level)))
-;;     (draw-sprite (player-sprite player))))
-
-;; (define (draw-level level)
-;;   (draw-sprite (level-background level))
-;;   (draw-bullet-system (level-player-bullet-system level))
-;;   (draw-player level)
-;;   (draw-bullet-system (level-enemy-bullet-system level))
-;;   (draw-level-enemies level))
