@@ -4,6 +4,7 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku scene)
   #:use-module (gnumaku fps)
+  #:use-module (gnumaku assets)
   #:export (director-init director-run director-show-fps director-push-scene director-pop-scene
                           director-replace-scene director-set-draw-target director-reset-draw-target))
 
@@ -64,7 +65,7 @@
 (game-on-start-hook
  director-game
  (lambda ()
-   (set! director-font (make-font "data/fonts/CarroisGothic-Regular.ttf" 18))))
+   (set! director-font (load-asset "CarroisGothic-Regular.ttf" 18))))
 
 (game-on-update-hook
  director-game
