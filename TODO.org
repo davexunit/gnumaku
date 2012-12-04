@@ -41,7 +41,7 @@
 ** Need to talk to the folks on #guile about this
 * TODO Improve bullet pool code
 ** Use a more efficient method to find unused bullets in the pool.
-* TODO Refactor scheduler
+* DONE Refactor scheduler
 ** Use the srfi-9 records module
 * TODO Add GPL snippet to every source file
 * DONE Implement reference counting for bullets to prevent weird bugs
@@ -74,3 +74,5 @@
 ** OOP will be nice for generic interfaces
 * TODO Docstrings for EVERYTHING
 ** I have been doing a terrible job at documenting this code.
+* TODO Add event emitter class
+** Must support multiple listeners per event type.
