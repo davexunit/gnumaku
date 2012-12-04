@@ -4,7 +4,7 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku director)
-  #:use-module (gnumaku scheduler)
+  #:use-module (gnumaku agenda)
   #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
   #:use-module (demo player)
@@ -37,7 +37,7 @@
 (define-method (update (level <level>) dt)
   ;; Tick agenda by 1
   ;; We time things based upon number of updates, not time in seconds
-  (update-agenda! (agenda level) 1)
+  (update-agenda (agenda level) 1)
   (update-bullet-system! (player-bullet-system level) dt)
   (update-bullet-system! (enemy-bullet-system level) dt)
   (update (player level) dt)

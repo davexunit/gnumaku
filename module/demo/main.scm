@@ -1,3 +1,4 @@
+
 (define-module (demo main)
   #:use-module (oop goops)
   #:use-module (system repl server)
@@ -33,7 +34,7 @@
   (register-bullet-type 'sword
                         (lambda (bullet)
                           (set-bullet-sprite! bullet 3)
-                          (set-bullet-hitbox! bullet -16 -6 32 12)))
+                          (set-bullet-hitbox! bullet -4 -4 8 8)))
 
   (register-bullet-type 'small-green
                         (lambda (bullet)

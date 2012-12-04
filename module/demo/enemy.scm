@@ -2,7 +2,6 @@
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
-  #:use-module (gnumaku scheduler)
   #:use-module (demo actor)
   #:export (<enemy> sprite speed direction points health damage action))
 
@@ -33,7 +32,7 @@
   ((enemy-action enemy) enemy))
 
 (define-method (update (enemy <enemy>) dt)
-  (update-agenda! (agenda enemy) 1)
+  (next-method)
   (set-position enemy
                 (+ (x enemy) (dx enemy dt))
                 (+ (y enemy) (dy enemy dt)))

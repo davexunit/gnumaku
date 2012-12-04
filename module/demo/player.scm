@@ -3,7 +3,6 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku coroutine)
-  #:use-module (gnumaku scheduler)
   #:use-module (demo actor)
   #:export (<player> make-player sprite speed movement shooting score lives power
                      invincible bounds shot set-movement invincible-mode add-points))
@@ -47,7 +46,7 @@
   (draw-sprite (sprite player)))
 
 (define-method (update (player <player>) dt)
-  (update-agenda! (agenda player) 1)
+  (next-method)
   (when (moving? player)
     (let ((direction (direction player)))
       (set! (x player) (+ (x player) (dx player direction dt)))

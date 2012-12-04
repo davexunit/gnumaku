@@ -2,7 +2,7 @@
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
-  #:use-module (gnumaku scheduler)
+  #:use-module (gnumaku agenda)
   #:export (<actor> level name hitbox agenda bullet-system x y get-x get-y shot-sound))
 
 (define-class <actor> ()
@@ -15,7 +15,8 @@
   (bullet-system #:accessor bullet-system #:init-keyword #:bullet-system #:init-value #f)
   (shot-sound #:accessor shot-sound #:init-keyword #:shot-sound #:init-value #f))
 
-(define-method (update (actor <actor>) dt))
+(define-method (update (actor <actor>) dt)
+  (update-agenda (agenda actor) 1))
 
 (define-method (draw (actor <actor>)))
 
@@ -25,4 +26,4 @@
 
 (define-method (wait (actor <actor>) delay)
   (abort-to-prompt 'coroutine-prompt
-                   (lambda (resume) (add-to-agenda! (agenda actor) delay resume))))
+                   (lambda (resume) (agenda-schedule (agenda actor) delay resume))))
