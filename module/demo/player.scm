@@ -19,16 +19,7 @@
   (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
   (speed #:accessor speed #:init-keyword #:speed #:init-value 300)
   (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
-  (s #:accessor s #:init-keyword #:s #:init-value #f)
-  (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f
-            #:allocation #:virtual
-            #:slot-ref (lambda (player)
-                         (slot-ref player 's))
-            #:slot-set! (lambda (player new-shooting)
-                          (slot-set! player 's new-shooting)
-                          ;; SHOOT!
-                          (when (and new-shooting (procedure? (slot-ref player 'shot)))
-                            ((shot player) player))))
+  (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f)
   (score #:accessor score #:init-keyword #:score #:init-value 0)
   (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
   (power #:accessor power #:init-keyword #:power #:init-value 10)
@@ -41,6 +32,15 @@
     (center-sprite-image! (sprite player))
     (set! (hitbox player) (make-rect 0 0 8 8))
     player))
+
+(define-method (set-shooting (player <player>) new-shooting)
+  (slot-set! player 'shooting new-shooting)
+  ;; SHOOT!
+  (when (and new-shooting (procedure? (shot player)))
+    ((shot player) player)))
+
+;; Override setter for shooting slot
+(define shooting (make-procedure-with-setter shooting set-shooting))
 
 (define-method (draw (player <player>))
   (draw-sprite (sprite player)))
