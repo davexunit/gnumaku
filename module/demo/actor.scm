@@ -3,9 +3,10 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku agenda)
+  #:use-module (gnumaku events)
   #:export (<actor> level name hitbox agenda bullet-system x y get-x get-y shot-sound))
 
-(define-class <actor> ()
+(define-class <actor> (<event-emitter>)
   (level #:accessor level #:init-keyword #:level #:init-value #f)
   (name #:accessor name #:init-keyword #:name #:init-value "untitled")
   (x #:accessor x #:getter get-x #:init-keyword #:x #:init-value 0)
