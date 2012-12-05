@@ -74,5 +74,5 @@
 ** OOP will be nice for generic interfaces
 * TODO Docstrings for EVERYTHING
 ** I have been doing a terrible job at documenting this code.
-* TODO Add event emitter class
+* DONE Add event emitter class
 ** Must support multiple listeners per event type.
