@@ -3,7 +3,7 @@ Gnumaku
 
 About
 -----
-Gnumaku is (trying to be) a libre bullet hell shooting game. It is currently a young project with very little functionality.
+Gnumaku is (trying to be) a libre bullet hell shmup engine that allows you to create awesome bullet patterns using Scheme.
 
 Tech
 ----
@@ -11,7 +11,7 @@ Gnumaku is written in C and Scheme. GNU Guile is the Scheme implementation used,
 The Allegro 5 game library has been chosen for it's simplicity and use of OpenGL accelerated rendering rather than software rendering.
 
 Through the power of Guile, it is possible to write very awesome bullet patterns easily.
-Using a simple implementation of coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
+Using coroutines it is very easy to write scripts that seem to execute concurrently, but without the problems of multithreading.
 Here's what a bullet script might look like:
 
     (define (player-shot player)
