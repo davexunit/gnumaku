@@ -1,5 +1,4 @@
 (define-module (gnumaku agenda)
-  #:use-module (ice-9 receive)
   #:use-module (ice-9 q)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
