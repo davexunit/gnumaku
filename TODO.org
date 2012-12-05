@@ -76,3 +76,18 @@
 ** I have been doing a terrible job at documenting this code.
 * DONE Add event emitter class
 ** Must support multiple listeners per event type.
+* TODO UI Widgets
+** some ideas. some are necessary, others are likely not
+** TODO Text label
+** TODO Text input field
+** TODO Menu
+*** TODO Text menu item
+*** TODO Text input menu item
+*** TODO Option cycle menu item
+*** TODO Toggle menu item
+** TODO Container
+*** TODO Layout strategies
+**** TODO Manual
+**** TODO Vertical
+**** TODO Horizontal
+**** TODO Table (m x n)
