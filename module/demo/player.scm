@@ -3,6 +3,7 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku coroutine)
+  #:use-module (gnumaku events)
   #:use-module (demo actor)
   #:export (<player> make-player sprite speed movement shooting score lives power
                      invincible bounds shot set-movement invincible-mode add-points))
@@ -34,6 +35,7 @@
     player))
 
 (define-method (set-shooting (player <player>) new-shooting)
+  "Sets player shooting flag. Calls shot procedure when flag is set to #t."
   (slot-set! player 'shooting new-shooting)
   ;; SHOOT!
   (when (and new-shooting (procedure? (shot player)))
@@ -41,6 +43,18 @@
 
 ;; Override setter for shooting slot
 (define shooting (make-procedure-with-setter shooting set-shooting))
+
+(define-method (set-lives (player <player>) new-lives)
+  (slot-set! player 'lives new-lives)
+  (dispatch player 'lives-changed new-lives))
+
+(define lives (make-procedure-with-setter lives set-lives))
+
+(define-method (set-score (player <player>) new-score)
+  (slot-set! player 'score new-score)
+  (dispatch player 'score-changed new-score))
+
+(define score (make-procedure-with-setter score set-score))
 
 (define-method (draw (player <player>))
   (draw-sprite (sprite player)))
