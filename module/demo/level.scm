@@ -30,7 +30,16 @@
 
 (define-method (init-level (lvl <level>))
   (set! (buffer lvl) (make-image (width lvl) (height lvl)))
-  (set! (level (player lvl)) lvl))
+  (set! (level (player lvl)) lvl)
+  (set-bounds lvl (player-bullet-system lvl))
+  (set-bounds lvl (enemy-bullet-system lvl)))
+
+(define-method (set-bounds (lvl <level>) system)
+  (let ((padding 32))
+    (set-bullet-system-bounds system
+                              (* -1 padding) (* -1 padding)
+                              (+ (* 2 padding) (width lvl))
+                              (+ (* 2 padding) (height lvl)))))
 
 (define-method (run (level <level>)))
 
@@ -38,8 +47,8 @@
   ;; Tick agenda by 1
   ;; We time things based upon number of updates, not time in seconds
   (update-agenda (agenda level) 1)
-  (update-bullet-system! (player-bullet-system level) dt)
-  (update-bullet-system! (enemy-bullet-system level) dt)
+  (update-bullet-system (player-bullet-system level) dt)
+  (update-bullet-system (enemy-bullet-system level) dt)
   (update (player level) dt)
   (update-enemies level dt)
   (check-player-collision level)
