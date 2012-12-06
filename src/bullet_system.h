@@ -28,6 +28,7 @@ typedef struct {
     int max_bullets;
     Bullet *bullets;
     SCM sprite_sheet;
+    Rect bounds;
 } BulletSystem;
 
 typedef struct {
