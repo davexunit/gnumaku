@@ -1,7 +1,7 @@
 (define-module (gnumaku fps)
+  #:use-module (srfi srfi-9)
+  #:use-module (gnumaku core)
   #:export (make-fps fps? fps-game fps-last-frames update-fps!))
-(use-modules (srfi srfi-9) (gnumaku core))
-
 
 (define-record-type FPS
   (%make-fps game last-time time-acc frames last-frames)
