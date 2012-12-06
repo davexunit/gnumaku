@@ -20,10 +20,9 @@
 
 (define-method (on (emitter <event-emitter>) type callback)
   "Registers an event callback for the given event type."
-  (let ((events (events emitter)))
-    (if (get-callbacks emitter type)
-        (add-event-callback emitter type callback)
-        (add-event emitter type callback))))
+  (if (get-callbacks emitter type)
+      (add-event-callback emitter type callback)
+      (add-event emitter type callback)))
 
 (define-method (dispatch (emitter <event-emitter>) type . args)
   "Calls all callbacks for the given event type."
