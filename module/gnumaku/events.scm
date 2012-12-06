@@ -14,7 +14,7 @@
   "Adds a callback to the list of callbacks for an existing event type."
   (set! (events emitter) (cons callback (events emitter))))
 
-(define-method (add-event (emitter <event-emitter>) type callback)
+(define-method (add-event-type (emitter <event-emitter>) type callback)
   "Creates a new event type and adds the callback to it's callback list."
   (hash-set! (events emitter) type (list callback)))
 
@@ -22,7 +22,7 @@
   "Registers an event callback for the given event type."
   (if (get-callbacks emitter type)
       (add-event-callback emitter type callback)
-      (add-event emitter type callback)))
+      (add-event-type emitter type callback)))
 
 (define-method (dispatch (emitter <event-emitter>) type . args)
   "Calls all callbacks for the given event type."
