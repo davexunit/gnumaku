@@ -18,28 +18,28 @@
 (define (init-bullet-types)
   (register-bullet-type 'medium-blue 
                         (lambda (bullet)
-                          (set-bullet-sprite! bullet 0)
-                          (set-bullet-hitbox! bullet -3 -3 6 6)))
+                          (set-bullet-sprite bullet 0)
+                          (set-bullet-hitbox bullet -3 -3 6 6)))
 
   (register-bullet-type 'small-diamond
                         (lambda (bullet)
-                          (set-bullet-sprite! bullet 1)
-                          (set-bullet-hitbox! bullet -2 -2 4 4)))
+                          (set-bullet-sprite bullet 1)
+                          (set-bullet-hitbox bullet -2 -2 4 4)))
 
   (register-bullet-type 'large-orange
                         (lambda (bullet)
-                          (set-bullet-sprite! bullet 2)
-                          (set-bullet-hitbox! bullet -5 -5 10 10)))
+                          (set-bullet-sprite bullet 2)
+                          (set-bullet-hitbox bullet -5 -5 10 10)))
 
   (register-bullet-type 'sword
                         (lambda (bullet)
-                          (set-bullet-sprite! bullet 3)
-                          (set-bullet-hitbox! bullet -4 -4 8 8)))
+                          (set-bullet-sprite bullet 3)
+                          (set-bullet-hitbox bullet -4 -4 8 8)))
 
   (register-bullet-type 'small-green
                         (lambda (bullet)
-                          (set-bullet-sprite! bullet 5)
-                          (set-bullet-hitbox! bullet -2 -2 4 4))))
+                          (set-bullet-sprite bullet 5)
+                          (set-bullet-hitbox bullet -2 -2 4 4))))
 
 (define (init-assets-manager)
   (register-asset-manager "images" load-image)
