@@ -179,7 +179,7 @@ game_update (Game *game)
     while (game->time_accumulator >= game->timestep) {
         game->time_accumulator -= game->timestep;
         if (scm_is_true (game->on_update)) {
-            scm_call_1 (game->on_update, scm_from_double(game->timestep));
+            scm_call_0 (game->on_update);
         }
     }
 }
