@@ -1,5 +1,6 @@
 (define-module (gnumaku coroutine)
-  #:export (coroutine))
+  #:use-module (oop goops)
+  #:export (coroutine wait))
 
 (define (do-coroutine proc)
   "Creates a procedure that be yield and resume at any point. Used for cooperative multi-threading."
@@ -19,3 +20,5 @@
   (syntax-rules ()
     ((coroutine exp ...)
      (do-coroutine (lambda () exp ...)))))
+
+(define-generic wait)
