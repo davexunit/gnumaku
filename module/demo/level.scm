@@ -22,7 +22,7 @@
   (enemies #:accessor enemies #:init-keyword #:enemies #:init-value '())
   (background #:accessor background #:init-keyword #:background #:init-value #f)
   (background-y #:accessor background-y #:init-keyword #:background-y #:init-value 0)
-  (scroll-speed #:accessor scroll-speed #:init-keyword #:scroll-speed #:init-value 100)
+  (scroll-speed #:accessor scroll-speed #:init-keyword #:scroll-speed #:init-value 1)
   (buffer #:accessor buffer #:init-keyword #:buffer #:init-value #f)
   (agenda #:accessor agenda #:init-keyword #:agenda #:init-value (make-agenda))
   (player-bullet-system #:accessor player-bullet-system #:init-keyword #:player-bullet-system #:init-value #f)
@@ -43,26 +43,26 @@
 
 (define-method (run (level <level>)))
 
-(define-method (update (level <level>) dt)
+(define-method (update (level <level>))
   ;; Tick agenda by 1
   ;; We time things based upon number of updates, not time in seconds
   (update-agenda (agenda level) 1)
-  (update-bullet-system (player-bullet-system level) dt)
-  (update-bullet-system (enemy-bullet-system level) dt)
-  (update (player level) dt)
-  (update-enemies level dt)
+  (update-bullet-system (player-bullet-system level))
+  (update-bullet-system (enemy-bullet-system level))
+  (update (player level))
+  (update-enemies level)
   (check-player-collision level)
-  (update-background level dt))
+  (update-background level))
 
-(define-method (update-background (level <level>) dt)
+(define-method (update-background (level <level>))
   (let ((y (background-y level)))
-    (set! y (+ y (* (scroll-speed level) dt)))
+    (set! y (+ y (scroll-speed level)))
     (when (> y (height level))
       (set! y (- y (image-height (background level)))))
     (set! (background-y level) y)))
 
-(define-method (update-enemies (level <level>) dt)
-  (for-each (lambda (enemy) (update enemy dt)) (enemies level))
+(define-method (update-enemies (level <level>))
+  (for-each (lambda (enemy) (update enemy)) (enemies level))
   (check-enemies-collision level))
 
 (define-method (check-player-collision (level <level>))

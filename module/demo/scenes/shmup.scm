@@ -36,8 +36,8 @@
   (draw (current-level scene))
   (draw-hud (hud scene)))
 
-(define-method (update (scene <shmup-scene>) dt)
-  (update (current-level scene) dt))
+(define-method (update (scene <shmup-scene>))
+  (update (current-level scene)))
 
 (define-method (on-start (scene <shmup-scene>))
   (load-assets scene)
@@ -64,7 +64,7 @@
      (play-sample (shot-sound player) 1.0 0.0 1.0)
      (let ((x (x player))
 	   (y (y player))
-	   (speed 800)
+	   (speed 15)
            (bullets (bullet-system player)))
        (emit-bullet bullets (- x 16) y speed 269 0 0 'sword)
        (emit-bullet bullets x (- y 20) speed 270 0 0 'sword)

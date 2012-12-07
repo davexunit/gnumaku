@@ -23,20 +23,20 @@
 (define-method (alive? (enemy <enemy>))
   (> (enemy-health enemy) 0))
 
-(define-method (dx (enemy <enemy>) dt)
-  (* (speed enemy) (cos (direction enemy)) dt))
+(define-method (dx (enemy <enemy>))
+  (* (speed enemy) (cos (direction enemy))))
 
-(define-method (dy (enemy <enemy>) dt)
-  (* (speed enemy) (sin  (direction enemy)) dt))
+(define-method (dy (enemy <enemy>))
+  (* (speed enemy) (sin  (direction enemy))))
 
 (define (run-enemy-action enemy)
   ((enemy-action enemy) enemy))
 
-(define-method (update (enemy <enemy>) dt)
+(define-method (update (enemy <enemy>))
   (next-method)
   (set-position enemy
-                (+ (x enemy) (dx enemy dt))
-                (+ (y enemy) (dy enemy dt))))
+                (+ (x enemy) (dx enemy))
+                (+ (y enemy) (dy enemy))))
 
 (define-method (%draw (enemy <enemy>))
   (draw-sprite (sprite enemy)))

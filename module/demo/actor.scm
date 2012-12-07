@@ -16,7 +16,7 @@
   (bullet-system #:accessor bullet-system #:init-keyword #:bullet-system #:init-value #f)
   (shot-sound #:accessor shot-sound #:init-keyword #:shot-sound #:init-value #f))
 
-(define-method (update (actor <actor>) dt)
+(define-method (update (actor <actor>))
   (update-agenda (agenda actor) 1))
 
 (define-method (set-position (actor <actor>) new-x new-y)

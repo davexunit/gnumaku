@@ -19,7 +19,7 @@
 
 (define-class <player> (<actor>)
   (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
-  (speed #:accessor speed #:init-keyword #:speed #:init-value 300)
+  (speed #:accessor speed #:init-keyword #:speed #:init-value 5)
   (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
   (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f)
   (score #:accessor score #:init-keyword #:score #:init-value 0)
@@ -60,19 +60,19 @@
 (define-method (%draw (player <player>))
   (draw-sprite (sprite player)))
 
-(define-method (update (player <player>) dt)
+(define-method (update (player <player>))
   (next-method)
   (when (moving? player)
     (let ((direction (direction player)))
-      (set! (x player) (+ (x player) (dx player direction dt)))
-      (set! (y player) (+ (y player) (dy player direction dt)))
+      (set! (x player) (+ (x player) (dx player direction)))
+      (set! (y player) (+ (y player) (dy player direction)))
       (restrict-bounds player))))
 
-(define-method (dx (player <player>) direction dt)
-  (* (speed player) (cos direction) dt))
+(define-method (dx (player <player>) direction)
+  (* (speed player) (cos direction)))
 
-(define-method (dy (player <player>) direction dt)
-  (* (speed player) (sin direction) dt))
+(define-method (dy (player <player>) direction)
+  (* (speed player) (sin direction)))
 
 (define-method (set-movement (player <player>) direction flag)
   (hash-set! (movement player) direction flag))
