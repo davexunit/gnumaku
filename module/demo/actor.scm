@@ -1,6 +1,7 @@
 (define-module (demo actor)
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
+  #:use-module (gnumaku coroutine)
   #:use-module (gnumaku core)
   #:use-module (gnumaku scene-graph)
   #:use-module (gnumaku agenda)
