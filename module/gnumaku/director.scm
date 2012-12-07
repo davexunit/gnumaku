@@ -70,11 +70,11 @@
 
 (game-on-update-hook
  director-game
- (lambda (dt)
+ (lambda ()
    (update-fps! director-fps)
    ;; Update current scene. If the scene stack is empty, exit the game.
    (if (director-current-scene)
-       (update (director-current-scene) dt)
+       (update (director-current-scene))
        (game-stop director-game))))
 
 (game-on-draw-hook
