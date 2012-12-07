@@ -21,7 +21,7 @@
   (set! (health enemy) (- (health enemy) damage)))
 
 (define-method (alive? (enemy <enemy>))
-  (> (enemy-health enemy) 0))
+  (> (health enemy) 0))
 
 (define-method (dx (enemy <enemy>))
   (* (speed enemy) (cos (direction enemy))))
@@ -30,7 +30,7 @@
   (* (speed enemy) (sin  (direction enemy))))
 
 (define (run-enemy-action enemy)
-  ((enemy-action enemy) enemy))
+  ((action enemy) enemy))
 
 (define-method (update (enemy <enemy>))
   (next-method)
@@ -40,12 +40,3 @@
 
 (define-method (%draw (enemy <enemy>))
   (draw-sprite (sprite enemy)))
-
-(define (enemy-move-to enemy x y speed)
-  (unless (eq? speed 0)
-    (let ((dx (- x (enemy-x enemy)))
-	  (dy (- y (enemy-y enemy))))
-      (set-enemy-direction! enemy (atan dy dx))
-      (set-enemy-speed! enemy speed)
-      (enemy-wait enemy (/ (sqrt (+ (* dx dx) (* dy dy))) (enemy-speed enemy)))
-      (set-enemy-speed! enemy 0))))
