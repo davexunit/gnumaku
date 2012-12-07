@@ -8,7 +8,7 @@
 
 (define-method (draw (scene <scene>)))
 
-(define-method (update (scene <scene>) dt))
+(define-method (update (scene <scene>)))
 
 (define-method (on-start (scene <scene>)))
 
