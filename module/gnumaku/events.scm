@@ -1,6 +1,7 @@
 (define-module (gnumaku events)
   #:use-module (oop goops)
-  #:export (<event-emitter> on dispatch))
+  #:use-module (srfi srfi-1)
+  #:export (<event-emitter> on off dispatch))
 
 (define-class <event-emitter> ()
   (events #:accessor events #:init-keyword #:events #:init-thunk make-hash-table))
@@ -23,6 +24,13 @@
   (if (get-callbacks emitter type)
       (add-event-callback emitter type callback)
       (add-event-type emitter type callback)))
+
+(define-method (off (emitter <event-emitter>) type callback)
+  "Removes callback from the list of event callbacks for the given type."
+  (let ((callbacks (get-callbacks emitter type)))
+    (when callbacks
+      (hash-set! (events emitter) type
+                 (remove (lambda (c) (eq? c callback)) callbacks)))))
 
 (define-method (dispatch (emitter <event-emitter>) type . args)
   "Calls all callbacks for the given event type."
