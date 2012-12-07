@@ -4,6 +4,7 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku events)
+  #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
   #:export (<player> make-player sprite speed movement shooting score lives power
                      invincible bounds shot set-movement invincible-mode add-points))
@@ -56,7 +57,7 @@
 
 (define score (make-procedure-with-setter score set-score))
 
-(define-method (draw (player <player>))
+(define-method (%draw (player <player>))
   (draw-sprite (sprite player)))
 
 (define-method (update (player <player>) dt)
@@ -65,8 +66,7 @@
     (let ((direction (direction player)))
       (set! (x player) (+ (x player) (dx player direction dt)))
       (set! (y player) (+ (y player) (dy player direction dt)))
-      (restrict-bounds player)))
-  (set-sprite-position! (sprite player) (x player) (y player)))
+      (restrict-bounds player))))
 
 (define-method (dx (player <player>) direction dt)
   (* (speed player) (cos direction) dt))

@@ -4,13 +4,14 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku primitives)
   #:use-module (gnumaku coroutine)
+  #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
   #:use-module (demo level)
   #:export (test-pattern-1 spiral-1 fire-at-player))
 
 (define (test-pattern-1 actor)
-  (let ((x (get-x actor))
-        (y (get-y actor)))
+  (let ((x (x actor))
+        (y (y actor)))
     (coroutine
      (when (bullet-system actor)
        (emit-bullet (bullet-system actor) (+ x -100 (random 200)) (+ y 50)
@@ -25,8 +26,7 @@
            (y (y actor)))
        (when (shot-sound actor)
          (play-sample (shot-sound actor) 1.0 0.0 1.0))
-       (when (bullet-system actor)
-         (emit-circle (bullet-system actor) x y 24 10 rotate 100 10 10 'small-diamond))
+       (emit-circle (bullet-system actor) x y 24 10 (+ rotate (random 10)) 100 10 10 'small-diamond)
        (wait actor 4)
        (loop (+ rotate (/ 360 40)))))))
 
@@ -38,7 +38,7 @@
          (play-sample (shot-sound actor) 1.0 0.0 1.0))
        (emit-towards (bullet-system actor) (x actor) (y actor) 300
                      (x player) (y player) 0 0 'small-diamond)
-       (wait actor 5)
+       (wait actor 10)
        (loop)))
     (coroutine
      (let fire-circle ()

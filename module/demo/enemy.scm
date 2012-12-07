@@ -2,6 +2,7 @@
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
+  #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
   #:export (<enemy> sprite speed direction points health damage action))
 
@@ -35,10 +36,9 @@
   (next-method)
   (set-position enemy
                 (+ (x enemy) (dx enemy dt))
-                (+ (y enemy) (dy enemy dt)))
-  (set-sprite-position! (sprite enemy) (x enemy) (y enemy)))
+                (+ (y enemy) (dy enemy dt))))
 
-(define-method (draw (enemy <enemy>))
+(define-method (%draw (enemy <enemy>))
   (draw-sprite (sprite enemy)))
 
 (define (enemy-move-to enemy x y speed)
