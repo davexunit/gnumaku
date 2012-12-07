@@ -71,7 +71,7 @@
 * Switch to frame-based timing
 ** Every time the update hook is called, a timer should be incremented by one and the game should use this to time events.
 ** DONE Time agenda events by frames
-** TODO Time game object motion by frames
+** DONE Time game object motion by frames
 * DONE Use GOOPS
 ** OOP will be nice for generic interfaces
 * TODO Docstrings for EVERYTHING
