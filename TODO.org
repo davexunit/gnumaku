@@ -11,7 +11,7 @@
 * DONE Add angular velocity to bullets
 * TODO Stop using Euler integration
 ** Maybe...
-* TODO Add a bounding box to the bullet system that specifies the bounds of the game area
+* DONE Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
 ** DONE Add a bounding box struct
 * TODO Add a counter to bullet system that counts active bullets
