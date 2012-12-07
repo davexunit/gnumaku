@@ -147,14 +147,14 @@ clear_bullet_system (SCM bullet_system_smob)
 }
 
 static void
-update_bullet(Bullet *bullet, float dt) {
+update_bullet(Bullet *bullet) {
     float theta = deg2rad(bullet->direction);
-    float dx = bullet->speed * cos(theta) * dt;
-    float dy = bullet->speed * sin(theta) * dt;
+    float dx = bullet->speed * cos(theta);
+    float dy = bullet->speed * sin(theta);
     bullet->x += dx;
     bullet->y += dy;
-    bullet->speed += bullet->acceleration * dt;
-    bullet->direction += bullet->angular_velocity * dt;
+    bullet->speed += bullet->acceleration;
+    bullet->direction += bullet->angular_velocity;
 }
 
 static bool
@@ -208,10 +208,9 @@ bullet_system_bounds (SCM bullet_system_smob)
 
 
 static SCM
-update_bullet_system (SCM bullet_system_smob, SCM s_dt)
+update_bullet_system (SCM bullet_system_smob)
 {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    float dt = scm_to_double (s_dt);
 
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
@@ -219,7 +218,7 @@ update_bullet_system (SCM bullet_system_smob, SCM s_dt)
 
         if (bullet->alive)
         {
-            update_bullet (bullet, dt);
+            update_bullet (bullet);
             remove_out_of_bounds_bullet (bullet_system, bullet);
         }
     }
@@ -622,7 +621,7 @@ init_bullet_system_type (void)
     scm_c_define_gsubr ("clear-bullet-system", 1, 0, 0, clear_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system", 1, 0, 0, draw_bullet_system);
     scm_c_define_gsubr ("draw-bullet-system-hitboxes", 1, 0, 0, draw_bullet_system_hitboxes);
-    scm_c_define_gsubr ("update-bullet-system", 2, 0, 0, update_bullet_system);
+    scm_c_define_gsubr ("update-bullet-system", 1, 0, 0, update_bullet_system);
     scm_c_define_gsubr ("set-bullet-system-sprite-sheet", 2, 0, 0, set_bullet_system_sprite_sheet);
     scm_c_define_gsubr ("bullet-system-sprite-sheet", 1, 0, 0, get_bullet_system_sprite_sheet);
     scm_c_define_gsubr ("bullet-system-collide-rect", 3, 0, 0, bullet_system_collide_rect);
