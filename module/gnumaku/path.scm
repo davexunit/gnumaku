@@ -12,7 +12,7 @@
   (p3 bezier-p3))
 
 (define (bezier-at bezier t)
-  "Returns the position along the bezier curve at time t, where t is 0 <= t <= 1."
+  "Returns the position along the bezier curve at time t, where 0 <= t <= 1."
   (let ((u (- 1 t)))
     (vadd (vscale (* u u u) (bezier-p0 bezier))
           (vscale (* 3 u u t) (bezier-p1 bezier))
