@@ -9,7 +9,7 @@
   #:export (move-to move-by move-bezier))
 
 (define-method (move-to (node <scene-node>) dst-x dst-y duration)
-  "Move linearly from current position to destination"
+  "Move linearly from current position to destination."
   (let ((start-x (x node))
         (start-y (y node))
         (dx (- dst-x (x node)))
@@ -23,9 +23,11 @@
         (tick (1+ t))))))
 
 (define-method (move-by (node <scene-node>) dx dy duration)
+  "Move linearly from current position by (dx, dy)."
   (move-to node (+ (x node) dx) (+ (y node) dy) duration))
 
 (define-method (move-bezier (node <scene-node>) bezier duration)
+  "Move along a bezier curve."
   (let tick ((t 0))
     (when (< t duration)
       (let ((p (bezier-at bezier (/ t duration))))
