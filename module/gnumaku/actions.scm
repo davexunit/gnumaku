@@ -6,10 +6,10 @@
   #:use-module (gnumaku scene-graph)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku path)
-  #:export (move-to move-by move-bezier))
+  #:export (move-to move-by move-bezier move-bezier-path))
 
 (define-method (move-to (node <scene-node>) dst-x dst-y duration)
-  "Move linearly from current position to destination."
+  "Moves linearly from current position to destination."
   (let ((start-x (x node))
         (start-y (y node))
         (dx (- dst-x (x node)))
@@ -23,11 +23,11 @@
         (tick (1+ t))))))
 
 (define-method (move-by (node <scene-node>) dx dy duration)
-  "Move linearly from current position by (dx, dy)."
+  "Moves linearly from current position by (dx, dy)."
   (move-to node (+ (x node) dx) (+ (y node) dy) duration))
 
 (define-method (move-bezier (node <scene-node>) bezier duration)
-  "Move along a bezier curve."
+  "Moves along a bezier curve."
   (let tick ((t 0))
     (when (< t duration)
       (let ((p (bezier-at bezier (/ t duration))))
@@ -35,3 +35,7 @@
         (set! (y node) (second p)))
       (wait node 1)
       (tick (1+ t)))))
+
+(define-method (move-bezier-path (node <scene-node>) beziers durations)
+  "Moves along a series of connected bezier curves."
+  (for-each (lambda (b d) (move-bezier node b d)) beziers durations))
