@@ -21,7 +21,8 @@
           (vscale (* 3 u t t) (bezier-p2 bezier))
           (vscale (* t t t) (bezier-p3 bezier)))))
 
-(define* (draw-bezier bezier #:optional (segments 32) (color '(1 1 1 1)) (thickness 2))
+(define* (draw-bezier bezier #:optional #:key (segments 32) (color '(1 1 1 1)) (thickness 2))
+  "Draw a bezier curve approximation as a series of line segments."
   (let draw-segment ((i 1)
                      (last (bezier-at bezier 0)))
     (when (<= i segments)
