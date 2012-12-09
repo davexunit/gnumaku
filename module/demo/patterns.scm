@@ -26,8 +26,8 @@
            (y (y actor)))
        (when (shot-sound actor)
          (play-sample (shot-sound actor) 1.0 0.0 1.0))
-       (emit-circle (bullet-system actor) x y 24 10 (+ rotate (random 10)) 2 .01 .2 'small-diamond)
-       (wait actor 4)
+       (emit-circle (bullet-system actor) x y 24 10 (+ rotate (random 10)) 2 0 .2 'small-diamond)
+       (wait actor 15)
        (loop (+ rotate (/ 360 40)))))))
 
 (define (fire-at-player actor)
@@ -37,8 +37,12 @@
        (when (shot-sound actor)
          (play-sample (shot-sound actor) 1.0 0.0 1.0))
        (emit-towards (bullet-system actor) (x actor) (y actor) 4
+                     (- (x player) 80) (y player) 0 -.2 'small-diamond)
+       (emit-towards (bullet-system actor) (x actor) (y actor) 4
                      (x player) (y player) 0 0 'small-diamond)
-       (wait actor 10)
+       (emit-towards (bullet-system actor) (x actor) (y actor) 4
+                     (+ (x player) 80) (y player) 0 .2 'small-diamond)
+       (wait actor 45)
        (loop)))
     (coroutine
      (let fire-circle ()

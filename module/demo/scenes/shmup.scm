@@ -9,6 +9,7 @@
   #:use-module (gnumaku primitives)
   #:use-module (gnumaku assets)
   #:use-module (gnumaku scene-graph)
+  #:use-module (gnumaku path)
   #:use-module (demo level)
   #:use-module (demo actor)
   #:use-module (demo player)
@@ -35,6 +36,8 @@
   (draw-image (background scene) 0 0)
   (draw (current-level scene))
   (draw-hud (hud scene)))
+  ;; (let ((bezier (make-bezier '(0 0) '(100 500) '(700 400) '(800 0))))
+  ;;   (draw-bezier bezier)))
 
 (define-method (update (scene <shmup-scene>))
   (update (current-level scene)))
