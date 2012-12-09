@@ -15,19 +15,19 @@ Using coroutines it is very easy to write scripts that seem to execute concurren
 Here's what a bullet script might look like:
 
 ```scheme
-(define (player-shot player)
-  (coroutine
+(coroutine
+ (let loop ()
    (when (shooting player)
-         (play-sample (shot-sound player) 1.0 0.0 1.0)
-         (let ((x (x player))
-               (y (y player))
-               (speed 800)
-               (bullets (bullet-system player)))
-           (emit-bullet bullets (- x 16) y speed 269 0 0 'sword)
-           (emit-bullet bullets x (- y 20) speed 270 0 0 'sword)
-           (emit-bullet bullets (+ x 16) y speed 271 0 0 'sword))
-         (wait player 3)
-         (player-shot player))))
+     (play-sample (shot-sound player) 1.0 0.0 1.0)
+     (let ((x (x player))
+           (y (y player))
+           (speed 15)
+           (bullets (bullet-system player)))
+       (emit-bullet bullets (- x 16) y speed 269 0 0 'sword)
+       (emit-bullet bullets x (- y 20) speed 270 0 0 'sword)
+       (emit-bullet bullets (+ x 16) y speed 271 0 0 'sword))
+     (wait player 3)
+     (loop)))))
 ```
 
 This script first checks if the player's shooting flag is currently true.
