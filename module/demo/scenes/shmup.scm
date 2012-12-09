@@ -36,8 +36,6 @@
   (draw-image (background scene) 0 0)
   (draw (current-level scene))
   (draw-hud (hud scene)))
-  ;; (let ((bezier (make-bezier '(0 0) '(100 500) '(700 400) '(800 0))))
-  ;;   (draw-bezier bezier)))
 
 (define-method (update (scene <shmup-scene>))
   (update (current-level scene)))
@@ -55,8 +53,9 @@
   (set! (shot-sound scene) (load-asset "player_shot.wav")))
 
 (define-method (init-player (scene <shmup-scene>))
-  (set! (player scene) (make-player (make-rect 0 0 (field-width scene) (field-height scene))
-                                    (sprite-sheet-tile (load-asset "player.png" 48 48 0 0) 0)))
+  (set! (player scene)
+        (make-player (make-rect -24 -24 48 48)
+                     (sprite-sheet-tile (load-asset "player.png" 48 48 0 0) 0)))
   (set! (shot (player scene)) player-shot-1)
   (set! (shot-sound (player scene)) (shot-sound scene))
   (set-position (player scene) (/ (field-width scene) 2) (- (field-height scene) 32)))

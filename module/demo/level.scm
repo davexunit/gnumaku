@@ -66,12 +66,10 @@
   (check-enemies-collision level))
 
 (define-method (check-player-collision (level <level>))
-  (let ((hitbox (hitbox (player level)))
-        (player (player level)))
-    (set-rect-position! hitbox
-			(- (x player) (/ (rect-width hitbox) 2))
-			(- (y player) (/ (rect-height hitbox) 2)))
-    (bullet-system-collide-rect (enemy-bullet-system level) hitbox (lambda () (on-player-hit level)))))
+  (let ((player (player level)))
+        (let ((hitbox (rect-move (hitbox player) (x player) (y player))))
+          (bullet-system-collide-rect (enemy-bullet-system level) hitbox
+                                      (lambda () (on-player-hit level))))))
 
 (define-method (check-enemy-collision (level <level>) enemy)
   (let ((hitbox (hitbox enemy)))
