@@ -5,10 +5,12 @@
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku events)
   #:use-module (gnumaku scene-graph)
+  #:use-module (gnumaku assets)
   #:use-module (demo actor)
   #:use-module (demo level)
-  #:export (<player> make-player sprite speed movement shooting score lives power
-                     invincible bounds shot set-movement invincible-mode add-points))
+  #:export (<player> make-player sprite speed movement shooting score graze-count lives
+                     power invincible bounds shot set-movement invincible-mode add-points
+                     graze-hitbox))
 
 (define (make-movement-hash)
   (let ((hash (make-hash-table)))
@@ -18,22 +20,36 @@
     (hash-set! hash 'right #f)
     hash))
 
+(define (make-bounds)
+  (make-rect -24 -24 48 48))
+
+(define (make-hitbox)
+  (make-rect -4 -4 8 8))
+
+(define (make-graze-hitbox)
+  (make-rect -8 -8 16 16))
+
+(define (make-player-sprite)
+  (make-sprite (sprite-sheet-tile (load-asset "player.png" 48 48 0 0) 0)))
+
 (define-class <player> (<actor>)
   (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
   (speed #:accessor speed #:init-keyword #:speed #:init-value 5)
   (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
   (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f)
   (score #:accessor score #:init-keyword #:score #:init-value 0)
+  (graze-count #:accessor graze-count #:init-keyword #:graze-count #:init-value 0)
   (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
   (power #:accessor power #:init-keyword #:power #:init-value 10)
   (invincible #:accessor invincible #:init-keyword #:invincible #:init-value #f)
-  (bounds #:accessor bounds #:init-keyword #:bounds #:init-value #f)
+  (bounds #:accessor bounds #:init-thunk make-bounds)
+  (graze-hitbox #:accessor graze-hitbox #:init-thunk make-graze-hitbox)
   (shot #:accessor shot #:init-keyword #:shot #:init-value #f))
 
-(define (make-player bounds image)
-  (let ((player (make <player> #:bounds bounds #:sprite (make-sprite image))))
+(define (make-player)
+  (let ((player (make <player> #:sprite (make-player-sprite)
+                      #:hitbox (make-hitbox))))
     (center-sprite-image! (sprite player))
-    (set! (hitbox player) (make-rect -4 -4 8 8))
     player))
 
 (define-method (set-shooting (player <player>) new-shooting)
