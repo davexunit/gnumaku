@@ -3,7 +3,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (gnumaku core)
   #:use-module (gnumaku vector)
-  #:export (make-bezier bezier-at draw-bezier))
+  #:export (make-bezier make-bezier-path bezier-at bezier-path draw-bezier draw-bezier-path))
 
 (define-record-type <bezier>
   (make-bezier p0 p1 p2 p3)
@@ -21,11 +21,29 @@
           (vscale (* 3 u t t) (bezier-p2 bezier))
           (vscale (* t t t) (bezier-p3 bezier)))))
 
+(define (make-bezier-path . points)
+  "Builds a list of bezier curves from the given points that form a connected path."
+  (define (build-path points path)
+    (if (>= (length points) 4)
+      (build-path (drop points 3)
+                  (append path
+                          (list (make-bezier (first points) (second points)
+                                             (third points) (fourth points)))))
+      path))
+  (build-path points '()))
+
 (define* (draw-bezier bezier #:optional #:key (segments 32) (color '(1 1 1 1)) (thickness 2))
-  "Draw a bezier curve approximation as a series of line segments."
+  "Draws a bezier curve approximation as a series of line segments."
   (let draw-segment ((i 1)
                      (last (bezier-at bezier 0)))
     (when (<= i segments)
       (let ((current (bezier-at bezier (/ i segments))))
         (draw-line (first last) (second last) (first current) (second current) color thickness)
         (draw-segment (1+ i) current)))))
+
+(define* (draw-bezier-path bezier-path #:optional #:key (segments 32)
+                           (color '(1 1 1 1)) (thickness 2))
+  "Draws a series of connected bezier curves."
+  (for-each (lambda (b) (draw-bezier b #:segments segments
+                                     #:color color #:thickness thickness))
+            bezier-path))
