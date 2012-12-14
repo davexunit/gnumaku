@@ -14,7 +14,7 @@
 * DONE Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
 ** DONE Add a bounding box struct
-* TODO Add a counter to bullet system that counts active bullets
+* DONE Add a counter to bullet system that counts active bullets
 * DONE Rotate bullet sprites in the direction they are moving
 * DONE Break Scheme code into modules
 ** DONE Coroutine module
@@ -39,8 +39,9 @@
 ** I keep switching brace styles for no good reason...
 * DONE Get rid of those annoying compiler warnings for scm_c_define_gsubr
 ** Need to talk to the folks on #guile about this
-* TODO Improve bullet pool code
+* DONE Improve bullet pool code
 ** Use a more efficient method to find unused bullets in the pool.
+** DONE Search for free bullets starting from the last index a free bullet was found + 1.
 * DONE Refactor scheduler
 ** Use the srfi-9 records module
 * TODO Add GPL snippet to every source file
@@ -53,7 +54,7 @@
 * TODO Add bindings for Allegro audio addon
 ** Need some minimal bindings for background music and short sound effects
 ** DONE Sound effects
-** TODO Music streams
+** TODO Audio streams
 * TODO Custom window resolutions and fullscreen mode
 ** DONE Specify window size and fullscreen mode when initializing
 ** TODO Allow user to change screen size and fullscreen mode after initializing
@@ -66,9 +67,9 @@
 ** I was lazy and didn't do this, but now Gnumaku is a shared lib so it's necessary.
 * DONE Level format
 ** A proc + a Level record
-* TODO Add a register procedure to bullet-types module
+* DONE Add a register procedure to bullet-types module
 ** Allow user to register bullet types instead of having hardcoded ones
-* Switch to frame-based timing
+* DONE Switch to frame-based timing
 ** Every time the update hook is called, a timer should be incremented by one and the game should use this to time events.
 ** DONE Time agenda events by frames
 ** DONE Time game object motion by frames
