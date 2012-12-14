@@ -53,6 +53,7 @@ make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob)
     /* Step 2: Initialize it with straight code.
      */
     bullet_system->max_bullets = max_bullets;
+    bullet_system->current_index = 0;
     bullet_system->bullets = NULL;
     bullet_system->sprite_sheet = SCM_BOOL_F;
 
@@ -116,8 +117,12 @@ free_bullet_index (BulletSystem *bullet_system)
 {
     for (int i = 0; i < bullet_system->max_bullets; ++i)
     {
-        if (!get_bullet_at_index (bullet_system, i)->alive)
-            return i;
+        /* current_index is used so that we don't keep searching from the beginning of the array */
+        /* every time so we have speedier lookups, generally */
+        int index = (bullet_system->current_index + i) % bullet_system->max_bullets;
+        
+        if (!get_bullet_at_index (bullet_system, index)->alive)
+            return index;
     }
 
     return -1;
@@ -126,7 +131,12 @@ free_bullet_index (BulletSystem *bullet_system)
 static Bullet*
 get_free_bullet (BulletSystem *bullet_system)
 {
-    return get_bullet_at_index (bullet_system, free_bullet_index (bullet_system));
+    int index = free_bullet_index (bullet_system);
+
+    /* Next time, start searching for free bullets at the next array index. */
+    bullet_system->current_index = index + 1;
+    
+    return get_bullet_at_index (bullet_system, index);
 }
 
 static SCM
@@ -169,6 +179,7 @@ remove_out_of_bounds_bullet (BulletSystem *bullet_system, Bullet *bullet)
 {
     if (bullet_out_of_bounds (bullet_system, bullet)) {
         bullet->alive = false;
+        --bullet_system->num_bullets;
     }
 }
 
@@ -359,6 +370,8 @@ make_bullet_ref (SCM bullet_system_smob)
     bullet->referenced = true;
     bullet_ref->bullet_system = bullet_system;
     bullet_ref->bullet = bullet;
+
+    ++bullet_system->num_bullets;
 
     return smob;
 }
