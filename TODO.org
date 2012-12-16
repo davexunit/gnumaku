@@ -9,8 +9,6 @@
 ** DONE Add a sprite sheet member variable to bullet system
 ** DONE Use sub-bitmaps of the sprite sheet to set bullet bitmaps
 * DONE Add angular velocity to bullets
-* TODO Stop using Euler integration
-** Maybe...
 * DONE Add a bounding box to the bullet system that specifies the bounds of the game area
 ** Bullets outside of this box are killed but right now it is hard-coded in remove_out_of_bounds_bullet
 ** DONE Add a bounding box struct
@@ -94,3 +92,11 @@
 **** TODO Vertical
 **** TODO Horizontal
 **** TODO Table (m x n)
+* TODO Bullet System optimization
+** TODO Only create a bullet ref when the user wants to script the bullets.
+** TODO Fix bullet pool code
+* TODO Gamma correction
+** http://www.geeks3d.com/20101001/tutorial-gamma-correction-a-story-of-linearity/
+* TODO Improve coroutines
+** Write a define-coroutine macro
+* DONE Generic particle system
