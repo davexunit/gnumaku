@@ -2,6 +2,25 @@
 
 #include "math.h"
 
-float deg2rad(float degrees) {
+float deg2rad (float degrees) {
     return degrees * ALLEGRO_PI / 180;
+}
+
+float rad2deg (float radians) {
+    return radians * 180 / ALLEGRO_PI;
+}
+
+float
+rand1 (void) {
+    return (float) rand () / (float) RAND_MAX;
+}
+
+void
+normalize (float *x, float *y) {
+    float vx = *x;
+    float vy = *y;
+    float length = sqrt (vx * vx + vy * vy);
+
+    *x = vx / length;
+    *y = vy / length;
 }
