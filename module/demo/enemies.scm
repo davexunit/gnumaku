@@ -18,7 +18,7 @@
     (let ((enemy (make <enemy> #:sprite (make-sprite image) #:health 50 #:points 100)))
       (set-position enemy x y)
       (set! (shot-sound enemy) (load-asset "enemy_shot.wav"))
-      (center-sprite-image! (sprite enemy))
+      (center-sprite-image (sprite enemy))
       (set! (hitbox enemy) (make-rect 0 0 48 32))
       (set! (health enemy) 200)
       (set! (action enemy) (lambda (enemy)

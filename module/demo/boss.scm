@@ -17,8 +17,8 @@
 
 (define (make-orbiter)
   (let ((sprite (make-sprite (sprite-sheet-tile (load-asset "orbiter.png" 32 32 0 0) 0))))
-    (set-sprite-position! sprite 48 0)
-    (center-sprite-image! sprite)
+    (set-sprite-position sprite 48 0)
+    (center-sprite-image sprite)
     sprite))
 
 (define (make-boss-hitbox)
@@ -34,7 +34,7 @@
 
 (define (make-boss x y)
   (let ((sprite (make-sprite (sprite-sheet-tile (load-asset "enemy.png" 64 48 0 0) 0))))
-    (center-sprite-image! sprite)
+    (center-sprite-image sprite)
     (make <boss> #:x x #:y y #:sprite sprite #:action boss-ai
           #:hitbox (make-boss-hitbox) #:health 2000
           #:shot-sound (load-asset "enemy_shot.wav"))))
@@ -46,7 +46,7 @@
     (let ((x (sprite-x orbiter))
           (y (sprite-y orbiter))
           (theta (/ pi 60)))
-      (set-sprite-position! orbiter
+      (set-sprite-position orbiter
                             (- (* x (cos theta)) (* y (sin theta)))
                             (+ (* x (sin theta)) (* y (cos theta)))))))
 

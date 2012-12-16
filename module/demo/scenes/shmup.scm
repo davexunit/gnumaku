@@ -21,6 +21,7 @@
   #:duplicates (merge-generics)
   #:export (<shmup-scene> background field-width field-height player hud current-level))
 
+
 (define-class <shmup-scene> (<scene>)
   (background #:accessor background #:init-keyword #:background #:init-value #f)
   (field-width #:accessor field-width #:init-keyword #:field-width #:init-value 480)

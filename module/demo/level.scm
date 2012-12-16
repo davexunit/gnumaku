@@ -95,7 +95,7 @@
     (if (invincible player)
         #f
       (begin
-        (sprite-blink (player-sprite player) 180 30)
+        ;(sprite-blink (player-sprite player) 180 30)
         (set! (lives player) (1- (lives player)))
         (invincible-mode player 180)
         ;; Return true so that the bullet that hit the player is removed
