@@ -67,13 +67,18 @@ load_sprite_sheet (SCM s_file, SCM s_tile_width, SCM s_tile_height, SCM s_spacin
     return smob;
 }
 
+ALLEGRO_BITMAP*
+sprite_sheet_tile (SpriteSheet *sprite_sheet, int index) {
+    return sprite_sheet->tiles[index];
+}
+
 static SCM
 get_sprite_sheet_tile (SCM sprite_sheet_smob, SCM s_index)
 {
     SpriteSheet *sprite_sheet = check_sprite_sheet (sprite_sheet_smob);
     int index = scm_to_int (s_index);
     
-    return make_image_from_bitmap (sprite_sheet->tiles[index]);
+    return make_image_from_bitmap (sprite_sheet_tile (sprite_sheet, index));
 }
 
 static size_t

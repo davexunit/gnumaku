@@ -16,6 +16,7 @@ typedef struct
     ALLEGRO_BITMAP **tiles;
 } SpriteSheet;
 
+ALLEGRO_BITMAP* sprite_sheet_tile (SpriteSheet *sprite_sheet, int index);
 SpriteSheet* check_sprite_sheet (SCM sprite_sheet_smob);
 void init_sprite_sheet_type (void);
 
