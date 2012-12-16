@@ -6,7 +6,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <libguile.h>
 
-#include "draw.h"
+#include "color.h"
 
 typedef struct
 {

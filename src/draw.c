@@ -1,16 +1,6 @@
 #include "draw.h"
 #include "rect.h"
-
-ALLEGRO_COLOR
-scm_to_color (SCM s_color_list)
-{
-    float r = scm_to_double (scm_car (s_color_list));
-    float g = scm_to_double (scm_cadr (s_color_list));
-    float b = scm_to_double (scm_caddr (s_color_list));
-    float a = scm_to_double (scm_cadddr (s_color_list));
-    
-    return al_map_rgba_f (r * a, g * a, b * a, a);
-}
+#include "color.h"
 
 static SCM
 get_clipping_rect ()
