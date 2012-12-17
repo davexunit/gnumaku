@@ -16,7 +16,7 @@ typedef struct {
     float acceleration;
     float angular_velocity;
     float x, y;
-    bool alive;
+    bool active;
     bool referenced;
     bool killable;
     Rect hitbox;

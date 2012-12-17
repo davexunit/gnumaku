@@ -28,7 +28,7 @@ init_bullet (Bullet *bullet) {
     bullet->angular_velocity = 0;
     bullet->x = 0;
     bullet->y = 0;
-    bullet->alive = false;
+    bullet->active = false;
     bullet->referenced = false;
     bullet->killable = true;
     bullet->image = NULL;
@@ -104,7 +104,7 @@ get_free_bullet (BulletSystem *bullet_system) {
     if (bullet_system->bullet_count <  bullet_system->max_bullets) {
         return &bullet_system->bullets[bullet_system->bullet_count++];
     }
-    
+
     return NULL;
 }
 
@@ -114,7 +114,7 @@ clear_bullet_system (SCM bullet_system_smob)
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
 
     bullet_system->bullet_count = 0;
-    
+
     for (int i = 0; i < bullet_system->max_bullets; ++i) {
         Bullet *bullet = &bullet_system->bullets[i];
         init_bullet(bullet);
@@ -147,8 +147,8 @@ free_bullet (BulletSystem *bullet_system, int index) {
     Bullet *bullet = &bullet_system->bullets[index];
     Bullet temp;
     int bullet_count = --bullet_system->bullet_count;
-    
-    bullet->alive = false;
+
+    bullet->active = false;
     temp = bullet_system->bullets[bullet_count];
     bullet_system->bullets[bullet_count] = *bullet;
     bullet_system->bullets[index] = temp;
@@ -195,12 +195,13 @@ update_bullet_system (SCM bullet_system_smob) {
     {
         Bullet *bullet = &bullet_system->bullets[i];
 
-        if (bullet->alive)
+        if (bullet->active)
         {
             update_bullet (bullet);
 
             if (bullet_out_of_bounds (bullet_system, bullet)) {
                 free_bullet (bullet_system, i);
+                --i;
             }
         }
     }
@@ -221,7 +222,7 @@ draw_bullet_system (SCM bullet_system_smob) {
     {
         Bullet *bullet = bullet_system->bullets + i;
 
-        if (bullet->alive && bullet->image)
+        if (bullet->active && bullet->image)
         {
             al_draw_rotated_bitmap (bullet->image, sprite_sheet->tile_width / 2, sprite_sheet->tile_height / 2, bullet->x, bullet->y, deg2rad(bullet->direction), 0);
         }
@@ -241,7 +242,7 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
     {
         Bullet *bullet = bullet_system->bullets + i;
 
-        if (bullet->alive && bullet->image)
+        if (bullet->active && bullet->image)
         {
             Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
             al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
@@ -279,9 +280,9 @@ bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
     {
         Bullet *bullet = bullet_system->bullets + i;
 
-        if (bullet->alive && bullet_collision_check (bullet, rect, callback))
+        if (bullet->active && bullet_collision_check (bullet, rect, callback))
         {
-            bullet->alive = false;
+            bullet->active = false;
         }
     }
 
@@ -334,7 +335,7 @@ make_bullet_ref (SCM bullet_system_smob) {
     /* Step 4: Finish the initialization.
      */
     init_bullet(bullet);
-    bullet->alive = true;
+    bullet->active = true;
     bullet->referenced = true;
     bullet_ref->bullet_system = bullet_system;
     bullet_ref->bullet = bullet;
@@ -499,7 +500,7 @@ static SCM
 kill_bullet (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
 
-    bullet_ref->bullet->alive = false;
+    bullet_ref->bullet->active = false;
 
     scm_remember_upto_here_1 (bullet_ref_smob);
 
