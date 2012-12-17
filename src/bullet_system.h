@@ -26,10 +26,7 @@ typedef struct {
 
 typedef struct {
     int max_bullets;
-    /* Array index to start from when finding free bullets */
-    int current_index;
-    /* Number of bullets that are 'alive'. */
-    int num_bullets;
+    int bullet_count;
     Bullet *bullets;
     SCM sprite_sheet;
     Rect bounds;
