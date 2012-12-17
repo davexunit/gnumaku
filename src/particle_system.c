@@ -224,7 +224,6 @@ free_particle (ParticleSystem *system, int index) {
     temp = system->particles[particle_count];
     system->particles[particle_count] = *particle;
     system->particles[index] = temp;
-    
 }
 
 static void
