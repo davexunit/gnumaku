@@ -21,7 +21,7 @@
 
   (let ((level (make <demo-level> #:player player #:width width #:height height
                     #:background (load-asset "space.png")
-                    #:player-bullet-system (make-bullet-system 2000 bullet-sprites)
+                    #:player-bullet-system (make-bullet-system 1000 bullet-sprites)
                     #:enemy-bullet-system (make-bullet-system 10000 bullet-sprites))))
     (set! (bullet-system player) (player-bullet-system level))
     (init-level level)
