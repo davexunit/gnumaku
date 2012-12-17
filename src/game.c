@@ -103,8 +103,13 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen)
 
     /* Initialize Allegro things */
     /* TODO: Handle these errors in a proper way */
-    if(!al_init ()) {
+    if (!al_init ()) {
 	fprintf (stderr, "failed to initialize allegro!\n");
+        exit (-1);
+    }
+
+    if (!al_init_primitives_addon ()) {
+        fprintf (stderr, "failed to initialize primitives addon!\n");
         exit (-1);
     }
 
