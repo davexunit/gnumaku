@@ -19,8 +19,13 @@ void
 normalize (float *x, float *y) {
     float vx = *x;
     float vy = *y;
-    float length = sqrt (vx * vx + vy * vy);
+    float length = mag (vx, vy);
 
     *x = vx / length;
     *y = vy / length;
+}
+
+float
+mag (float x, float y) {
+    return sqrt (x * x + y * y);
 }
