@@ -2,30 +2,21 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku math)
   #:use-module (gnumaku bullet-types)
-  #:export (emit-bullet emit-towards emit-circle))
+  #:export (emit-bullet emit-simple-bullet emit-script-bullet bullet-wait))
 
-(define (emit-bullet system x y speed direction acceleration angular-velocity type)
-  (let ((bullet (make-bullet system)))
-    (set-bullet-type bullet type)
-    (set-bullet-position bullet x y)
-    (set-bullet-speed bullet speed)
-    (set-bullet-direction bullet direction)
-    (set-bullet-acceleration bullet acceleration)
-    (set-bullet-angular-velocity bullet angular-velocity)
-    bullet))
+(define (bullet-wait bullet delay)
+  "Sets the bullet script field to the continuation of a coroutine."
+  (abort-to-prompt 'coroutine-prompt
+                   (lambda (resume) (set-bullet-script bullet delay resume))))
 
-(define (emit-towards system x y speed dst-x dst-y acceleration angular-velocity type)
-  (let ((direction (rad2deg (atan (- dst-y y) (- dst-x x)))))
-    (emit-bullet system x y speed direction acceleration angular-velocity type)))
+(define (emit-bullet system x y speed direction acceleration angular-velocity life type)
+  "Emits a non-scripted bullet."
+  (%emit-bullet system x y speed direction acceleration angular-velocity life type))
 
-(define (emit-circle system x y radius num-bullets rotate-offset speed acceleration angular-velocity type)
-  (define bullets '())
-  (let iterate ((i 0))
-    (when (< i num-bullets)
-      (let ((direction (+ rotate-offset (* i (/ 360 num-bullets)))))
-	(let ((x (+ x (* radius (cos-deg direction))))
-	      (y (+ y (* radius (sin-deg direction)))))
-	  (set! bullets
-		(cons (emit-bullet system x y speed direction acceleration angular-velocity type) bullets))
-	  (iterate (1+ i))))))
-  bullets)
+(define (emit-simple-bullet system x y speed direction type)
+  "Emits a simple, non-scripted bullet with unlimited lifetime and no acceleration or angular velocity,"
+  (%emit-simple-bullet system x y speed direction type))
+
+(define (emit-script-bullet system x y type script)
+  "Emits a bullet that can be manipulated via a script."
+  (%emit-script-bullet system x y type script))
