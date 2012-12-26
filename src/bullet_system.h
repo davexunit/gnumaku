@@ -22,17 +22,19 @@ typedef enum {
 typedef struct {
     int id; /* Unique identifier. */
     int life; /* Maximum lifetime. 0 is unlimited. */
-    int life_count; /* Total elapsed lifetime */
+    int script_time; /* Time to execute the bullet script. */
+    int life_count; /* Total elapsed lifetime. */
     bool active; /* Currently being drawn/updated? */
-    bool scripted; /* Scripted bullets must be freed explicitly by the user. */
     float x, y;     /* Position */
     float dx, dy;   /* Velocity */
     float ddx, ddy; /* Acceleration */
-    ALLEGRO_TRANSFORM angular_velocity; /* Change in direction */
+    ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     Rect hitbox;
     BlendMode blend_mode;
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
+    SCM script; /* Scheme procedure to run at a given time. */
+    SCM ref; /* Scheme structure for referencing a bullet. */
 } Bullet;
 
 typedef struct {
