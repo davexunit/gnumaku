@@ -10,16 +10,27 @@
 #include "sprite_sheet.h"
 #include "rect.h"
 
+/* String representations of Scheme symbols for blend modes */
+#define SYM_BLEND_ALPHA "alpha"
+#define SYM_BLEND_ADD   "add"
+
+typedef enum {
+    BLEND_ALPHA,
+    BLEND_ADD,
+} BlendMode;
+
 typedef struct {
-    float speed;
-    float direction;
-    float acceleration;
-    float angular_velocity;
-    float x, y;
-    bool active;
-    bool referenced;
-    bool killable;
+    int id; /* Unique identifier. */
+    int life; /* Maximum lifetime. 0 is unlimited. */
+    int life_count; /* Total elapsed lifetime */
+    bool active; /* Currently being drawn/updated? */
+    bool scripted; /* Scripted bullets must be freed explicitly by the user. */
+    float x, y;     /* Position */
+    float dx, dy;   /* Velocity */
+    float ddx, ddy; /* Acceleration */
+    ALLEGRO_TRANSFORM angular_velocity; /* Change in direction */
     Rect hitbox;
+    BlendMode blend_mode;
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
 } Bullet;
@@ -28,13 +39,14 @@ typedef struct {
     int max_bullets;
     int bullet_count;
     Bullet *bullets;
+    int *bullet_ids; /* Maps bullet id to bullet pool index. */
     SCM sprite_sheet;
     Rect bounds;
 } BulletSystem;
 
 typedef struct {
-    BulletSystem *bullet_system;
-    Bullet *bullet;
+    BulletSystem *system;
+    int id;
 } BulletRef;
 
 void init_bullet_system_type (void);
