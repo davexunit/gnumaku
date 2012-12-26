@@ -25,6 +25,7 @@ typedef struct {
     int script_time; /* Time to execute the bullet script. */
     int life_count; /* Total elapsed lifetime. */
     bool active; /* Currently being drawn/updated? */
+    bool kill; /* Remove the bullet on next update? */
     float x, y;     /* Position */
     float dx, dy;   /* Velocity */
     float ddx, ddy; /* Acceleration */

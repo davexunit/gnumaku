@@ -210,7 +210,8 @@ bullet_has_life_remaining (Bullet *bullet) {
 
 static bool
 bullet_dead (BulletSystem *bullet_system, Bullet *bullet) {
-    return (bullet_out_of_bounds (bullet_system, bullet) ||
+    return (bullet->kill ||
+            bullet_out_of_bounds (bullet_system, bullet) ||
             !bullet_has_life_remaining (bullet));
 }
 
@@ -370,6 +371,7 @@ init_bullet (Bullet *bullet, float x, float y, float speed,
              float direction, float acceleration, float angular_velocity,
              int life, SCM script, ALLEGRO_BITMAP *image) {
     bullet->active = true;
+    bullet->kill = false;
     bullet->life = life;
     bullet->script_time = 0;
     bullet->life_count = 0;
@@ -489,7 +491,7 @@ emit_script_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_image, SCM s
     /* Get new bullet from pool. */
     index = bullet_system->bullet_count++;
     bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, x, y, 0, 0, 0, 0, 0, script,
+    init_bullet (bullet, x, y, .1, 0, 0, 0, 0, script,
                  sprite_sheet_tile (sprite_sheet, image));
 
     return SCM_UNSPECIFIED;
@@ -525,9 +527,10 @@ set_bullet_script (SCM bullet_ref_smob, SCM s_dt, SCM script) {
 static SCM
 kill_bullet (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
-    BulletSystem *bullet_system = bullet_ref->system;
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    free_bullet (bullet_system, bullet_index_from_id (bullet_system, bullet_ref->id));
+    bullet->kill = true;
+    
 
     return SCM_UNSPECIFIED;
 }
