@@ -59,9 +59,11 @@
   (draw-sprite (orbiter boss)))
 
 (define-method (boss-ai (boss <boss>))
+  (define-coroutine (follow-path)
+    (move-bezier-path boss (path boss) '(200 200))
+    (follow-path))
+
   (let ((w (width (level boss))))
     (set! (path boss) (make-boss-path boss)))
-  (coroutine (let loop ()
-               (move-bezier-path boss (path boss) '(200 200))
-               (loop)))
-  (spiral-1 boss))
+  (follow-path)
+  (spiral1 boss))

@@ -36,7 +36,7 @@
   (set-bounds lvl (enemy-bullet-system lvl)))
 
 (define-method (set-bounds (lvl <level>) system)
-  (let ((padding 32))
+  (let ((padding 100))
     (set-bullet-system-bounds system
                               (* -1 padding) (* -1 padding)
                               (+ (* 2 padding) (width lvl))
