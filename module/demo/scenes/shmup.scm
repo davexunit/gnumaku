@@ -67,9 +67,9 @@
             (y (y player))
             (speed 15)
             (bullets (bullet-system player)))
-        (emit-simple-bullet bullets (- x 16) y speed 269 0)
-        (emit-simple-bullet bullets x (- y 20) speed 270 0)
-        (emit-simple-bullet bullets (+ x 16) y speed 271 0))
+        (emit-simple-bullet bullets (- x 16) y speed 269 'medium-blue)
+        (emit-simple-bullet bullets x (- y 20) speed 270 'medium-blue)
+        (emit-simple-bullet bullets (+ x 16) y speed 271 'medium-blue))
       (wait player 3)
       (loop))))
 

@@ -16,30 +16,20 @@
 (spawn-server)
 
 (define (init-bullet-types)
-  (register-bullet-type 'medium-blue 
-                        (lambda (bullet)
-                          (set-bullet-sprite bullet 0)
-                          (set-bullet-hitbox bullet -3 -3 6 6)))
+  (register-bullet-type 'medium-blue
+                        (make-bullet-type 0 (make-rect -3 -3 6 6) 'alpha #f))
 
   (register-bullet-type 'small-diamond
-                        (lambda (bullet)
-                          (set-bullet-sprite bullet 1)
-                          (set-bullet-hitbox bullet -2 -2 4 4)))
+                        (make-bullet-type 1 (make-rect -2 -2 4 4) 'alpha #t))
 
   (register-bullet-type 'large-orange
-                        (lambda (bullet)
-                          (set-bullet-sprite bullet 2)
-                          (set-bullet-hitbox bullet -5 -5 10 10)))
+                        (make-bullet-type 2 (make-rect -5 -5 10 10) 'alpha #f))
 
   (register-bullet-type 'sword
-                        (lambda (bullet)
-                          (set-bullet-sprite bullet 3)
-                          (set-bullet-hitbox bullet -4 -4 8 8)))
+                        (make-bullet-type 3 (make-rect -4 -4 8 8) 'alpha #t))
 
   (register-bullet-type 'small-green
-                        (lambda (bullet)
-                          (set-bullet-sprite bullet 5)
-                          (set-bullet-hitbox bullet -2 -2 4 4))))
+                        (make-bullet-type 3 (make-rect -2 -2 4 4) 'alpha #f)))
 
 (define (init-assets-manager)
   (register-asset-manager "images" load-image)
