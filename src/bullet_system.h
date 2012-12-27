@@ -10,14 +10,21 @@
 #include "sprite_sheet.h"
 #include "rect.h"
 
-/* String representations of Scheme symbols for blend modes */
-#define SYM_BLEND_ALPHA "alpha"
-#define SYM_BLEND_ADD   "add"
+/* Scheme symbols for blend modes */
+#define SYM_BLEND_ALPHA scm_from_locale_symbol ("alpha")
+#define SYM_BLEND_ADD   scm_from_locale_symbol ("add")
 
 typedef enum {
     BLEND_ALPHA,
     BLEND_ADD,
 } BlendMode;
+
+typedef struct {
+    bool directional; /* Rotate sprite to reflect direction? */
+    int image;
+    Rect hitbox;
+    BlendMode blend_mode;
+} BulletType;
 
 typedef struct {
     int id; /* Unique identifier. */
@@ -26,6 +33,7 @@ typedef struct {
     int life_count; /* Total elapsed lifetime. */
     bool active; /* Currently being drawn/updated? */
     bool kill; /* Remove the bullet on next update? */
+    bool directional;
     float x, y;     /* Position */
     float dx, dy;   /* Velocity */
     float ddx, ddy; /* Acceleration */
