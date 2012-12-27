@@ -11,6 +11,7 @@ typedef struct
 } Rect;
 
 Rect* check_rect (SCM rect_smob);
+Rect scm_to_rect (SCM rect_smob);
 void init_rect_type (void);
 void init_rect (Rect *rect, float x, float y, float width, float height);
 bool rect_collide_point (Rect *rect, float x, float y);
