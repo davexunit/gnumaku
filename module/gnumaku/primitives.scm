@@ -11,12 +11,15 @@
 
 (define (emit-bullet system x y speed direction acceleration angular-velocity life type)
   "Emits a non-scripted bullet."
-  (%emit-bullet system x y speed direction acceleration angular-velocity life type))
+  (let ((type (get-bullet-type type)))
+    (%emit-bullet system x y speed direction acceleration angular-velocity life type)))
 
 (define (emit-simple-bullet system x y speed direction type)
   "Emits a simple, non-scripted bullet with unlimited lifetime and no acceleration or angular velocity,"
-  (%emit-simple-bullet system x y speed direction type))
+  (let ((type (get-bullet-type type)))
+    (%emit-simple-bullet system x y speed direction type)))
 
 (define (emit-script-bullet system x y type script)
   "Emits a bullet that can be manipulated via a script."
-  (%emit-script-bullet system x y type script))
+  (let ((type (get-bullet-type type)))
+    (%emit-script-bullet system x y type script)))
