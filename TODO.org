@@ -92,11 +92,11 @@
 **** TODO Vertical
 **** TODO Horizontal
 **** TODO Table (m x n)
-* TODO Bullet System optimization
-** TODO Only create a bullet ref when the user wants to script the bullets.
-** TODO Fix bullet pool code
+* DONE Bullet System optimization
+** DONE Only create a bullet ref when the user wants to script the bullets.
+** DONE Fix bullet pool code
 * TODO Gamma correction
 ** http://www.geeks3d.com/20101001/tutorial-gamma-correction-a-story-of-linearity/
-* TODO Improve coroutines
+* DONE Improve coroutines
 ** Write a define-coroutine macro
 * DONE Generic particle system
