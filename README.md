@@ -15,25 +15,32 @@ Using coroutines it is very easy to write scripts that seem to execute concurren
 Here's what a bullet script might look like:
 
 ```scheme
-(coroutine
- (let loop ()
-   (when (shooting player)
-     (play-sample (shot-sound player) 1.0 0.0 1.0)
-     (let ((x (x player))
-           (y (y player))
-           (speed 15)
-           (bullets (bullet-system player)))
-       (emit-bullet bullets (- x 16) y speed 269 0 0 'sword)
-       (emit-bullet bullets x (- y 20) speed 270 0 0 'sword)
-       (emit-bullet bullets (+ x 16) y speed 271 0 0 'sword))
-     (wait player 3)
-     (loop)))))
+(define-coroutine (player-shot-1 player)
+  (when (shooting player)
+    (play-sample (shot-sound player) 1.0 0.0 1.0)
+    (let ((x (x player))
+          (y (y player))
+          (speed 15)
+          (bullets (bullet-system player)))
+      (emit-simple-bullet bullets x y speed 269 'sword)
+      (emit-simple-bullet bullets x y speed 270 'sword)
+      (emit-simple-bullet bullets x y speed 271 'sword))
+    (wait player 3)
+    (player-shot-1 player)))
 ```
 
-This script first checks if the player's shooting flag is currently true.
+This script first checks if the player's shooting flag is currently set.
 If so, 3 bullets are fired and a sound sample is played.
-Then the procedure is stopped and scheduled to resume 3 frames from now.
-Upon re-entering the script, we repeat this process until the player is no longer in the shooting state.
+The bullets are emitted from the player's bullet system.
+The bullets have a speed of 15 pixels per second.
+They are fired from the player's current location with directions of 269, 270,
+and 271 degrees,respectively.
+`'sword` refers to the type of bullet to fire. Bullet types define the image,
+hitbox, and blend mode that the bullet has.
+The procedure is then stopped and scheduled in the player's agenda  to resume
+after 3 frames have passed.
+When the script continues, we recursively call the procedure and the process
+repeats until the player is no longer in the shooting state.
     
 Dependencies
 ------------
