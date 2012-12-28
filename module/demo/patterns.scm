@@ -3,7 +3,7 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku math)
-  #:use-module (gnumaku primitives)
+  #:use-module (gnumaku bullet)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
@@ -43,7 +43,7 @@
   (repeat count emit))
 
 (define-coroutine (spiral1 actor)
-  (define step (/ 360 30))
+  (define step (/ 360 15))
   
   (define (spiral angle)
     (let ((system (bullet-system actor))
@@ -54,8 +54,9 @@
       (emit-script-bullet system x y 'large-orange
                           (lambda (bullet)
                             (set-bullet-movement bullet 4 direction 0 0)
-                            (explode bullet system 45 6 4 30))))
-                            ;;(sine-wave bullet))))
+                            (homing-bullet bullet player))))
+                            ;;(explode bullet system 45 6 4 30))))
+                            ;; (sine-wave bullet))))
     (wait actor 6)
     (spiral (+ angle step)))
 

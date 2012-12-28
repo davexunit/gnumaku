@@ -5,7 +5,7 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku assets)
   #:use-module (gnumaku director)
-  #:use-module (gnumaku bullet-types)
+  #:use-module (gnumaku bullet)
   #:use-module (demo scenes shmup)
   #:export (main))
 

@@ -4,7 +4,6 @@
   #:use-module (gnumaku core)
   #:use-module (gnumaku math)
   #:use-module (gnumaku assets)
-  #:use-module (gnumaku primitives)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku scene-graph)
   #:use-module (gnumaku path)

@@ -3,8 +3,6 @@
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
   #:use-module (gnumaku assets)
-  #:use-module (gnumaku primitives)
-  #:use-module (gnumaku coroutine)
   #:use-module (demo level)
   #:use-module (demo actor)
   #:use-module (demo player)
