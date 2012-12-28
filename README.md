@@ -34,7 +34,7 @@ If so, 3 bullets are fired and a sound sample is played.
 The bullets are emitted from the player's bullet system.
 The bullets have a speed of 15 pixels per second.
 They are fired from the player's current location with directions of 269, 270,
-and 271 degrees,respectively.
+and 271 degrees, respectively.
 `'sword` refers to the type of bullet to fire. Bullet types define the image,
 hitbox, and blend mode that the bullet has.
 The procedure is then stopped and scheduled in the player's agenda  to resume
