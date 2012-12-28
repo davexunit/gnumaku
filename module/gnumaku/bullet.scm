@@ -1,8 +1,18 @@
-(define-module (gnumaku primitives)
+(define-module (gnumaku bullet)
   #:use-module (gnumaku core)
   #:use-module (gnumaku math)
-  #:use-module (gnumaku bullet-types)
-  #:export (emit-bullet emit-simple-bullet emit-script-bullet bullet-wait))
+  #:export (get-bullet-type register-bullet-type emit-bullet emit-simple-bullet
+                            emit-script-bullet bullet-wait))
+
+(define bullet-types (make-hash-table))
+
+(define (register-bullet-type key type)
+  "Associates a key with a procedure for setting particular bullet properties."
+  (hash-set! bullet-types key type))
+
+(define (get-bullet-type key)
+  "Applies the bullet properties associated with the given key."
+  (hash-ref bullet-types key))
 
 (define (bullet-wait bullet delay)
   "Sets the bullet script field to the continuation of a coroutine."
