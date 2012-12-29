@@ -64,10 +64,9 @@ init_particle (ParticleSystem *system, Particle *particle) {
     particle->image = sprite_sheet_tile (sprite_sheet, tile);
     particle->color = start_color;
     particle->dcolor = delta_color (start_color, end_color, particle->life);
-    particle->x = system->x + system->x_var * rand1 ();
-    particle->y = system->y +  system->y_var * rand1 ();
-    particle->dx = cos (theta) * speed;
-    particle->dy = sin (theta) * speed;
+    particle->pos.x = system->pos.x + system->pos_var.x * rand1 ();
+    particle->pos.y = system->pos.y +  system->pos_var.y * rand1 ();
+    particle->vel = vector2_from_polar (speed, theta);
     particle->radial_accel = system->radial_accel + system->radial_accel_var * rand1 ();
     particle->tan_accel = system->tan_accel + system->tan_accel_var * rand1 ();
     particle->scale = start_scale;
@@ -96,10 +95,10 @@ make_particle_system (SCM s_max_particles, SCM sprite_sheet_smob)
     particle_system->amount = 0;
     particle_system->life = 0;
     particle_system->life_var = 0;
-    particle_system->x = 0;
-    particle_system->y = 0;
-    particle_system->x_var = 0;
-    particle_system->y_var = 0;
+    particle_system->pos.x = 0;
+    particle_system->pos.y = 0;
+    particle_system->pos_var.y = 0;
+    particle_system->pos_var.x = 0;
     particle_system->radial_accel = 0;
     particle_system->radial_accel_var = 0;
     particle_system->tan_accel = 0;
@@ -154,7 +153,7 @@ print_particle_system (SCM particle_system_smob, SCM port, scm_print_state *psta
 {
     ParticleSystem *particle_system = (ParticleSystem *) SCM_SMOB_DATA (particle_system_smob);
 
-    scm_puts ("#<ParticleSystem ", port);
+    scm_puts ("#<particle-system ", port);
     scm_display (scm_from_int(particle_system->max_particles), port);
     scm_puts (">", port);
 
@@ -167,8 +166,8 @@ draw_particle (Particle *particle) {
     if (particle->active) {
         float cx = al_get_bitmap_width (particle->image) / 2;
         float cy = al_get_bitmap_height (particle->image) / 2;
-        float x = particle->x - (cx * particle->scale);
-        float y = particle->y - (cy * particle->scale);
+        float x = particle->pos.x - (cx * particle->scale);
+        float y = particle->pos.y - (cy * particle->scale);
 
         al_draw_tinted_scaled_rotated_bitmap(particle->image, particle->color,
                                              0, 0, x, y,
@@ -241,29 +240,19 @@ particle_system_do_emit (ParticleSystem *system) {
 static void
 update_particle (ParticleSystem *system, int index) {
     Particle *particle = &system->particles[index];
-    float radial_x = 0;
-    float radial_y = 0;
-    float tan_x = 0;
-    float tan_y = 0;
+    Vector2 radial = vector2_zero();
+    Vector2 tangent;
     
     if (particle->active) {
-        if (particle->x != system->x || particle->y != system->y) {
-            radial_x = system->x - particle->x;
-            radial_y = system->y - particle->y;
-            normalize (&radial_x, &radial_y);
+        if (!vector2_equal (particle->pos, system->pos)) {
+            radial = vector2_norm (vector2_sub (system->pos, particle->pos));
         }
 
-        tan_x = - radial_y;
-        tan_y = radial_x;
-        radial_x *= particle->radial_accel;
-        radial_y *= particle->radial_accel;
-        tan_x *= particle->tan_accel;
-        tan_y *= particle->tan_accel;
-
-        particle->dx += radial_x + tan_x;
-        particle->dy += radial_y + tan_y;
-        particle->x += particle->dx;
-        particle->y += particle->dy;
+        tangent = vector2_right_normal (radial);
+        radial = vector2_scale (radial, particle->radial_accel);
+        tangent = vector2_scale (tangent, particle->tan_accel);
+        particle->vel = vector2_add (particle->vel, (vector2_add (radial, tangent)));
+        particle->pos = vector2_add (particle->pos, particle->vel);
         particle->scale += particle->dscale;
         particle->color = add_color (particle->color, particle->dcolor);
         ++particle->duration;
@@ -374,7 +363,7 @@ particle_system_x (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->x);
+    return scm_from_double (particle_system->pos.x);
 }
 
 static SCM
@@ -383,7 +372,7 @@ particle_system_y (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->y);
+    return scm_from_double (particle_system->pos.y);
 }
 
 static SCM
@@ -392,7 +381,7 @@ particle_system_x_var (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->x_var);
+    return scm_from_double (particle_system->pos_var.x);
 }
 
 static SCM
@@ -401,7 +390,7 @@ particle_system_y_var (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->y_var);
+    return scm_from_double (particle_system->pos_var.y);
 }
 
 static SCM
@@ -410,7 +399,7 @@ particle_system_gravity_x (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->gravity_x);
+    return scm_from_double (particle_system->gravity.x);
 }
 
 static SCM
@@ -419,7 +408,7 @@ particle_system_gravity_y (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->gravity_y);
+    return scm_from_double (particle_system->gravity.y);
 }
 
 static SCM
@@ -594,7 +583,7 @@ set_particle_system_rate (SCM particle_system_smob, SCM s_rate) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     int rate = scm_to_int (s_rate);
 
-    particle_system->rate = rate;;
+    particle_system->rate = rate;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -606,7 +595,7 @@ set_particle_system_amount (SCM particle_system_smob, SCM s_amount) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     int amount = scm_to_int (s_amount);
 
-    particle_system->amount = amount;;
+    particle_system->amount = amount;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -618,7 +607,7 @@ set_particle_system_life (SCM particle_system_smob, SCM s_life) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     int life = scm_to_int (s_life);
 
-    particle_system->life = life;;
+    particle_system->life = life;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -630,7 +619,7 @@ set_particle_system_life_var (SCM particle_system_smob, SCM s_life_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     int life_var = scm_to_int (s_life_var);
 
-    particle_system->life_var = life_var;;
+    particle_system->life_var = life_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -642,7 +631,7 @@ set_particle_system_x (SCM particle_system_smob, SCM s_x) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float x = scm_to_double (s_x);
 
-    particle_system->x = x;;
+    particle_system->pos.x = x;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -654,7 +643,7 @@ set_particle_system_y (SCM particle_system_smob, SCM s_y) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float y = scm_to_double (s_y);
 
-    particle_system->y = y;;
+    particle_system->pos.y = y;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -666,7 +655,7 @@ set_particle_system_x_var (SCM particle_system_smob, SCM s_x_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float x_var = scm_to_double (s_x_var);
 
-    particle_system->x_var = x_var;;
+    particle_system->pos_var.x = x_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -678,7 +667,7 @@ set_particle_system_y_var (SCM particle_system_smob, SCM s_y_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float y_var = scm_to_double (s_y_var);
 
-    particle_system->y_var = y_var;;
+    particle_system->pos_var.y = y_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -690,7 +679,7 @@ set_particle_system_gravity_x (SCM particle_system_smob, SCM s_gravity_x) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float gravity_x = scm_to_double (s_gravity_x);
 
-    particle_system->gravity_x = gravity_x;;
+    particle_system->gravity.x = gravity_x;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -702,7 +691,7 @@ set_particle_system_gravity_y (SCM particle_system_smob, SCM s_gravity_y) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float gravity_y = scm_to_double (s_gravity_y);
 
-    particle_system->gravity_y = gravity_y;;
+    particle_system->gravity.y = gravity_y;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -714,7 +703,7 @@ set_particle_system_direction (SCM particle_system_smob, SCM s_direction) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float direction = scm_to_double (s_direction);
 
-    particle_system->direction = direction;;
+    particle_system->direction = direction;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -726,7 +715,7 @@ set_particle_system_direction_var (SCM particle_system_smob, SCM s_direction_var
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float direction_var = scm_to_double (s_direction_var);
 
-    particle_system->direction_var = direction_var;;
+    particle_system->direction_var = direction_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -737,7 +726,7 @@ static SCM set_particle_system_speed (SCM particle_system_smob, SCM s_speed) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float speed = scm_to_double (s_speed);
 
-    particle_system->speed = speed;;
+    particle_system->speed = speed;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -749,7 +738,7 @@ set_particle_system_speed_var (SCM particle_system_smob, SCM s_speed_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float speed_var = scm_to_double (s_speed_var);
 
-    particle_system->speed_var = speed_var;;
+    particle_system->speed_var = speed_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -761,7 +750,7 @@ set_particle_system_radial_accel (SCM particle_system_smob, SCM s_radial_accel) 
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float radial_accel = scm_to_double (s_radial_accel);
 
-    particle_system->radial_accel = radial_accel;;
+    particle_system->radial_accel = radial_accel;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -773,7 +762,7 @@ set_particle_system_radial_accel_var (SCM particle_system_smob, SCM s_radial_acc
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float radial_accel_var = scm_to_double (s_radial_accel_var);
 
-    particle_system->radial_accel_var = radial_accel_var;;
+    particle_system->radial_accel_var = radial_accel_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -785,7 +774,7 @@ set_particle_system_tan_accel (SCM particle_system_smob, SCM s_tan_accel) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float tan_accel = scm_to_double (s_tan_accel);
 
-    particle_system->tan_accel = tan_accel;;
+    particle_system->tan_accel = tan_accel;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -797,7 +786,7 @@ set_particle_system_tan_accel_var (SCM particle_system_smob, SCM s_tan_accel_var
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float tan_accel_var = scm_to_double (s_tan_accel_var);
 
-    particle_system->tan_accel_var = tan_accel_var;;
+    particle_system->tan_accel_var = tan_accel_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -809,7 +798,7 @@ set_particle_system_start_scale (SCM particle_system_smob, SCM s_start_scale) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float start_scale = scm_to_double (s_start_scale);
 
-    particle_system->start_scale = start_scale;;
+    particle_system->start_scale = start_scale;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -821,7 +810,7 @@ set_particle_system_start_scale_var (SCM particle_system_smob, SCM s_start_scale
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float start_scale_var = scm_to_double (s_start_scale_var);
 
-    particle_system->start_scale_var = start_scale_var;;
+    particle_system->start_scale_var = start_scale_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -833,7 +822,7 @@ set_particle_system_end_scale (SCM particle_system_smob, SCM s_end_scale) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float end_scale = scm_to_double (s_end_scale);
 
-    particle_system->end_scale = end_scale;;
+    particle_system->end_scale = end_scale;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -845,7 +834,7 @@ set_particle_system_end_scale_var (SCM particle_system_smob, SCM s_end_scale_var
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     float end_scale_var = scm_to_double (s_end_scale_var);
 
-    particle_system->end_scale_var = end_scale_var;;
+    particle_system->end_scale_var = end_scale_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -857,7 +846,7 @@ set_particle_system_start_color (SCM particle_system_smob, SCM s_start_color) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     ALLEGRO_COLOR start_color = scm_to_color (s_start_color);
 
-    particle_system->start_color = start_color;;
+    particle_system->start_color = start_color;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -869,7 +858,7 @@ set_particle_system_start_color_var (SCM particle_system_smob, SCM s_start_color
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     ALLEGRO_COLOR start_color_var = scm_to_color (s_start_color_var);
 
-    particle_system->start_color_var = start_color_var;;
+    particle_system->start_color_var = start_color_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -882,7 +871,7 @@ set_particle_system_end_color (SCM particle_system_smob, SCM s_end_color) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     ALLEGRO_COLOR end_color = scm_to_color (s_end_color);
 
-    particle_system->end_color = end_color;;
+    particle_system->end_color = end_color;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -894,7 +883,7 @@ set_particle_system_end_color_var (SCM particle_system_smob, SCM s_end_color_var
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
     ALLEGRO_COLOR end_color_var = scm_to_color (s_end_color_var);
 
-    particle_system->end_color_var = end_color_var;;
+    particle_system->end_color_var = end_color_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 

@@ -6,6 +6,7 @@
 #include <libguile.h>
 
 #include "math.h"
+#include "vector.h"
 #include "color.h"
 #include "sprite_sheet.h"
 
@@ -13,10 +14,8 @@ typedef struct {
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
     ALLEGRO_COLOR dcolor;
-    float x;
-    float y;
-    float dx;
-    float dy;
+    Vector2 pos;
+    Vector2 vel;
     float radial_accel;
     float tan_accel;
     float scale;
@@ -37,12 +36,10 @@ typedef struct {
     int amount;
     int life;
     int life_var;
-    float x;
-    float y;
-    float x_var;
-    float y_var;
-    float gravity_x;
-    float gravity_y;
+    Vector2 pos;
+    Vector2 pos_var;
+    Vector2 gravity;
+    Vector2 gravity_var;
     float direction;
     float direction_var;
     float speed;
