@@ -7,6 +7,7 @@
 #include <libguile.h>
 
 #include "math.h"
+#include "vector.h"
 #include "sprite_sheet.h"
 #include "rect.h"
 
@@ -34,9 +35,9 @@ typedef struct {
     bool active; /* Currently being drawn/updated? */
     bool kill; /* Remove the bullet on next update? */
     bool directional;
-    float x, y;     /* Position */
-    float dx, dy;   /* Velocity */
-    float ddx, ddy; /* Acceleration */
+    Vector2 pos;
+    Vector2 vel;
+    Vector2 acc;
     ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     Rect hitbox;
     BlendMode blend_mode;

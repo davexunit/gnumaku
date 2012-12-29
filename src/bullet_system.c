@@ -145,7 +145,7 @@ clear_bullet_system (SCM bullet_system_smob)
 
 static bool
 bullet_out_of_bounds(BulletSystem *bullet_system, Bullet *bullet) {
-    return !rect_collide_point(&bullet_system->bounds, bullet->x, bullet->y);
+    return !rect_collide_point(&bullet_system->bounds, bullet->pos.x, bullet->pos.y);
 }
 
 static int
@@ -228,12 +228,12 @@ update_bullet_script (Bullet *bullet) {
 static void
 update_bullet(Bullet *bullet) {
     update_bullet_script (bullet);
-    al_transform_coordinates (&bullet->angular_velocity, &bullet->dx, &bullet->dy);
-    al_transform_coordinates (&bullet->angular_velocity, &bullet->ddx, &bullet->ddy);
-    bullet->x += bullet->dx;
-    bullet->y += bullet->dy;
-    bullet->dx += bullet->ddx;
-    bullet->dy += bullet->ddy;
+    al_transform_coordinates (&bullet->angular_velocity,
+                              &bullet->pos.x, &bullet->pos.y);
+    al_transform_coordinates (&bullet->angular_velocity,
+                              &bullet->acc.x, &bullet->acc.y);
+    bullet->pos = vector2_add (bullet->pos, bullet->vel);
+    bullet->vel = vector2_add (bullet->vel, bullet->acc);
     bullet->life_count++;
 }
 
@@ -293,7 +293,7 @@ set_bullet_blend_mode (Bullet *bullet) {
 static float
 bullet_sprite_angle (Bullet *bullet) {
     if (bullet->directional) {
-        return atan2 (bullet->dy, bullet->dx);
+        return vector2_angle (bullet->vel);
     }
 
     return 0;
@@ -305,7 +305,7 @@ draw_bullet (Bullet *bullet, int cx, int cy) {
 
     set_bullet_blend_mode (bullet);
     al_draw_rotated_bitmap (bullet->image, cx, cy,
-                             bullet->x, bullet->y, angle, 0);
+                             bullet->pos.x, bullet->pos.y, angle, 0);
 }
 
 static SCM
@@ -342,7 +342,7 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
         Bullet *bullet = bullet_system->bullets + i;
 
         if (bullet->active && bullet->image) {
-            Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
+            Rect hitbox = rect_move(&bullet->hitbox, bullet->pos.x, bullet->pos.y);
             al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
                                al_map_rgba_f (1, 0, 1, 1), 2);
         }
@@ -355,7 +355,7 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
 
 static bool
 bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback) {
-    Rect hitbox = rect_move(&bullet->hitbox, bullet->x, bullet->y);
+    Rect hitbox = rect_move(&bullet->hitbox, bullet->pos.x, bullet->pos.y);
 
     if (rect_collide_rect (&hitbox, rect)) {
         if (scm_procedure_p (callback)) {
@@ -408,10 +408,10 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
     float dx = cos (direction);
     float dy = sin (direction);
 
-    bullet->dx = dx * speed;
-    bullet->dy = dy * speed;
-    bullet->ddx = dx * acceleration;
-    bullet->ddy = dy * acceleration;
+    bullet->vel.x = dx * speed;
+    bullet->vel.y = dy * speed;
+    bullet->acc.x = dx * acceleration;
+    bullet->acc.y = dy * acceleration;
     al_build_transform (&bullet->angular_velocity, 0, 0, 1, 1,
                         deg2rad (angular_velocity));
 }
@@ -428,8 +428,8 @@ init_bullet (Bullet *bullet, BulletSystem *bullet_system, float x, float y,
     bullet->life = life;
     bullet->script_time = 0;
     bullet->life_count = 0;
-    bullet->x = x;
-    bullet->y = y;
+    bullet->pos.x = x;
+    bullet->pos.y = y;
     bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
     bullet->color = al_map_rgba_f (1, 1, 1, 1);
     bullet->blend_mode = type->blend_mode;
@@ -596,7 +596,6 @@ kill_bullet (SCM bullet_ref_smob) {
 
     bullet->kill = true;
     
-
     return SCM_UNSPECIFIED;
 }
 
@@ -605,7 +604,7 @@ bullet_x (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (bullet->x);
+    return scm_from_double (bullet->pos.x);
 }
 
 static SCM
@@ -613,7 +612,7 @@ bullet_y (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (bullet->y);
+    return scm_from_double (bullet->pos.y);
 }
 
 static SCM
@@ -621,14 +620,14 @@ bullet_speed (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (mag (bullet->dx, bullet->dy));
+    return scm_from_double (vector2_mag (bullet->vel));
 }
 
 static SCM
 bullet_direction (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float direction = rad2deg (atan2 (bullet->dy, bullet->dx));
+    float direction = rad2deg (vector2_angle (bullet->vel));
 
     return scm_from_double (direction);
 }
@@ -638,7 +637,7 @@ bullet_acceleration (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (mag (bullet->ddx, bullet->ddy));
+    return scm_from_double (vector2_mag (bullet->acc));
 }
 
 static SCM
@@ -669,7 +668,7 @@ set_bullet_x (SCM bullet_ref_smob, SCM s_x) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float x = scm_to_double (s_x);
 
-    bullet->x = x;
+    bullet->pos.x = x;
 
     return SCM_UNSPECIFIED;
 }
@@ -680,7 +679,7 @@ set_bullet_y (SCM bullet_ref_smob, SCM s_y) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float y = scm_to_double (s_y);
 
-    bullet->y = y;
+    bullet->pos.y = y;
 
     return SCM_UNSPECIFIED;
 }
@@ -692,8 +691,8 @@ set_bullet_position (SCM bullet_ref_smob, SCM s_x, SCM s_y) {
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
 
-    bullet->x = x;
-    bullet->y = y;
+    bullet->pos.x = x;
+    bullet->pos.y = y;
 
     return SCM_UNSPECIFIED;
 }
@@ -703,10 +702,8 @@ set_bullet_speed (SCM bullet_ref_smob, SCM s_speed) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float speed = scm_to_double (s_speed);
-    float theta = atan2 (bullet->dy, bullet->dx);
 
-    bullet->dx = cos (theta) * speed;
-    bullet->dy = sin (theta) * speed;
+    bullet->vel = vector2_scale (vector2_norm (bullet->vel), speed);
 
     return SCM_UNSPECIFIED;
 }
@@ -717,13 +714,11 @@ set_bullet_direction (SCM bullet_ref_smob, SCM s_direction) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float direction = scm_to_double (s_direction);
     float theta = deg2rad (direction);
-    float speed = mag (bullet->dx, bullet->dy);
-    float acceleration = mag (bullet->ddx, bullet->ddy);
+    float speed = vector2_mag (bullet->vel);
+    float acceleration = vector2_mag (bullet->acc);
 
-    bullet->dx = cos (theta) * speed;
-    bullet->dy = sin (theta) * speed;
-    bullet->ddx = cos (theta) * acceleration;
-    bullet->ddy = sin (theta) * acceleration;
+    bullet->vel = vector2_from_polar (speed, theta);
+    bullet->acc = vector2_from_polar (acceleration, theta);
 
     return SCM_UNSPECIFIED;
 }
@@ -733,10 +728,8 @@ set_bullet_acceleration (SCM bullet_ref_smob, SCM s_acceleration) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float acceleration = scm_to_double (s_acceleration);
-    float theta = atan2 (bullet->ddy, bullet->ddx);
 
-    bullet->ddx = cos (theta) * acceleration;
-    bullet->ddy = sin (theta) * acceleration;
+    bullet->acc = vector2_scale (vector2_norm (bullet->acc), acceleration);
 
     return SCM_UNSPECIFIED;
 }
