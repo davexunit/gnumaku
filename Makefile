@@ -4,7 +4,7 @@ CFLAGS = -std=c99 -Wall -g -fPIC `pkg-config --cflags allegro-5.0 allegro_image-
 LIBS = `pkg-config --libs allegro-5.0 allegro_image-5.0 allegro_font-5.0 allegro_ttf-5.0 \
 	allegro_primitives-5.0 allegro_acodec-5.0 allegro_audio-5.0 guile-2.0` -lpthread -lm
 SOURCES = src/main.c src/math.c src/color.c src/rect.c src/font.c src/transform.c \
-	src/image.c src/sprite_sheet.c \
+	src/vector.c src/image.c src/sprite_sheet.c \
 	src/sprite.c src/audio.c src/particle_system.c src/bullet_system.c \
 	src/game.c src/draw.c
 OBJECTS = $(SOURCES:.c=.o)
