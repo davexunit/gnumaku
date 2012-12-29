@@ -14,18 +14,3 @@ float
 rand1 (void) {
     return (float) rand () / (float) RAND_MAX;
 }
-
-void
-normalize (float *x, float *y) {
-    float vx = *x;
-    float vy = *y;
-    float length = mag (vx, vy);
-
-    *x = vx / length;
-    *y = vy / length;
-}
-
-float
-mag (float x, float y) {
-    return sqrt (x * x + y * y);
-}
