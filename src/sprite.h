@@ -4,16 +4,15 @@
 #include <allegro5/allegro.h>
 
 #include "image.h"
+#include "vector.h"
 
-typedef struct
-{
+typedef struct {
     SCM image;
     ALLEGRO_COLOR color;
-    float x, y;
-    float center_x, center_y;
-    float scale_x, scale_y;
+    Vector2 position;
+    Vector2 scale;
+    Vector2 anchor;
     float rotation;
-    bool visible;
 } Sprite;
 
 void init_sprite_type (void);
