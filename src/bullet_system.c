@@ -417,7 +417,7 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
 }
 
 static void
-init_bullet (Bullet *bullet, BulletSystem *bullet_system, float x, float y,
+init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
              float speed, float direction, float acceleration, float angular_velocity,
              int life, SCM script, BulletType *type) {
     SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
@@ -428,8 +428,7 @@ init_bullet (Bullet *bullet, BulletSystem *bullet_system, float x, float y,
     bullet->life = life;
     bullet->script_time = 0;
     bullet->life_count = 0;
-    bullet->pos.x = x;
-    bullet->pos.y = y;
+    bullet->pos = pos;
     bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
     bullet->color = al_map_rgba_f (1, 1, 1, 1);
     bullet->blend_mode = type->blend_mode;
@@ -485,12 +484,11 @@ print_bullet_ref (SCM bullet_ref_smob, SCM port, scm_print_state *pstate) {
 }
 
 static SCM
-emit_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_speed,
+emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
              SCM s_direction, SCM s_acceleration, SCM s_angular_velocity,
              SCM s_life, SCM s_type) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
+    Vector2 pos = scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
     float direction = deg2rad (scm_to_double (s_direction));
     float acceleration = scm_to_double (s_acceleration);
@@ -507,18 +505,17 @@ emit_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_speed,
     /* Get new bullet from pool. */
     index = bullet_system->bullet_count++;
     bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, x, y, speed, direction, acceleration,
+    init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
                  angular_velocity, life, SCM_BOOL_F, type);
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-emit_simple_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_speed,
+emit_simple_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
                     SCM s_direction, SCM s_type) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
+    Vector2 pos = scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
     float direction = deg2rad (scm_to_double (s_direction));
     float acceleration = 0;
@@ -535,17 +532,16 @@ emit_simple_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_speed,
     /* Get new bullet from pool. */
     index = bullet_system->bullet_count++;
     bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, x, y, speed, direction, acceleration,
+    init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
                  angular_velocity, life, SCM_BOOL_F, type);
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-emit_script_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_type, SCM script) {
+emit_script_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_type, SCM script) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
+    Vector2 pos = scm_to_vector2 (s_pos);
     BulletType *type = check_bullet_type (s_type);
     Bullet *bullet;
     int index;
@@ -557,7 +553,7 @@ emit_script_bullet (SCM bullet_system_smob, SCM s_x, SCM s_y, SCM s_type, SCM sc
     /* Get new bullet from pool. */
     index = bullet_system->bullet_count++;
     bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, x, y, .1, 0, 0, 0, 0, script, type);
+    init_bullet (bullet, bullet_system, pos, .1, 0, 0, 0, 0, script, type);
 
     return SCM_UNSPECIFIED;
 }
@@ -600,19 +596,11 @@ kill_bullet (SCM bullet_ref_smob) {
 }
 
 static SCM
-bullet_x (SCM bullet_ref_smob) {
+bullet_position (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (bullet->pos.x);
-}
-
-static SCM
-bullet_y (SCM bullet_ref_smob) {
-    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
-    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-
-    return scm_from_double (bullet->pos.y);
+    return scm_from_vector2 (bullet->pos);
 }
 
 static SCM
@@ -663,36 +651,12 @@ bullet_life (SCM bullet_ref_smob) {
 }
 
 static SCM
-set_bullet_x (SCM bullet_ref_smob, SCM s_x) {
+set_bullet_position (SCM bullet_ref_smob, SCM s_pos) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float x = scm_to_double (s_x);
+    Vector2 pos = scm_to_vector2 (s_pos);
 
-    bullet->pos.x = x;
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_bullet_y (SCM bullet_ref_smob, SCM s_y) {
-    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
-    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float y = scm_to_double (s_y);
-
-    bullet->pos.y = y;
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_bullet_position (SCM bullet_ref_smob, SCM s_x, SCM s_y) {
-    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
-    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
-
-    bullet->pos.x = x;
-    bullet->pos.y = y;
+    bullet->pos = pos;
 
     return SCM_UNSPECIFIED;
 }
@@ -779,9 +743,9 @@ init_bullet_system_type (void) {
                         bullet_system_collide_rect);
     scm_c_define_gsubr ("bullet-system-bounds", 1, 0, 0, bullet_system_bounds);
     scm_c_define_gsubr ("set-bullet-system-bounds", 5, 0, 0, set_bullet_system_bounds);
-    scm_c_define_gsubr ("%emit-bullet", 9, 0, 0, emit_bullet);
-    scm_c_define_gsubr ("%emit-simple-bullet", 6, 0, 0, emit_simple_bullet);
-    scm_c_define_gsubr ("%emit-script-bullet", 5, 0, 0, emit_script_bullet);
+    scm_c_define_gsubr ("%emit-bullet", 8, 0, 0, emit_bullet);
+    scm_c_define_gsubr ("%emit-simple-bullet", 5, 0, 0, emit_simple_bullet);
+    scm_c_define_gsubr ("%emit-script-bullet", 4, 0, 0, emit_script_bullet);
 
     /* BulletRef bindings */
     bullet_ref_tag = scm_make_smob_type ("<bullet-ref>", sizeof (BulletRef));
@@ -791,17 +755,14 @@ init_bullet_system_type (void) {
     
     scm_c_define_gsubr ("set-bullet-movement", 5, 0, 0, set_bullet_movement);
     scm_c_define_gsubr ("kill-bullet", 1, 0, 0, kill_bullet);
-    scm_c_define_gsubr ("bullet-x", 1, 0, 0, bullet_x);
-    scm_c_define_gsubr ("bullet-y", 1, 0, 0, bullet_y);
+    scm_c_define_gsubr ("bullet-position", 1, 0, 0, bullet_position);
     scm_c_define_gsubr ("bullet-speed", 1, 0, 0, bullet_speed);
     scm_c_define_gsubr ("bullet-direction", 1, 0, 0, bullet_direction);
     scm_c_define_gsubr ("bullet-acceleration", 1, 0, 0, bullet_acceleration);
     scm_c_define_gsubr ("bullet-angular-velocity", 1, 0, 0, bullet_angular_velocity);
     scm_c_define_gsubr ("bullet-life", 1, 0, 0, bullet_life);
     scm_c_define_gsubr ("set-bullet-script", 3, 0, 0, set_bullet_script);
-    scm_c_define_gsubr ("set-bullet-x", 2, 0, 0, set_bullet_x);
-    scm_c_define_gsubr ("set-bullet-y", 2, 0, 0, set_bullet_y);
-    scm_c_define_gsubr ("set-bullet-position", 3, 0, 0, set_bullet_position);
+    scm_c_define_gsubr ("set-bullet-position", 2, 0, 0, set_bullet_position);
     scm_c_define_gsubr ("set-bullet-speed", 2, 0, 0, set_bullet_speed);
     scm_c_define_gsubr ("set-bullet-direction", 2, 0, 0, set_bullet_direction);
     scm_c_define_gsubr ("set-bullet-acceleration", 2, 0, 0, set_bullet_acceleration);
@@ -834,16 +795,13 @@ init_bullet_system_type (void) {
     scm_c_export ("%emit-script-bullet", NULL);
     scm_c_export ("set-bullet-movement", NULL);
     scm_c_export ("kill-bullet", NULL);
-    scm_c_export ("bullet-x", NULL);
-    scm_c_export ("bullet-y", NULL);
+    scm_c_export ("bullet-position", NULL);
     scm_c_export ("bullet-speed", NULL);
     scm_c_export ("bullet-direction", NULL);
     scm_c_export ("bullet-acceleration", NULL);
     scm_c_export ("bullet-angular-velocity", NULL);
     scm_c_export ("bullet-life", NULL);
     scm_c_export ("set-bullet-script", NULL);
-    scm_c_export ("set-bullet-x", NULL);
-    scm_c_export ("set-bullet-y", NULL);
     scm_c_export ("set-bullet-position", NULL);
     scm_c_export ("set-bullet-speed", NULL);
     scm_c_export ("set-bullet-direction", NULL);
