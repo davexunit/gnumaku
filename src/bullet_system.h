@@ -11,10 +11,6 @@
 #include "sprite_sheet.h"
 #include "rect.h"
 
-/* Scheme symbols for blend modes */
-#define SYM_BLEND_ALPHA scm_from_locale_symbol ("alpha")
-#define SYM_BLEND_ADD   scm_from_locale_symbol ("add")
-
 typedef enum {
     BLEND_ALPHA,
     BLEND_ADD,

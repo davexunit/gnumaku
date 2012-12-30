@@ -3,12 +3,14 @@
 static scm_t_bits bullet_system_tag;
 static scm_t_bits bullet_ref_tag;
 static scm_t_bits bullet_type_tag;
+static SCM sym_blend_alpha;
+static SCM sym_blend_add;
 
 static BlendMode
 scm_to_blend_mode (SCM blend_mode) {
-    if (scm_eq_p (blend_mode, SYM_BLEND_ALPHA)) {
+    if (scm_is_true (scm_eq_p (blend_mode, sym_blend_alpha))) {
         return BLEND_ALPHA;
-    } else if (scm_eq_p (blend_mode, SYM_BLEND_ADD)) {
+    } else if (scm_is_true (scm_eq_p (blend_mode, sym_blend_add))) {
         return BLEND_ADD;
     }
 
@@ -299,14 +301,23 @@ update_bullet_system (SCM bullet_system_smob) {
 }
 
 static void
-set_bullet_blend_mode (Bullet *bullet) {
-    switch (bullet->blend_mode) {
-    case BLEND_ALPHA:
-        al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
-        break;
-    case BLEND_ADD:
-        al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
-        break;
+set_bullet_blend_mode (Bullet *bullet, BlendMode prev_blend_mode) {
+    if (bullet->blend_mode != prev_blend_mode) {
+        /* It is not possible to hold bitmap drawing and
+         * change the blending mode.
+         */
+        al_hold_bitmap_drawing (false);
+        
+        switch (bullet->blend_mode) {
+        case BLEND_ALPHA:
+            al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
+            break;
+        case BLEND_ADD:
+            al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
+            break;
+        }
+
+        al_hold_bitmap_drawing (true);
     }
 }
 
@@ -320,10 +331,10 @@ bullet_sprite_angle (Bullet *bullet) {
 }
 
 static void
-draw_bullet (Bullet *bullet, int cx, int cy) {
+draw_bullet (Bullet *bullet, int cx, int cy, BlendMode prev_blend_mode) {
     float angle = bullet_sprite_angle (bullet);
 
-    set_bullet_blend_mode (bullet);
+    set_bullet_blend_mode (bullet, prev_blend_mode);
     al_draw_rotated_bitmap (bullet->image, cx, cy,
                              bullet->pos.x, bullet->pos.y, angle, 0);
 }
@@ -332,7 +343,7 @@ static SCM
 draw_bullet_system (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
-
+    BlendMode prev_blend_mode = BLEND_ALPHA;
     ALLEGRO_STATE state;
 
     al_store_state (&state, ALLEGRO_STATE_BLENDER);
@@ -341,10 +352,10 @@ draw_bullet_system (SCM bullet_system_smob) {
     for (int i = 0; i < bullet_system->bullet_count; ++i) {
         Bullet *bullet = bullet_system->bullets + i;
 
-        if (bullet->active && bullet->image) {
-            draw_bullet (bullet, sprite_sheet->tile_width / 2,
-                         sprite_sheet->tile_height / 2);
-        }
+        draw_bullet (bullet, sprite_sheet->tile_width / 2,
+                     sprite_sheet->tile_height / 2,
+                     prev_blend_mode);
+        prev_blend_mode = bullet->blend_mode;
     }
 
     al_hold_bitmap_drawing (false);
@@ -398,7 +409,7 @@ bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
         Bullet *bullet = bullet_from_index (bullet_system, i);
 
         if (bullet->active && bullet_collision_check (bullet, rect, callback)) {
-            bullet->active = false;
+            bullet->kill = true;
         }
     }
 
@@ -742,6 +753,9 @@ set_bullet_life (SCM bullet_ref_smob, SCM s_life) {
 
 void
 init_bullet_system_type (void) {
+    sym_blend_alpha = scm_from_latin1_symbol ("alpha");
+    sym_blend_add = scm_from_latin1_symbol ("add");
+
     /* BulletSystem bindings */
     bullet_system_tag = scm_make_smob_type ("<bullet-system>", sizeof (BulletSystem));
     scm_set_smob_mark (bullet_system_tag, mark_bullet_system);
