@@ -154,7 +154,7 @@ print_vector2 (SCM vector2_smob, SCM port, scm_print_state *pstate)
     scm_puts (" y: ", port);
     scm_display (scm_from_double (vector2->y), port);
     scm_puts (" >", port);
-    
+
     /* non-zero means success */
     return 1;
 }
@@ -173,7 +173,7 @@ static SCM
 s_vector2_x (SCM s_v) {
     Vector2 v = scm_to_vector2 (s_v);
     SCM x = scm_from_double (v.x);
-    
+
     scm_remember_upto_here_1 (s_v);
 
     return x;
@@ -183,20 +183,20 @@ static SCM
 s_vector2_y (SCM s_v) {
     Vector2 v = scm_to_vector2 (s_v);
     SCM y = scm_from_double (v.y);
-    
+
     scm_remember_upto_here_1 (s_v);
 
     return y;
 }
 
 static SCM
-s_vector2_equalp (SCM s_v1, SCM s_v2) {
+vector2_equal_p (SCM s_v1, SCM s_v2) {
     Vector2 v1 = scm_to_vector2 (s_v1);
     Vector2 v2 = scm_to_vector2 (s_v2);
-    
+
     scm_remember_upto_here_1 (s_v1);
     scm_remember_upto_here_1 (s_v2);
-    
+
     return scm_from_bool (vector2_equal (v1, v2));
 }
 
@@ -204,17 +204,17 @@ static SCM
 s_vector2_add (SCM s_vectors) {
     Vector2 sum = vector2_zero ();
 
-    while (!scm_to_bool (scm_null_p (s_vectors))) {
+    while (scm_is_false (scm_null_p (s_vectors))) {
         SCM s_v = scm_car (s_vectors);
         Vector2 v = scm_to_vector2 (s_v);
 
         sum = vector2_add (sum, v);
-        
+
         s_vectors = scm_cdr (s_vectors);
     }
-    
+
     scm_remember_upto_here_1 (s_vectors);
-    
+
     return scm_from_vector2 (sum);
 }
 
@@ -222,17 +222,17 @@ static SCM
 s_vector2_sub (SCM s_v, SCM s_vectors) {
     Vector2 difference = scm_to_vector2 (s_v);
 
-    while (!scm_to_bool (scm_null_p (s_vectors))) {
+    while (scm_is_false (scm_null_p (s_vectors))) {
         SCM s_v = scm_car (s_vectors);
         Vector2 v = scm_to_vector2 (s_v);
 
         difference = vector2_sub (difference, v);
-        
+
         s_vectors = scm_cdr (s_vectors);
     }
-    
+
     scm_remember_upto_here_1 (s_vectors);
-    
+
     return scm_from_vector2 (difference);
 }
 
@@ -240,9 +240,9 @@ static SCM
 s_vector2_scale (SCM s_v, SCM s_scalar) {
     Vector2 v = scm_to_vector2 (s_v);
     float scalar = scm_to_double (s_scalar);
-    
+
     scm_remember_upto_here_1 (s_v);
-    
+
     return scm_from_vector2 (vector2_scale (v, scalar));
 }
 
@@ -277,10 +277,10 @@ static SCM
 s_vector2_dot (SCM s_v1, SCM s_v2) {
     Vector2 v1 = scm_to_vector2 (s_v1);
     Vector2 v2 = scm_to_vector2 (s_v2);
-    
+
     scm_remember_upto_here_1 (s_v1);
     scm_remember_upto_here_1 (s_v2);
-    
+
     return scm_from_double (vector2_dot (v1, v2));
 }
 
@@ -288,17 +288,17 @@ static SCM
 s_vector2_cross (SCM s_v1, SCM s_v2) {
     Vector2 v1 = scm_to_vector2 (s_v1);
     Vector2 v2 = scm_to_vector2 (s_v2);
-    
+
     scm_remember_upto_here_1 (s_v1);
     scm_remember_upto_here_1 (s_v2);
-    
+
     return scm_from_double (vector2_cross (v1, v2));;
 }
 
 static SCM
 s_vector2_right_normal (SCM s_v) {
     Vector2 v = scm_to_vector2 (s_v);
-    
+
     scm_remember_upto_here_1 (s_v);
 
     return scm_from_vector2 (vector2_right_normal (v));
@@ -307,7 +307,7 @@ s_vector2_right_normal (SCM s_v) {
 static SCM
 s_vector2_left_normal (SCM s_v) {
     Vector2 v = scm_to_vector2 (s_v);
-    
+
     scm_remember_upto_here_1 (s_v);
 
     return scm_from_vector2 (vector2_left_normal (v));
@@ -319,8 +319,8 @@ init_vector2_type (void) {
     scm_set_smob_mark (vector2_tag, 0);
     scm_set_smob_free (vector2_tag, free_vector2);
     scm_set_smob_print (vector2_tag, print_vector2);
+    scm_set_smob_equalp (vector2_tag, vector2_equal_p);
 
-    scm_c_define_gsubr ("vector2-eq?", 2, 0, 0, s_vector2_equalp);
     scm_c_define_gsubr ("make-vector2", 2, 0, 0, make_vector2);
     scm_c_define_gsubr ("vector2-from-polar", 2, 0, 0, s_vector2_from_polar);
     scm_c_define_gsubr ("vector2-x", 1, 0, 0, s_vector2_x);
@@ -340,7 +340,6 @@ init_vector2_type (void) {
     scm_c_export ("vector2-from-polar", NULL);
     scm_c_export ("vector2-x", NULL);
     scm_c_export ("vector2-y", NULL);
-    scm_c_export ("vector2-eq?", NULL);
     scm_c_export ("vector2-add", NULL);
     scm_c_export ("vector2-sub", NULL);
     scm_c_export ("vector2-scale", NULL);
