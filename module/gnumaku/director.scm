@@ -55,7 +55,8 @@
   (game-run director-game))
 
 (define (director-draw-fps)
-  (font-draw-text director-font 730 575 '(1 1 1 0.7) (string-append "FPS: " (number->string (fps-last-frames director-fps)))))
+  (font-draw-text director-font 730 575 (make-color-f 1 1 1 0.7)
+                  (string-append "FPS: " (number->string (fps-last-frames director-fps)))))
 
 (define (director-set-draw-target image)
   (set-target-image image))
