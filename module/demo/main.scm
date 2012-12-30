@@ -17,7 +17,7 @@
 
 (define (init-bullet-types)
   (register-bullet-type 'medium-blue
-                        (make-bullet-type 0 (make-rect -3 -3 6 6) 'alpha #f))
+                        (make-bullet-type 0 (make-rect -4 -4 8 8) 'add #f))
 
   (register-bullet-type 'small-diamond
                         (make-bullet-type 1 (make-rect -2 -2 4 4) 'alpha #t))
@@ -27,9 +27,12 @@
 
   (register-bullet-type 'sword
                         (make-bullet-type 3 (make-rect -4 -4 8 8) 'alpha #t))
+  
+  (register-bullet-type 'bright
+                        (make-bullet-type 4 (make-rect -8 -8 16 16) 'add #f))
 
   (register-bullet-type 'small-green
-                        (make-bullet-type 3 (make-rect -2 -2 4 4) 'alpha #f)))
+                        (make-bullet-type 5 (make-rect -2 -2 4 4) 'alpha #f)))
 
 (define (init-assets-manager)
   (register-asset-manager "images" load-image)

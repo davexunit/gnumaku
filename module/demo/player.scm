@@ -138,7 +138,7 @@
         (pos (position player))
         (x (vector2-x pos))
         (y (vector2-y pos))
-        (bounds (rect-move (bounds player) x y))
+        (bounds (rect-move (bounds player) pos))
         (left (rect-x bounds))
         (top (rect-y bounds))
         (right (+ (rect-x bounds) (rect-width bounds)))

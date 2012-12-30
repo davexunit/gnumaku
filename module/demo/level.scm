@@ -69,20 +69,18 @@
 (define-method (check-player-collision (level <level>))
   (let ((player (player level)))
         (let* ((pos (position player))
-               (hitbox (rect-move (hitbox player) (vector2-x pos) (vector2-y pos)))
-              (graze-hitbox (rect-move (graze-hitbox player) (vector2-x pos) (vector2-y pos))))
+               (hitbox (rect-move (hitbox player) pos))
+               (graze-hitbox (rect-move (graze-hitbox player) pos)))
           (bullet-system-collide-rect (enemy-bullet-system level) graze-hitbox
                                       (lambda () (on-player-graze level)))
           (bullet-system-collide-rect (enemy-bullet-system level) hitbox
                                       (lambda () (on-player-hit level))))))
 
 (define-method (check-enemy-collision (level <level>) enemy)
-  (let ((hitbox (hitbox enemy))
-        (pos (position enemy)))
-    (set-rect-position! hitbox
-			(- (vector2-x pos) (/ (rect-width hitbox) 2))
-			(- (vector2-y pos) (/ (rect-height hitbox) 2)))
-    (bullet-system-collide-rect (player-bullet-system level) hitbox (lambda () (on-enemy-hit level enemy)))))
+  (let* ((pos (position enemy))
+        (hitbox (rect-move (hitbox enemy) pos)))
+    (bullet-system-collide-rect (player-bullet-system level) hitbox
+                                (lambda () (on-enemy-hit level enemy)))))
 
 (define-method (check-enemies-collision (level <level>))
   (for-each (lambda (enemy) (check-enemy-collision level enemy)) (enemies level)))
@@ -120,7 +118,7 @@
   (draw-bullet-system (player-bullet-system level))
   (draw (player level))
   (draw-bullet-system (enemy-bullet-system level))
-  ;(draw-bullet-system-hitboxes (enemy-bullet-system level))
+  (draw-bullet-system-hitboxes (enemy-bullet-system level))
   (draw-enemies level)
   (director-reset-draw-target)
   (draw-image (buffer level) 0 0))

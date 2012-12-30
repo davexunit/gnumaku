@@ -49,12 +49,15 @@
       (let ((system (bullet-system actor))
             (player (player (level actor)))
             (direction (+ 90 (* 30 (sin-deg angle)))))
-        (emit-script-bullet system (position actor) 'large-orange
+        (emit-script-bullet system (position actor) 'bright
                             (lambda (bullet)
                               (set-bullet-movement bullet 4 direction 0 0)
-                              (homing-bullet bullet player 3 1))))
-      ;;(explode bullet system 45 6 4 30))))
-      ;; (sine-wave bullet))))
+                              (set-bullet-color bullet
+                                                (make-color-f (random:exp) (random:exp)
+                                                              (random:exp) 1))
+                              ;;(homing-bullet bullet player 3 1))))
+                              (explode bullet system 45 6 4 30))))
+                              ;; (sine-wave bullet))))
       (wait actor 6)
       (spiral (+ angle step)))
 
@@ -62,7 +65,10 @@
 
 (define-coroutine (spiral2 actor)
   (let loop ((angle 0))
-    (emit-bullet (bullet-system actor) (position actor) 2 (random (+ angle 20))
-                 0 0 0 'medium-blue)
+    (let ((scale (* 2 (random:exp))))
+      (emit-bullet (bullet-system actor) (position actor) 2
+                   (random (+ angle 20)) 'medium-blue
+                   #:color (make-color-f (random:exp) (random:exp) (random:exp) 1)
+                   #:scale (make-vector2 scale scale)))
     (wait actor 2)
     (loop (+ angle 20))))

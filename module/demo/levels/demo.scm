@@ -14,9 +14,7 @@
 (define bullet-sprites #f)
 
 (define (make-demo-level player width height)
-  ;; only load the sprites once
-  (set! bullet-sprites (or bullet-sprites (load-asset "bullets.png" 32 32 0 0)))
-
+  (set! bullet-sprites (load-asset "bullets.png" 32 32 0 0))
   (let ((level (make <demo-level> #:player player #:width width #:height height
                     #:background (load-asset "space.png")
                     #:player-bullet-system (make-bullet-system 1000 bullet-sprites)
