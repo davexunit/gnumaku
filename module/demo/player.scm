@@ -35,8 +35,7 @@
 
 (define (make-particles)
   (let ((particles (make-particle-system 200 (load-asset "particle.png" 256 256 0 0))))
-    (set-particle-x particles 0)
-    (set-particle-y particles 14)
+    (set-particle-position particles (make-vector2 0 14))
     (set-particle-amount particles 8)
     (set-particle-rate particles 3)
     (set-particle-life particles 5)
