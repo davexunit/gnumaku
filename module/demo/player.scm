@@ -30,7 +30,8 @@
   (make-rect -8 -8 16 16))
 
 (define (make-player-sprite)
-  (make-sprite (sprite-sheet-tile (load-asset "player.png" 48 48 0 0) 0)))
+  (let ((sheet (load-asset "player.png" 48 48 0 0)))
+    (make-sprite (sprite-sheet-tile sheet 0))))
 
 (define (make-particles)
   (let ((particles (make-particle-system 200 (load-asset "particle.png" 256 256 0 0))))
@@ -52,7 +53,7 @@
     particles))
 
 (define-class <player> (<actor>)
-  (sprite #:accessor sprite #:init-keyword #:sprite #:init-value #f)
+  (sprite #:accessor sprite #:init-keyword #:sprite #:init-thunk make-player-sprite)
   (speed #:accessor speed #:init-keyword #:speed #:init-value 5)
   (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
   (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f)
@@ -67,10 +68,7 @@
   (particles #:accessor particles #:init-thunk make-particles))
 
 (define (make-player)
-  (let ((player (make <player> #:sprite (make-player-sprite)
-                      #:hitbox (make-hitbox))))
-    (center-sprite-image (sprite player))
-    player))
+  (make <player> #:hitbox (make-hitbox)))
 
 (define-method (set-shooting (player <player>) new-shooting)
   "Sets player shooting flag. Calls shot procedure when flag is set to #t."

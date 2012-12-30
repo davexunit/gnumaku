@@ -13,17 +13,6 @@
 (define (clamp n min-n max-n)
   (max min-n (min max-n n)))
 
-;; (define-coroutine (homing-bullet bullet target speed max-turn)
-;;   (let* ((direction (bullet-direction bullet))
-;;          (target-angle (rad2deg (atan (- (y target) (bullet-y bullet))
-;;                                       (- (x target) (bullet-x bullet)))))
-;;          (new-direction (clamp target-angle
-;;                                (- direction max-turn)
-;;                                (+ direction max-turn))))
-;;     (set-bullet-movement bullet speed new-direction 0 0))
-;;   (bullet-wait bullet 1)
-;;   (homing-bullet bullet target speed max-turn))
-
 (define-coroutine (homing-bullet bullet target speed turn)
   (let* ((pos (bullet-position bullet))
          (target-pos (vector2-sub (position target) pos))
