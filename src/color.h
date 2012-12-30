@@ -8,6 +8,7 @@ typedef struct {
     ALLEGRO_COLOR color;
 } Color;
 
+ALLEGRO_COLOR color_mult_alpha (ALLEGRO_COLOR color);
 SCM scm_from_color (ALLEGRO_COLOR color);
 ALLEGRO_COLOR scm_to_color (SCM s_color);
 void init_color_type (void);

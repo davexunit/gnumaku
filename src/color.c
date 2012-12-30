@@ -1,5 +1,16 @@
 #include "color.h"
 
+ALLEGRO_COLOR color_mult_alpha (ALLEGRO_COLOR color) {
+    ALLEGRO_COLOR new_color;
+    
+    new_color.r = color.r * color.a;
+    new_color.g = color.g * color.a;
+    new_color.b = color.b * color.a;
+    new_color.a = color.a;
+
+    return new_color;
+}
+
 static scm_t_bits color_tag;
 
 SCM
