@@ -25,9 +25,12 @@ make_sprite (SCM image_smob, SCM rest) {
     Sprite *sprite;
     Image *image = check_image (image_smob);
     Vector2 pos = scm_to_vector2 (scm_get_keyword (keyword_pos, rest, default_pos));
-    Vector2 scale = scm_to_vector2 (scm_get_keyword (keyword_scale, rest, default_scale));
-    float rotation = scm_to_double (scm_get_keyword (keyword_rotation, rest, default_rotation));
-    ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, rest, default_color));
+    Vector2 scale = scm_to_vector2 (scm_get_keyword (keyword_scale, rest,
+                                                     default_scale));
+    float rotation = scm_to_double (scm_get_keyword (keyword_rotation, rest,
+                                                     default_rotation));
+    ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, rest,
+                                                         default_color));
 
     sprite = (Sprite *) scm_gc_malloc (sizeof (Sprite), "sprite");
     sprite->image = SCM_BOOL_F;
