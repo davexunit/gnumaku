@@ -19,10 +19,17 @@
   (abort-to-prompt 'coroutine-prompt
                    (lambda (resume) (set-bullet-script bullet delay resume))))
 
-(define (emit-bullet system pos speed direction acceleration angular-velocity life type)
+;; (define (emit-bullet system pos speed direction acceleration angular-velocity
+;;                      life color scale type)
+;;   "Emits a non-scripted bullet."
+;;   (let ((type (get-bullet-type type)))
+;;     (%emit-bullet system pos speed direction acceleration angular-velocity
+;;                   life color scale type)))
+
+(define* (emit-bullet system pos speed direction type . keyword-args)
   "Emits a non-scripted bullet."
   (let ((type (get-bullet-type type)))
-    (%emit-bullet system pos speed direction acceleration angular-velocity life type)))
+    (apply %emit-bullet system pos speed direction type keyword-args)))
 
 (define (emit-simple-bullet system pos speed direction type)
   "Emits a simple, non-scripted bullet with unlimited lifetime and no acceleration or angular velocity,"
