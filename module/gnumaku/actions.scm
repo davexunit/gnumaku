@@ -6,7 +6,7 @@
   #:use-module (gnumaku scene-graph)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku path)
-  #:export (move-to move-by move-bezier move-bezier-path))
+  #:export (move-to move-by move-bezier move-bezier-path sprite-blink))
 
 (define-method (move-to (node <scene-node>) dest duration)
   "Moves linearly from current position to destination."
@@ -35,3 +35,12 @@
 (define-method (move-bezier-path (node <scene-node>) beziers durations)
   "Moves along a series of connected bezier curves."
   (for-each (lambda (b d) (move-bezier node b d)) beziers durations))
+
+(define-method (sprite-blink (node <scene-node>) sprite interval times)
+  (define (blink i visible)
+    (when (< i times)
+      (set-sprite-opacity sprite (if visible 1 0))
+      (wait node interval)
+      (blink (1+ i) (not visible))))
+  (blink 0 #f)
+  (set-sprite-opacity sprite 1))
