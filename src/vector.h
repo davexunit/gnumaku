@@ -23,5 +23,7 @@ Vector2 vector2_from_polar (float radius, float angle);
 Vector2 vector2_right_normal (Vector2 v);
 Vector2 vector2_left_normal (Vector2 v);
 void init_vector2_type (void);
+Vector2 scm_to_vector2 (SCM s_v);
+SCM scm_from_vector2 (Vector2 v);
 
 #endif
