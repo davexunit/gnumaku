@@ -203,7 +203,8 @@ sprite_draw (SCM sprite_smob) {
     Sprite *sprite = check_sprite (sprite_smob);
     Image *image = check_image (sprite->image);
 
-    al_draw_tinted_scaled_rotated_bitmap (image->bitmap, sprite->color,
+    al_draw_tinted_scaled_rotated_bitmap (image->bitmap,
+                                          color_mult_alpha (sprite->color),
                                           sprite->anchor.x, sprite->anchor.y,
                                           sprite->position.x, sprite->position.y,
                                           sprite->scale.x, sprite->scale.y,
@@ -290,11 +291,16 @@ init_sprite_type (void) {
     scm_c_export ("sprite-position", NULL);
     scm_c_export ("sprite-scale", NULL);
     scm_c_export ("sprite-rotation", NULL);
+    scm_c_export ("sprite-color", NULL);
+    scm_c_export ("sprite-opacity", NULL);
+    scm_c_export ("sprite-anchor", NULL);
     scm_c_export ("set-sprite-image", NULL);
     scm_c_export ("set-sprite-position",NULL); 
     scm_c_export ("set-sprite-scale", NULL);
     scm_c_export ("set-sprite-rotation", NULL);
     scm_c_export ("set-sprite-color", NULL);
+    scm_c_export ("set-sprite-opacity", NULL);
+    scm_c_export ("set-sprite-anchor", NULL);
     scm_c_export ("set-sprite-sheet", NULL);
     scm_c_export ("draw-sprite", NULL);
 }
