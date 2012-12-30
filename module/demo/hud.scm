@@ -23,7 +23,7 @@
 
 (define (draw-lives hud x y)
   (font-draw-text (hud-font hud)
-                  x y '(1 1 1 1) "Lives")
+                  x y (make-color-f 1 1 1 1) "Lives")
   (let ((image (hud-life-image hud)))
     (let draw-life-icon ((i 0)
                          (x x)
@@ -34,9 +34,10 @@
 
 (define (draw-graze hud x y)
     (font-draw-text (hud-font hud)
-                  x y '(1 1 1 1) "Graze")
+                  x y (make-color-f 1 1 1 1) "Graze")
     (font-draw-text (hud-font hud)
-                  x (+ y 16) '(1 1 1 1) (number->string (graze-count (hud-player hud)))))
+                  x (+ y 16) (make-color-f 1 1 1 1)
+                  (number->string (graze-count (hud-player hud)))))
 
 (define (draw-hud hud)
   (draw-lives hud 520 20)
