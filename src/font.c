@@ -18,16 +18,9 @@ load_font (SCM s_filename, SCM s_size)
     const char *filename = scm_to_locale_string (s_filename);
     int size = scm_to_int (s_size);
 
-    /* Step 1: Allocate the memory block.
-     */
     font = (Font *) scm_gc_malloc (sizeof (Font), "font");
-
-    /* Step 2: Initialize it with straight code.
-     */
     font->font = NULL;
 
-    /* Step 3: Create the smob.
-     */
     SCM_NEWSMOB (smob, font_tag, font);
 
     font->font = al_load_ttf_font (filename, size, 0);
@@ -45,11 +38,10 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     Font *font = check_font (font_smob);
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
-    const char *text = scm_to_locale_string (s_text);
+    ALLEGRO_COLOR color = color_mult_alpha (scm_to_color (s_color));
+    const char *text = scm_to_latin1_string (s_text);
     
-    if (font->font) {
-        al_draw_text (font->font, scm_to_color (s_color), x, y, 0, text);
-    }
+    al_draw_text (font->font, color, x, y, 0, text);
 
     return SCM_UNSPECIFIED;
 }
