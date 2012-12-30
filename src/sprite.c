@@ -10,13 +10,15 @@ check_sprite (SCM sprite_smob) {
 }
 
 static SCM
-make_sprite (SCM image_smob, SCM s_pos, SCM s_scale, SCM s_rotation, SCM s_anchor) {
+make_sprite (SCM image_smob, SCM s_pos, SCM s_scale, SCM s_rotation,
+             SCM s_color, SCM s_anchor) {
     SCM smob;
     Sprite *sprite;
     Image *image = check_image (image_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
     Vector2 scale = scm_to_vector2 (s_scale);
     float rotation = scm_to_double (s_rotation);
+    ALLEGRO_COLOR color = scm_to_color (s_color);
 
     /* Step 1: Allocate the memory block.
      */
@@ -25,11 +27,10 @@ make_sprite (SCM image_smob, SCM s_pos, SCM s_scale, SCM s_rotation, SCM s_ancho
     /* Step 2: Initialize it with straight code.
      */
     sprite->image = SCM_BOOL_F;
-    sprite->color = al_map_rgba_f (1, 1, 1, 1);
+    sprite->color = color;
     sprite->position = pos;
     sprite->scale = scale;
     sprite->rotation = rotation;
-    sprite->visible = true;
 
     /* Step 3: Create the smob.
      */
@@ -121,14 +122,11 @@ set_sprite_rotation (SCM sprite_smob, SCM s_rotation) {
 }
 
 static SCM
-set_sprite_color (SCM sprite_smob, SCM s_r, SCM s_g, SCM s_b, SCM s_a) {
+set_sprite_color (SCM sprite_smob, SCM s_color) {
     Sprite *sprite = check_sprite (sprite_smob);
-    float r = scm_to_double (s_r);
-    float g = scm_to_double (s_g);
-    float b = scm_to_double (s_b);
-    float a = scm_to_double (s_a);
+    ALLEGRO_COLOR color = scm_to_color (s_color);
 
-    sprite->color = al_map_rgba_f (r, g, b, a);
+    sprite->color = color;
 
     scm_remember_upto_here_1 (sprite_smob);
 
@@ -205,7 +203,7 @@ init_sprite_type (void) {
     scm_set_smob_free (sprite_tag, free_sprite);
     scm_set_smob_print (sprite_tag, print_sprite);
 
-    scm_c_define_gsubr ("%make-sprite", 5, 0, 0, make_sprite);
+    scm_c_define_gsubr ("%make-sprite", 6, 0, 0, make_sprite);
     scm_c_define_gsubr ("sprite-image", 1, 0, 0, sprite_image);
     scm_c_define_gsubr ("sprite-position", 1, 0, 0, sprite_position);
     scm_c_define_gsubr ("sprite-scale", 1, 0, 0, sprite_scale);
@@ -214,7 +212,7 @@ init_sprite_type (void) {
     scm_c_define_gsubr ("set-sprite-position", 2, 0, 0, set_sprite_position);
     scm_c_define_gsubr ("set-sprite-scale", 2, 0, 0, set_sprite_scale);
     scm_c_define_gsubr ("set-sprite-rotation", 2, 0, 0, set_sprite_rotation);
-    scm_c_define_gsubr ("set-sprite-color", 5, 0, 0, set_sprite_color);
+    scm_c_define_gsubr ("set-sprite-color", 2, 0, 0, set_sprite_color);
     scm_c_define_gsubr ("draw-sprite", 1, 0, 0, sprite_draw);
 
     scm_c_export ("%make-sprite", NULL);

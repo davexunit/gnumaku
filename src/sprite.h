@@ -3,6 +3,7 @@
 
 #include <allegro5/allegro.h>
 
+#include "color.h"
 #include "image.h"
 #include "vector.h"
 
