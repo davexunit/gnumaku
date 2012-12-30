@@ -67,13 +67,30 @@ check_bullet_system (SCM bullet_system_smob) {
 
 static SCM make_bullet_ref (BulletSystem *bullet_system, int id);
 
+static Bullet*
+bullet_from_index (BulletSystem *bullet_system, int index) {
+    return bullet_system->bullets + index;
+}
+
+static int
+bullet_index_from_id (BulletSystem *bullet_system, int id) {
+    return bullet_system->bullet_ids[id];
+}
+
+static Bullet*
+bullet_from_id (BulletSystem *bullet_system, int id) {
+    return bullet_from_index (bullet_system,
+                              bullet_index_from_id (bullet_system, id));
+}
+
 static SCM
 make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob) {
     SCM smob;
     BulletSystem *bullet_system;
     int max_bullets = scm_to_int (s_max_bullets);
 
-    bullet_system = (BulletSystem *) scm_gc_malloc (sizeof (BulletSystem), "bullet_system");
+    bullet_system = (BulletSystem *) scm_gc_malloc (sizeof (BulletSystem),
+                                                    "bullet_system");
 
     bullet_system->max_bullets = max_bullets;
     bullet_system->bullet_count = 0;
@@ -88,11 +105,12 @@ make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob) {
 
     /* Initialize bullets. */
     for (int i = 0; i < max_bullets; ++i) {
-        Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_from_index (bullet_system, i);
 
         bullet->id = i;
         bullet->ref = make_bullet_ref (bullet_system, i);
         bullet->active = false;
+        bullet->script = SCM_BOOL_F;
         bullet_system->bullet_ids[i] = i;
     }
 
@@ -102,6 +120,14 @@ make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob) {
 static SCM
 mark_bullet_system (SCM bullet_system_smob) {
     BulletSystem *bullet_system = (BulletSystem *) SCM_SMOB_DATA (bullet_system_smob);
+
+    /* Mark all scheme objects within bullets array. */
+    for (int i = 0; i < bullet_system->max_bullets; ++i) {
+        Bullet *bullet = bullet_from_index (bullet_system, i);
+
+        scm_gc_mark (bullet->script);
+        scm_gc_mark (bullet->ref);
+    }
 
     return bullet_system->sprite_sheet;
 }
@@ -136,6 +162,12 @@ clear_bullet_system (SCM bullet_system_smob)
 {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
 
+    for (int i = 0; i < bullet_system->bullet_count; ++i) {
+        Bullet *bullet = bullet_from_index (bullet_system, i);
+
+        bullet->active = false;
+    }
+
     bullet_system->bullet_count = 0;
 
     scm_remember_upto_here_1 (bullet_system_smob);
@@ -146,18 +178,6 @@ clear_bullet_system (SCM bullet_system_smob)
 static bool
 bullet_out_of_bounds(BulletSystem *bullet_system, Bullet *bullet) {
     return !rect_collide_point(&bullet_system->bounds, bullet->pos.x, bullet->pos.y);
-}
-
-static int
-bullet_index_from_id (BulletSystem *bullet_system, int id) {
-    return bullet_system->bullet_ids[id];
-}
-
-static Bullet*
-bullet_from_id (BulletSystem *bullet_system, int id) {
-    int index = bullet_index_from_id (bullet_system, id);
-    
-    return bullet_system->bullets + index;
 }
 
 static void
@@ -326,7 +346,7 @@ draw_bullet_system (SCM bullet_system_smob) {
                          sprite_sheet->tile_height / 2);
         }
     }
-    
+
     al_hold_bitmap_drawing (false);
     al_restore_state (&state);
     scm_remember_upto_here_1 (bullet_system_smob);
@@ -339,11 +359,12 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
 
     for (int i = 0; i < bullet_system->bullet_count; ++i) {
-        Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_from_index (bullet_system, i);
 
         if (bullet->active && bullet->image) {
             Rect hitbox = rect_move(&bullet->hitbox, bullet->pos.x, bullet->pos.y);
-            al_draw_rectangle (hitbox.x, hitbox.y, hitbox.x + hitbox.width, hitbox.y + hitbox.height,
+            al_draw_rectangle (hitbox.x, hitbox.y,
+                               hitbox.x + hitbox.width, hitbox.y + hitbox.height,
                                al_map_rgba_f (1, 0, 1, 1), 2);
         }
     }
@@ -359,7 +380,8 @@ bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback) {
 
     if (rect_collide_rect (&hitbox, rect)) {
         if (scm_procedure_p (callback)) {
-            /* The callback can return true if the bullet should be removed from the system */
+            /* The callback can return true if the bullet should be
+             * removed from the system. */
             return scm_to_bool (scm_call_0 (callback));
         }
     }
@@ -373,7 +395,7 @@ bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback)
     Rect *rect = check_rect (rect_smob);
 
     for (int i = 0; i < bullet_system->bullet_count; ++i) {
-        Bullet *bullet = bullet_system->bullets + i;
+        Bullet *bullet = bullet_from_index (bullet_system, i);
 
         if (bullet->active && bullet_collision_check (bullet, rect, callback)) {
             bullet->active = false;
@@ -405,13 +427,10 @@ set_bullet_system_sprite_sheet (SCM bullet_system_smob, SCM sprite_sheet_smob) {
 static void
 init_bullet_movement (Bullet *bullet, float speed, float direction, float acceleration,
                       float angular_velocity) {
-    float dx = cos (direction);
-    float dy = sin (direction);
+    float theta = deg2rad (direction);
 
-    bullet->vel.x = dx * speed;
-    bullet->vel.y = dy * speed;
-    bullet->acc.x = dx * acceleration;
-    bullet->acc.y = dy * acceleration;
+    bullet->vel = vector2_from_polar (speed, theta);
+    bullet->acc = vector2_from_polar (acceleration, theta);
     al_build_transform (&bullet->angular_velocity, 0, 0, 1, 1,
                         deg2rad (angular_velocity));
 }
@@ -490,7 +509,7 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
-    float direction = deg2rad (scm_to_double (s_direction));
+    float direction = scm_to_double (s_direction);
     float acceleration = scm_to_double (s_acceleration);
     float angular_velocity = scm_to_double (s_angular_velocity);
     int life = scm_to_int (s_life);
@@ -517,7 +536,7 @@ emit_simple_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
-    float direction = deg2rad (scm_to_double (s_direction));
+    float direction = scm_to_double (s_direction);
     float acceleration = 0;
     float angular_velocity = 0;
     int life = 0;
@@ -564,7 +583,7 @@ set_bullet_movement (SCM bullet_ref_smob, SCM s_speed, SCM s_direction,
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float speed = scm_to_double (s_speed);
-    float direction = deg2rad (scm_to_double (s_direction));
+    float direction = scm_to_double (s_direction);
     float acceleration = scm_to_double (s_acceleration);
     float angular_velocity = scm_to_double (s_angular_velocity);
 
@@ -591,7 +610,7 @@ kill_bullet (SCM bullet_ref_smob) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
     bullet->kill = true;
-    
+
     return SCM_UNSPECIFIED;
 }
 
@@ -752,7 +771,7 @@ init_bullet_system_type (void) {
     scm_set_smob_mark (bullet_ref_tag, 0);
     scm_set_smob_free (bullet_ref_tag, free_bullet_ref);
     scm_set_smob_print (bullet_ref_tag, print_bullet_ref);
-    
+
     scm_c_define_gsubr ("set-bullet-movement", 5, 0, 0, set_bullet_movement);
     scm_c_define_gsubr ("kill-bullet", 1, 0, 0, kill_bullet);
     scm_c_define_gsubr ("bullet-position", 1, 0, 0, bullet_position);
@@ -775,7 +794,7 @@ init_bullet_system_type (void) {
     scm_set_smob_mark (bullet_type_tag, 0);
     scm_set_smob_free (bullet_type_tag, free_bullet_type);
     scm_set_smob_print (bullet_type_tag, print_bullet_type);
-    
+
     scm_c_define_gsubr ("make-bullet-type", 4, 0, 0, make_bullet_type);
 
     /* Exports */
