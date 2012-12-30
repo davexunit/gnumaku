@@ -358,57 +358,30 @@ particle_system_life_var (SCM particle_system_smob) {
 }
 
 static SCM
-particle_system_x (SCM particle_system_smob) {
+particle_system_position (SCM particle_system_smob) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->pos.x);
+    return scm_from_vector2 (particle_system->pos);
 }
 
 static SCM
-particle_system_y (SCM particle_system_smob) {
+particle_system_position_var (SCM particle_system_smob) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->pos.y);
+    return scm_from_vector2 (particle_system->pos_var);
 }
 
 static SCM
-particle_system_x_var (SCM particle_system_smob) {
+particle_system_gravity (SCM particle_system_smob) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_double (particle_system->pos_var.x);
-}
-
-static SCM
-particle_system_y_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->pos_var.y);
-}
-
-static SCM
-particle_system_gravity_x (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->gravity.x);
-}
-
-static SCM
-particle_system_gravity_y (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->gravity.y);
+    return scm_from_vector2 (particle_system->gravity);
 }
 
 static SCM
@@ -627,11 +600,11 @@ set_particle_system_life_var (SCM particle_system_smob, SCM s_life_var) {
 }
 
 static SCM
-set_particle_system_x (SCM particle_system_smob, SCM s_x) {
+set_particle_system_position (SCM particle_system_smob, SCM s_pos) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float x = scm_to_double (s_x);
+    Vector2 pos = scm_to_vector2 (s_pos);
 
-    particle_system->pos.x = x;
+    particle_system->pos = pos;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -639,11 +612,11 @@ set_particle_system_x (SCM particle_system_smob, SCM s_x) {
 }
 
 static SCM
-set_particle_system_y (SCM particle_system_smob, SCM s_y) {
+set_particle_system_position_var (SCM particle_system_smob, SCM s_pos_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float y = scm_to_double (s_y);
+    Vector2 pos_var = scm_to_vector2 (s_pos_var);
 
-    particle_system->pos.y = y;
+    particle_system->pos_var = pos_var;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -651,47 +624,11 @@ set_particle_system_y (SCM particle_system_smob, SCM s_y) {
 }
 
 static SCM
-set_particle_system_x_var (SCM particle_system_smob, SCM s_x_var) {
+set_particle_system_gravity (SCM particle_system_smob, SCM s_gravity) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float x_var = scm_to_double (s_x_var);
+    Vector2 gravity = scm_to_vector2 (s_gravity);
 
-    particle_system->pos_var.x = x_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_y_var (SCM particle_system_smob, SCM s_y_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float y_var = scm_to_double (s_y_var);
-
-    particle_system->pos_var.y = y_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_gravity_x (SCM particle_system_smob, SCM s_gravity_x) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float gravity_x = scm_to_double (s_gravity_x);
-
-    particle_system->gravity.x = gravity_x;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_gravity_y (SCM particle_system_smob, SCM s_gravity_y) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float gravity_y = scm_to_double (s_gravity_y);
-
-    particle_system->gravity.y = gravity_y;
+    particle_system->gravity = gravity;
 
     scm_remember_upto_here_1 (particle_system_smob);
 
@@ -909,12 +846,9 @@ init_particle_system_type (void) {
     scm_c_define_gsubr ("particle-amount", 1, 0, 0, particle_system_amount);
     scm_c_define_gsubr ("particle-life", 1, 0, 0, particle_system_life);
     scm_c_define_gsubr ("particle-life-var", 1, 0, 0, particle_system_life_var);
-    scm_c_define_gsubr ("particle-x", 1, 0, 0, particle_system_x);
-    scm_c_define_gsubr ("particle-y", 1, 0, 0, particle_system_y);
-    scm_c_define_gsubr ("particle-x-var", 1, 0, 0, particle_system_x_var);
-    scm_c_define_gsubr ("particle-y-var", 1, 0, 0, particle_system_y_var);
-    scm_c_define_gsubr ("particle-gravity-x", 1, 0, 0, particle_system_gravity_x);
-    scm_c_define_gsubr ("particle-gravity-y", 1, 0, 0, particle_system_gravity_y);
+    scm_c_define_gsubr ("particle-position", 1, 0, 0, particle_system_position);
+    scm_c_define_gsubr ("particle-position-var", 1, 0, 0, particle_system_position_var);
+    scm_c_define_gsubr ("particle-gravity", 1, 0, 0, particle_system_gravity);
     scm_c_define_gsubr ("particle-direction", 1, 0, 0, particle_system_direction);
     scm_c_define_gsubr ("particle-direction-var", 1, 0, 0, particle_system_direction_var);
     scm_c_define_gsubr ("particle-speed", 1, 0, 0, particle_system_speed);
@@ -932,33 +866,38 @@ init_particle_system_type (void) {
     scm_c_define_gsubr ("particle-end-color", 1, 0, 0, particle_system_end_color);
     scm_c_define_gsubr ("particle-end-color-var", 1, 0, 0, particle_system_end_color_var);
     scm_c_define_gsubr ("set-particle-sprite-sheet", 2, 0, 0, set_particle_system_sprite_sheet);
-    scm_c_define_gsubr ("set-particle-blend-additive", 2, 0, 0, set_particle_system_blend_additive);
+    scm_c_define_gsubr ("set-particle-blend-additive", 2, 0, 0,
+                        set_particle_system_blend_additive);
     scm_c_define_gsubr ("set-particle-rate", 2, 0, 0, set_particle_system_rate);
     scm_c_define_gsubr ("set-particle-amount", 2, 0, 0, set_particle_system_amount);
     scm_c_define_gsubr ("set-particle-life", 2, 0, 0, set_particle_system_life);
     scm_c_define_gsubr ("set-particle-life-var", 2, 0, 0, set_particle_system_life_var);
-    scm_c_define_gsubr ("set-particle-x", 2, 0, 0, set_particle_system_x);
-    scm_c_define_gsubr ("set-particle-y", 2, 0, 0, set_particle_system_y);
-    scm_c_define_gsubr ("set-particle-x-var", 2, 0, 0, set_particle_system_x_var);
-    scm_c_define_gsubr ("set-particle-y-var", 2, 0, 0, set_particle_system_y_var);
-    scm_c_define_gsubr ("set-particle-gravity-x", 2, 0, 0, set_particle_system_gravity_x);
-    scm_c_define_gsubr ("set-particle-gravity-y", 2, 0, 0, set_particle_system_gravity_y);
+    scm_c_define_gsubr ("set-particle-position", 2, 0, 0, set_particle_system_position);
+    scm_c_define_gsubr ("set-particle-position-var", 2, 0, 0, set_particle_system_position_var);
+    scm_c_define_gsubr ("set-particle-gravity", 2, 0, 0, set_particle_system_gravity);
     scm_c_define_gsubr ("set-particle-direction", 2, 0, 0, set_particle_system_direction);
-    scm_c_define_gsubr ("set-particle-direction-var", 2, 0, 0, set_particle_system_direction_var);
+    scm_c_define_gsubr ("set-particle-direction-var", 2, 0, 0,
+                        set_particle_system_direction_var);
     scm_c_define_gsubr ("set-particle-speed", 2, 0, 0, set_particle_system_speed);
     scm_c_define_gsubr ("set-particle-speed-var", 2, 0, 0, set_particle_system_speed_var);
     scm_c_define_gsubr ("set-particle-radial-accel", 2, 0, 0, set_particle_system_radial_accel);
-    scm_c_define_gsubr ("set-particle-radial-accel-var", 2, 0, 0, set_particle_system_radial_accel_var);
+    scm_c_define_gsubr ("set-particle-radial-accel-var", 2, 0, 0,
+                        set_particle_system_radial_accel_var);
     scm_c_define_gsubr ("set-particle-tan-accel", 2, 0, 0, set_particle_system_tan_accel);
-    scm_c_define_gsubr ("set-particle-tan-accel-var", 2, 0, 0, set_particle_system_tan_accel_var);
+    scm_c_define_gsubr ("set-particle-tan-accel-var", 2, 0, 0,
+                        set_particle_system_tan_accel_var);
     scm_c_define_gsubr ("set-particle-start-scale", 2, 0, 0, set_particle_system_start_scale);
-    scm_c_define_gsubr ("set-particle-start-scale-var", 2, 0, 0, set_particle_system_start_scale_var);
+    scm_c_define_gsubr ("set-particle-start-scale-var", 2, 0, 0,
+                        set_particle_system_start_scale_var);
     scm_c_define_gsubr ("set-particle-end-scale", 2, 0, 0, set_particle_system_end_scale);
-    scm_c_define_gsubr ("set-particle-end-scale-var", 2, 0, 0, set_particle_system_end_scale_var);
+    scm_c_define_gsubr ("set-particle-end-scale-var", 2, 0, 0,
+                        set_particle_system_end_scale_var);
     scm_c_define_gsubr ("set-particle-start-color", 2, 0, 0, set_particle_system_start_color);
-    scm_c_define_gsubr ("set-particle-start-color-var", 2, 0, 0, set_particle_system_start_color_var);
+    scm_c_define_gsubr ("set-particle-start-color-var", 2, 0, 0,
+                        set_particle_system_start_color_var);
     scm_c_define_gsubr ("set-particle-end-color", 2, 0, 0, set_particle_system_end_color);
-    scm_c_define_gsubr ("set-particle-end-color-var", 2, 0, 0, set_particle_system_end_color_var);
+    scm_c_define_gsubr ("set-particle-end-color-var", 2, 0, 0,
+                        set_particle_system_end_color_var);
 
     scm_c_export ("make-particle-system", NULL);
     scm_c_export ("update-particle-system", NULL);
@@ -971,12 +910,9 @@ init_particle_system_type (void) {
     scm_c_export ("particle-amount", NULL);
     scm_c_export ("particle-life", NULL);
     scm_c_export ("particle-life-var", NULL);
-    scm_c_export ("particle-x", NULL);
-    scm_c_export ("particle-y", NULL);
-    scm_c_export ("particle-x-var", NULL);
-    scm_c_export ("particle-y-var", NULL);
-    scm_c_export ("particle-gravity-x", NULL);
-    scm_c_export ("particle-gravity-y", NULL);
+    scm_c_export ("particle-position", NULL);
+    scm_c_export ("particle-position-var", NULL);
+    scm_c_export ("particle-gravity", NULL);
     scm_c_export ("particle-direction", NULL);
     scm_c_export ("particle-direction-var", NULL);
     scm_c_export ("particle-speed", NULL);
@@ -999,12 +935,9 @@ init_particle_system_type (void) {
     scm_c_export ("set-particle-amount", NULL);
     scm_c_export ("set-particle-life", NULL);
     scm_c_export ("set-particle-life-var", NULL);
-    scm_c_export ("set-particle-x", NULL);
-    scm_c_export ("set-particle-y", NULL);
-    scm_c_export ("set-particle-x-var", NULL);
-    scm_c_export ("set-particle-y-var", NULL);
-    scm_c_export ("set-particle-gravity-x", NULL);
-    scm_c_export ("set-particle-gravity-y", NULL);
+    scm_c_export ("set-particle-position", NULL);
+    scm_c_export ("set-particle-position-var", NULL);
+    scm_c_export ("set-particle-gravity", NULL);
     scm_c_export ("set-particle-direction", NULL);
     scm_c_export ("set-particle-direction-var", NULL);
     scm_c_export ("set-particle-speed", NULL);
