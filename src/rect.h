@@ -3,20 +3,24 @@
 
 #include <allegro5/allegro.h>
 #include <libguile.h>
+#include "vector.h"
 
-typedef struct
-{
+typedef struct {
     float x, y;
     float width, height;
 } Rect;
 
+Rect rect_new (float x, float y, float width, float height);
+bool rect_collide_point (Rect rect, Vector2 p);
+bool rect_collide_rect (Rect rect, Rect other);
+Rect rect_move (Rect rect, Vector2 delta);
+Rect rect_scale (Rect rect, Vector2 scale);
+Vector2 get_rect_center (Rect rect);
+Rect rect_center (Rect rect, Vector2 center);
+SCM make_rect (SCM s_x, SCM s_y, SCM s_width, SCM s_height);
 Rect* check_rect (SCM rect_smob);
 Rect scm_to_rect (SCM rect_smob);
+SCM scm_from_rect (Rect rect);
 void init_rect_type (void);
-void init_rect (Rect *rect, float x, float y, float width, float height);
-bool rect_collide_point (Rect *rect, float x, float y);
-bool rect_collide_rect (Rect *rect, Rect *other);
-Rect rect_move (Rect *rect, float dx, float dy);
-SCM make_rect (SCM s_x, SCM s_y, SCM s_width, SCM s_height);
 
 #endif
