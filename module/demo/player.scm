@@ -6,6 +6,7 @@
   #:use-module (gnumaku events)
   #:use-module (gnumaku scene-graph)
   #:use-module (gnumaku assets)
+  #:use-module (gnumaku actions)
   #:use-module (demo actor)
   #:use-module (demo level)
   #:export (<player> make-player sprite speed movement shooting score graze-count lives
@@ -56,7 +57,7 @@
   (speed #:accessor speed #:init-keyword #:speed #:init-value 5)
   (movement #:accessor movement #:init-keyword #:movement #:init-thunk make-movement-hash)
   (shooting #:accessor shooting #:init-keyword #:shooting #:init-value #f)
-  (score #:accessor score #:init-keyword #:score #:init-value 0)
+  (score #:accessor score #:init-keywordn #:score #:init-value 0)
   (graze-count #:accessor graze-count #:init-keyword #:graze-count #:init-value 0)
   (lives #:accessor lives #:init-keyword #:lives #:init-value 3)
   (power #:accessor power #:init-keyword #:power #:init-value 10)
@@ -160,8 +161,12 @@
   (set! (score player) (+ (score player) points)))
 
 (define-method (invincible-mode (player <player>) duration)
+  (define-coroutine (blink)
+    (sprite-blink player (sprite player) 2 (quotient duration 2)))
+  
   (define-coroutine (invincible-mode)
     (set! (invincible player) #t)
+    (blink)
     (wait player duration)
     (set! (invincible player) #f))
   (invincible-mode))
