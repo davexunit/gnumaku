@@ -5,6 +5,16 @@ static scm_t_bits bullet_ref_tag;
 static scm_t_bits bullet_type_tag;
 static SCM sym_blend_alpha;
 static SCM sym_blend_add;
+static SCM keyword_acceleration;
+static SCM keyword_angular_velocity;
+static SCM keyword_life;
+static SCM keyword_color;
+static SCM keyword_scale;
+static SCM default_acceleration;
+static SCM default_angular_velocity;
+static SCM default_life;
+static SCM default_color;
+static SCM default_scale;
 
 static BlendMode
 scm_to_blend_mode (SCM blend_mode) {
@@ -93,7 +103,6 @@ make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob) {
 
     bullet_system = (BulletSystem *) scm_gc_malloc (sizeof (BulletSystem),
                                                     "bullet_system");
-
     bullet_system->max_bullets = max_bullets;
     bullet_system->bullet_count = 0;
     bullet_system->bullets = NULL;
@@ -122,14 +131,6 @@ make_bullet_system (SCM s_max_bullets, SCM sprite_sheet_smob) {
 static SCM
 mark_bullet_system (SCM bullet_system_smob) {
     BulletSystem *bullet_system = (BulletSystem *) SCM_SMOB_DATA (bullet_system_smob);
-
-    /* Mark all scheme objects within bullets array. */
-    for (int i = 0; i < bullet_system->max_bullets; ++i) {
-        Bullet *bullet = bullet_from_index (bullet_system, i);
-
-        scm_gc_mark (bullet->script);
-        scm_gc_mark (bullet->ref);
-    }
 
     return bullet_system->sprite_sheet;
 }
@@ -179,7 +180,7 @@ clear_bullet_system (SCM bullet_system_smob)
 
 static bool
 bullet_out_of_bounds(BulletSystem *bullet_system, Bullet *bullet) {
-    return !rect_collide_point(&bullet_system->bounds, bullet->pos.x, bullet->pos.y);
+    return !rect_collide_point(bullet_system->bounds, bullet->pos);
 }
 
 static void
@@ -333,10 +334,13 @@ bullet_sprite_angle (Bullet *bullet) {
 static void
 draw_bullet (Bullet *bullet, int cx, int cy, BlendMode prev_blend_mode) {
     float angle = bullet_sprite_angle (bullet);
+    ALLEGRO_COLOR color = color_mult_alpha (bullet->color);
 
     set_bullet_blend_mode (bullet, prev_blend_mode);
-    al_draw_rotated_bitmap (bullet->image, cx, cy,
-                             bullet->pos.x, bullet->pos.y, angle, 0);
+    al_draw_tinted_scaled_rotated_bitmap (bullet->image, color, cx, cy,
+                                          bullet->pos.x, bullet->pos.y,
+                                          bullet->scale.x, bullet->scale.y,
+                                          angle, 0);
 }
 
 static SCM
@@ -373,7 +377,7 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
         Bullet *bullet = bullet_from_index (bullet_system, i);
 
         if (bullet->active && bullet->image) {
-            Rect hitbox = rect_move(&bullet->hitbox, bullet->pos.x, bullet->pos.y);
+            Rect hitbox = rect_move (bullet->hitbox, bullet->pos);
             al_draw_rectangle (hitbox.x, hitbox.y,
                                hitbox.x + hitbox.width, hitbox.y + hitbox.height,
                                al_map_rgba_f (1, 0, 1, 1), 2);
@@ -386,10 +390,10 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
 }
 
 static bool
-bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback) {
-    Rect hitbox = rect_move(&bullet->hitbox, bullet->pos.x, bullet->pos.y);
+bullet_collision_check (Bullet *bullet, Rect rect, SCM callback) {
+    Rect hitbox = rect_move (bullet->hitbox, bullet->pos);
 
-    if (rect_collide_rect (&hitbox, rect)) {
+    if (rect_collide_rect (hitbox, rect)) {
         if (scm_procedure_p (callback)) {
             /* The callback can return true if the bullet should be
              * removed from the system. */
@@ -403,7 +407,7 @@ bullet_collision_check (Bullet *bullet, Rect *rect, SCM callback) {
 static SCM
 bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback) {
     BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
-    Rect *rect = check_rect (rect_smob);
+    Rect rect = scm_to_rect (rect_smob);
 
     for (int i = 0; i < bullet_system->bullet_count; ++i) {
         Bullet *bullet = bullet_from_index (bullet_system, i);
@@ -435,6 +439,19 @@ set_bullet_system_sprite_sheet (SCM bullet_system_smob, SCM sprite_sheet_smob) {
     return SCM_UNSPECIFIED;
 }
 
+static Bullet*
+new_bullet (BulletSystem *bullet_system) {
+    int index;
+
+    if (bullet_system->bullet_count >= bullet_system->max_bullets) {
+        return NULL;
+    }
+
+    /* Get new bullet from pool. */
+    index = bullet_system->bullet_count++;
+    return bullet_system->bullets + index;
+}
+
 static void
 init_bullet_movement (Bullet *bullet, float speed, float direction, float acceleration,
                       float angular_velocity) {
@@ -449,7 +466,8 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
 static void
 init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
              float speed, float direction, float acceleration, float angular_velocity,
-             int life, SCM script, BulletType *type) {
+             int life, SCM script, ALLEGRO_COLOR color, Vector2 scale,
+             BulletType *type) {
     SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
 
     bullet->active = true;
@@ -459,11 +477,12 @@ init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
     bullet->script_time = 0;
     bullet->life_count = 0;
     bullet->pos = pos;
+    bullet->scale = scale;
     bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
-    bullet->color = al_map_rgba_f (1, 1, 1, 1);
+    bullet->color = color;
     bullet->blend_mode = type->blend_mode;
     bullet->script = script;
-    bullet->hitbox = type->hitbox;
+    bullet->hitbox = rect_scale (type->hitbox, scale);
     init_bullet_movement (bullet, speed, direction, acceleration, angular_velocity);
 }
 
@@ -514,29 +533,31 @@ print_bullet_ref (SCM bullet_ref_smob, SCM port, scm_print_state *pstate) {
 }
 
 static SCM
-emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
-             SCM s_direction, SCM s_acceleration, SCM s_angular_velocity,
-             SCM s_life, SCM s_type) {
+emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
+             SCM s_type, SCM keyword_args) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
     float direction = scm_to_double (s_direction);
-    float acceleration = scm_to_double (s_acceleration);
-    float angular_velocity = scm_to_double (s_angular_velocity);
-    int life = scm_to_int (s_life);
+    float acceleration = scm_to_double (scm_get_keyword (keyword_acceleration,
+                                                         keyword_args,
+                                                         default_acceleration));
+    float angular_velocity = scm_to_double (scm_get_keyword (keyword_angular_velocity,
+                                                             keyword_args,
+                                                             default_angular_velocity));
+    Vector2 scale = scm_to_vector2 (scm_get_keyword (keyword_scale, keyword_args,
+                                                     default_scale));
+    int life = scm_to_int (scm_get_keyword (keyword_life, keyword_args,
+                                            default_life));
+    ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, keyword_args,
+                                                         default_color));
     BulletType *type = check_bullet_type (s_type);
-    Bullet *bullet;
-    int index;
+    Bullet *bullet = new_bullet (bullet_system);
 
-    if (bullet_system->bullet_count >= bullet_system->max_bullets) {
-        return scm_from_int (-1);
+    if (bullet) {
+        init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
+                     angular_velocity, life, SCM_BOOL_F, color, scale, type);
     }
-
-    /* Get new bullet from pool. */
-    index = bullet_system->bullet_count++;
-    bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
-                 angular_velocity, life, SCM_BOOL_F, type);
 
     return SCM_UNSPECIFIED;
 }
@@ -546,24 +567,20 @@ emit_simple_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
                     SCM s_direction, SCM s_type) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
+    Vector2 scale = vector2_new (1, 1);
     float speed = scm_to_double (s_speed);
     float direction = scm_to_double (s_direction);
     float acceleration = 0;
     float angular_velocity = 0;
     int life = 0;
     BulletType *type = check_bullet_type (s_type);
-    Bullet *bullet;
-    int index;
+    ALLEGRO_COLOR color = al_map_rgba_f (1, 1, 1, 1);
+    Bullet *bullet = new_bullet (bullet_system);
 
-    if (bullet_system->bullet_count >= bullet_system->max_bullets) {
-        return scm_from_int (-1);
+    if (bullet) {
+        init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
+                     angular_velocity, life, SCM_BOOL_F, color, scale, type);
     }
-
-    /* Get new bullet from pool. */
-    index = bullet_system->bullet_count++;
-    bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
-                 angular_velocity, life, SCM_BOOL_F, type);
 
     return SCM_UNSPECIFIED;
 }
@@ -572,18 +589,15 @@ static SCM
 emit_script_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_type, SCM script) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
+    Vector2 scale = vector2_new (1, 1);
     BulletType *type = check_bullet_type (s_type);
-    Bullet *bullet;
-    int index;
+    ALLEGRO_COLOR color = al_map_rgba_f (1, 1, 1, 1);
+    Bullet *bullet = new_bullet (bullet_system);
 
-    if (bullet_system->bullet_count >= bullet_system->max_bullets) {
-        return scm_from_int (-1);
+    if (bullet) {
+        init_bullet (bullet, bullet_system, pos, .1, 0, 0, 0, 0, script,
+                     color, scale, type);
     }
-
-    /* Get new bullet from pool. */
-    index = bullet_system->bullet_count++;
-    bullet = &bullet_system->bullets[index];
-    init_bullet (bullet, bullet_system, pos, .1, 0, 0, 0, 0, script, type);
 
     return SCM_UNSPECIFIED;
 }
@@ -681,6 +695,22 @@ bullet_life (SCM bullet_ref_smob) {
 }
 
 static SCM
+bullet_color (SCM bullet_ref_smob) {
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
+
+    return scm_from_color (bullet->color);
+}
+
+static SCM
+bullet_scale (SCM bullet_ref_smob) {
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
+
+    return scm_from_vector2 (bullet->scale);
+}
+
+static SCM
 set_bullet_position (SCM bullet_ref_smob, SCM s_pos) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
@@ -751,10 +781,43 @@ set_bullet_life (SCM bullet_ref_smob, SCM s_life) {
     return SCM_UNSPECIFIED;
 }
 
+static SCM
+set_bullet_color (SCM bullet_ref_smob, SCM s_color) {
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
+    ALLEGRO_COLOR color = scm_to_color (s_color);
+
+    bullet->color = color;
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
+set_bullet_scale (SCM bullet_ref_smob, SCM s_scale) {
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
+    Vector2 scale = scm_to_vector2 (s_scale);
+
+    bullet->scale = scale;
+
+    return SCM_UNSPECIFIED;
+}
+
 void
 init_bullet_system_type (void) {
     sym_blend_alpha = scm_from_latin1_symbol ("alpha");
     sym_blend_add = scm_from_latin1_symbol ("add");
+
+    keyword_acceleration = scm_from_latin1_keyword ("acceleration");
+    keyword_angular_velocity = scm_from_latin1_keyword ("angular_velocity");
+    keyword_life = scm_from_latin1_keyword ("life");
+    keyword_color = scm_from_latin1_keyword ("color");
+    keyword_scale = scm_from_latin1_keyword ("scale");
+    default_acceleration = scm_from_double (0);
+    default_angular_velocity = scm_from_double (0);
+    default_life = scm_from_int (0);
+    default_color = scm_from_color (al_map_rgba_f (1, 1, 1, 1));
+    default_scale = scm_from_vector2 (vector2_new (1, 1));
 
     /* BulletSystem bindings */
     bullet_system_tag = scm_make_smob_type ("<bullet-system>", sizeof (BulletSystem));
@@ -776,7 +839,7 @@ init_bullet_system_type (void) {
                         bullet_system_collide_rect);
     scm_c_define_gsubr ("bullet-system-bounds", 1, 0, 0, bullet_system_bounds);
     scm_c_define_gsubr ("set-bullet-system-bounds", 5, 0, 0, set_bullet_system_bounds);
-    scm_c_define_gsubr ("%emit-bullet", 8, 0, 0, emit_bullet);
+    scm_c_define_gsubr ("%emit-bullet", 5, 0, 1, emit_bullet);
     scm_c_define_gsubr ("%emit-simple-bullet", 5, 0, 0, emit_simple_bullet);
     scm_c_define_gsubr ("%emit-script-bullet", 4, 0, 0, emit_script_bullet);
 
@@ -794,6 +857,8 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("bullet-acceleration", 1, 0, 0, bullet_acceleration);
     scm_c_define_gsubr ("bullet-angular-velocity", 1, 0, 0, bullet_angular_velocity);
     scm_c_define_gsubr ("bullet-life", 1, 0, 0, bullet_life);
+    scm_c_define_gsubr ("bullet-color", 1, 0, 0, bullet_color);
+    scm_c_define_gsubr ("bullet-scale", 1, 0, 0, bullet_scale);
     scm_c_define_gsubr ("set-bullet-script", 3, 0, 0, set_bullet_script);
     scm_c_define_gsubr ("set-bullet-position", 2, 0, 0, set_bullet_position);
     scm_c_define_gsubr ("set-bullet-speed", 2, 0, 0, set_bullet_speed);
@@ -802,6 +867,8 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("set-bullet-angular-velocity", 2, 0, 0,
                         set_bullet_angular_velocity);
     scm_c_define_gsubr ("set-bullet-life", 2, 0, 0, set_bullet_life);
+    scm_c_define_gsubr ("set-bullet-color", 2, 0, 0, set_bullet_color);
+    scm_c_define_gsubr ("set-bullet-scale", 2, 0, 0, set_bullet_scale);
 
     /* BulletType bindings */
     bullet_type_tag = scm_make_smob_type ("<bullet-type>", sizeof (BulletType));
@@ -834,6 +901,8 @@ init_bullet_system_type (void) {
     scm_c_export ("bullet-acceleration", NULL);
     scm_c_export ("bullet-angular-velocity", NULL);
     scm_c_export ("bullet-life", NULL);
+    scm_c_export ("bullet-color", NULL);
+    scm_c_export ("bullet-scale", NULL);
     scm_c_export ("set-bullet-script", NULL);
     scm_c_export ("set-bullet-position", NULL);
     scm_c_export ("set-bullet-speed", NULL);
@@ -841,4 +910,6 @@ init_bullet_system_type (void) {
     scm_c_export ("set-bullet-acceleration", NULL);
     scm_c_export ("set-bullet-angular-velocity", NULL);
     scm_c_export ("set-bullet-life", NULL);
+    scm_c_export ("set-bullet-color", NULL);
+    scm_c_export ("set-bullet-scale", NULL);
 }

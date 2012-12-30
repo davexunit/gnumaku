@@ -10,6 +10,7 @@
 #include "vector.h"
 #include "sprite_sheet.h"
 #include "rect.h"
+#include "color.h"
 
 typedef enum {
     BLEND_ALPHA,
@@ -23,6 +24,7 @@ typedef struct {
     BlendMode blend_mode;
 } BulletType;
 
+/* God damn this struct has gotten quite large. */
 typedef struct {
     int id; /* Unique identifier. */
     int life; /* Maximum lifetime. 0 is unlimited. */
@@ -30,10 +32,11 @@ typedef struct {
     int life_count; /* Total elapsed lifetime. */
     bool active; /* Currently being drawn/updated? */
     bool kill; /* Remove the bullet on next update? */
-    bool directional;
+    bool directional; /* Rotate sprite in bullet direction? */
     Vector2 pos;
     Vector2 vel;
     Vector2 acc;
+    Vector2 scale;
     ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     Rect hitbox;
     BlendMode blend_mode;
