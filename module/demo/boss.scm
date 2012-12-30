@@ -49,7 +49,7 @@
                                        (+ (* x (sin theta)) (* y (cos theta)))))))
 
 (define-method (draw (boss <boss>))
-    (draw-bezier-path (path boss) #:color '(1 0 0 1))
+    (draw-bezier-path (path boss) #:color (make-color-f 1 0 0 1))
     (next-method))
 
 (define-method (%draw (boss <boss>))
