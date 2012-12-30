@@ -19,10 +19,6 @@
 (define-method (update (actor <actor>))
   (update-agenda (agenda actor) 1))
 
-(define-method (set-position (actor <actor>) new-x new-y)
-  (set! (x actor) new-x)
-  (set! (y actor) new-y))
-
 (define-method (wait (actor <actor>) delay)
   (abort-to-prompt 'coroutine-prompt
                    (lambda (resume) (agenda-schedule (agenda actor) delay resume))))

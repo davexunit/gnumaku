@@ -24,8 +24,10 @@
   (make-rect 0 0 64 32))
 
 (define (make-boss-path boss)
-  (make-bezier-path '(0 0) '(100 500) '(300 -50) '(400 300)
-                    '(200 600) '(200 -100) '(0 0)))
+  (make-bezier-path (make-vector2 0 0) (make-vector2 100 500)
+                    (make-vector2 300 -50) (make-vector2 400 300)
+                    (make-vector2 200 600) (make-vector2 200 -100)
+                    (make-vector2 0 0)))
 
 (define-class <boss> (<enemy>)
   (orbiter #:accessor orbiter #:init-keyword #:orbiter #:init-thunk make-orbiter)
@@ -65,4 +67,4 @@
   (let ((w (width (level boss))))
     (set! (path boss) (make-boss-path boss)))
   (follow-path)
-  (spiral1 boss))
+  (spiral2 boss))

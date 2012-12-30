@@ -13,19 +13,31 @@
 (define (clamp n min-n max-n)
   (max min-n (min max-n n)))
 
-(define-coroutine (homing-bullet bullet target)
-  (let ((direction (rad2deg (atan (- (y target) (bullet-y bullet))
-                                  (- (x target) (bullet-x bullet))))))
-    (set-bullet-movement bullet 5 direction 0 0))
-  (bullet-wait bullet 60)
-  (homing-bullet bullet target))
+;; (define-coroutine (homing-bullet bullet target speed max-turn)
+;;   (let* ((direction (bullet-direction bullet))
+;;          (target-angle (rad2deg (atan (- (y target) (bullet-y bullet))
+;;                                       (- (x target) (bullet-x bullet)))))
+;;          (new-direction (clamp target-angle
+;;                                (- direction max-turn)
+;;                                (+ direction max-turn))))
+;;     (set-bullet-movement bullet speed new-direction 0 0))
+;;   (bullet-wait bullet 1)
+;;   (homing-bullet bullet target speed max-turn))
+
+(define-coroutine (homing-bullet bullet target speed turn)
+  (let* ((pos (bullet-position bullet))
+         (target-pos (vector2-sub (position target) pos))
+         (turn (if (> (vector2-cross pos target-pos) 0) turn (* -1 turn))))
+    (set-bullet-movement bullet speed (+ (bullet-direction bullet) turn) 0 0))
+  (bullet-wait bullet 1)
+  (homing-bullet bullet target speed turn))
 
 (define-coroutine (sine-wave bullet)
   (define angle-step 20)
   
   (define (step angle)
     (set-bullet-direction bullet (+ (bullet-direction bullet) (* 8 (sin-deg angle))))
-    (bullet-wait bullet 4)
+    (bullet-wait bullet 1)
     (step (+ angle angle-step)))
 
   (step 0))
@@ -35,7 +47,7 @@
   
   (define (emit i)
     (let ((direction (+ (* i step) (random angle-var))))
-      (emit-simple-bullet system (bullet-x bullet) (bullet-y bullet)
+      (emit-simple-bullet system (bullet-position bullet)
                           speed direction 'sword)))
   
   (bullet-wait bullet delay)
@@ -43,28 +55,25 @@
   (repeat count emit))
 
 (define-coroutine (spiral1 actor)
-  (define step (/ 360 15))
-  
-  (define (spiral angle)
-    (let ((system (bullet-system actor))
-          (x (x actor))
-          (y (y actor))
-          (player (player (level actor)))
-          (direction (+ 90 (* 30 (sin-deg angle)))))
-      (emit-script-bullet system x y 'large-orange
-                          (lambda (bullet)
-                            (set-bullet-movement bullet 4 direction 0 0)
-                            (homing-bullet bullet player))))
-                            ;;(explode bullet system 45 6 4 30))))
-                            ;; (sine-wave bullet))))
-    (wait actor 6)
-    (spiral (+ angle step)))
+  (let ((step (/ 360 15)))
+    (define (spiral angle)
+      (let ((system (bullet-system actor))
+            (player (player (level actor)))
+            (direction (+ 90 (* 30 (sin-deg angle)))))
+        (emit-script-bullet system (position actor) 'large-orange
+                            (lambda (bullet)
+                              (set-bullet-movement bullet 4 direction 0 0)
+                              (homing-bullet bullet player 3 1))))
+      ;;(explode bullet system 45 6 4 30))))
+      ;; (sine-wave bullet))))
+      (wait actor 6)
+      (spiral (+ angle step)))
 
-  (spiral 0))
+    (spiral 0)))
 
 (define-coroutine (spiral2 actor)
   (let loop ((angle 0))
-    (emit-bullet (bullet-system actor) (x actor) (y actor) 2 angle
-                 .01 2 0 'medium-blue)
+    (emit-bullet (bullet-system actor) (position actor) 2 (random (+ angle 20))
+                 0 0 0 'medium-blue)
     (wait actor 2)
-    (loop (+ angle 10))))
+    (loop (+ angle 20))))
