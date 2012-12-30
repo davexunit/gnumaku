@@ -130,7 +130,7 @@ print_image (SCM image_smob, SCM port, scm_print_state *pstate)
 {
     // Image *image = (Image *) SCM_SMOB_DATA (image_smob);
 
-    scm_puts ("#<Image >", port);
+    scm_puts ("#<image >", port);
 
     /* non-zero means success */
     return 1;
@@ -139,7 +139,7 @@ print_image (SCM image_smob, SCM port, scm_print_state *pstate)
 void
 init_image_type (void)
 {
-    image_tag = scm_make_smob_type ("Image", sizeof (Image));
+    image_tag = scm_make_smob_type ("<image>", sizeof (Image));
     scm_set_smob_mark (image_tag, 0);
     scm_set_smob_free (image_tag, free_image);
     scm_set_smob_print (image_tag, print_image);

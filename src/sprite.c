@@ -263,7 +263,7 @@ init_sprite_type (void) {
     default_rotation = scm_from_double (0);
     default_color = scm_from_color (al_map_rgba_f (1, 1, 1, 1));
 
-    sprite_tag = scm_make_smob_type ("Sprite", sizeof (Sprite));
+    sprite_tag = scm_make_smob_type ("<sprite>", sizeof (Sprite));
     scm_set_smob_mark (sprite_tag, mark_sprite);
     scm_set_smob_free (sprite_tag, free_sprite);
     scm_set_smob_print (sprite_tag, print_sprite);
