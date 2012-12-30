@@ -11,16 +11,14 @@ int get_image_height (Image *image) {
 static scm_t_bits image_tag;
 
 Image*
-check_image (SCM image_smob)
-{
+check_image (SCM image_smob) {
     scm_assert_smob_type (image_tag, image_smob);
 
     return (Image *) SCM_SMOB_DATA (image_smob);
 }
 
 static SCM
-load_image (SCM s_file)
-{
+load_image (SCM s_file) {
     SCM smob;
     const char *file = scm_to_locale_string (s_file);
     Image *image = (Image *) scm_gc_malloc (sizeof (Image), "image");
@@ -39,8 +37,7 @@ load_image (SCM s_file)
 }
 
 static SCM
-make_image (SCM s_width, SCM s_height)
-{
+make_image (SCM s_width, SCM s_height) {
     SCM smob;
     int width = scm_to_int (s_width);
     int height = scm_to_int (s_height);
@@ -56,8 +53,7 @@ make_image (SCM s_width, SCM s_height)
 }
 
 SCM
-make_image_from_bitmap (ALLEGRO_BITMAP *bitmap)
-{
+make_image_from_bitmap (ALLEGRO_BITMAP *bitmap) {
     SCM smob;
     Image *image = (Image *) scm_gc_malloc (sizeof (Image), "image");
 
@@ -71,24 +67,21 @@ make_image_from_bitmap (ALLEGRO_BITMAP *bitmap)
 }
 
 static SCM
-image_width (SCM image_smob)
-{
+image_width (SCM image_smob) {
     Image *image = check_image (image_smob);
 
     return scm_from_int (al_get_bitmap_width (image->bitmap));
 }
 
 static SCM
-image_height (SCM image_smob)
-{
+image_height (SCM image_smob) {
     Image *image = check_image (image_smob);
 
     return scm_from_int (al_get_bitmap_height (image->bitmap));
 }
 
 static SCM
-draw_image (SCM image_smob, SCM s_x, SCM s_y)
-{
+draw_image (SCM image_smob, SCM s_x, SCM s_y) {
     Image *image = check_image (image_smob);
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
@@ -101,8 +94,7 @@ draw_image (SCM image_smob, SCM s_x, SCM s_y)
 }
 
 static SCM
-set_target_image (SCM image_smob)
-{
+set_target_image (SCM image_smob) {
     Image *image = check_image (image_smob);
 
     al_set_target_bitmap (image->bitmap);
@@ -111,8 +103,7 @@ set_target_image (SCM image_smob)
 }
 
 static size_t
-free_image (SCM image_smob)
-{
+free_image (SCM image_smob) {
     Image *image = (Image *) SCM_SMOB_DATA (image_smob);
 
     // Do not free sub bitmaps
@@ -126,8 +117,7 @@ free_image (SCM image_smob)
 }
 
 static int
-print_image (SCM image_smob, SCM port, scm_print_state *pstate)
-{
+print_image (SCM image_smob, SCM port, scm_print_state *pstate) {
     // Image *image = (Image *) SCM_SMOB_DATA (image_smob);
 
     scm_puts ("#<image >", port);
@@ -137,8 +127,7 @@ print_image (SCM image_smob, SCM port, scm_print_state *pstate)
 }
 
 void
-init_image_type (void)
-{
+init_image_type (void) {
     image_tag = scm_make_smob_type ("<image>", sizeof (Image));
     scm_set_smob_mark (image_tag, 0);
     scm_set_smob_free (image_tag, free_image);
