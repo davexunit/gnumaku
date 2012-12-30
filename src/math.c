@@ -14,3 +14,7 @@ float
 rand1 (void) {
     return (float) rand () / (float) RAND_MAX;
 }
+
+float randf (float max) {
+    return rand1 () * max;
+}

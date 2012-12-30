@@ -7,5 +7,6 @@
 float deg2rad (float degrees);
 float rad2deg (float radians);
 float rand1 (void);
+float randf (float max);
 
 #endif
