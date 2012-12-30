@@ -1,5 +1,13 @@
 #include "image.h"
 
+int get_image_width (Image *image) {
+    return al_get_bitmap_width (image->bitmap);
+}
+
+int get_image_height (Image *image) {
+    return al_get_bitmap_height (image->bitmap);
+}
+
 static scm_t_bits image_tag;
 
 Image*
@@ -63,7 +71,7 @@ make_image_from_bitmap (ALLEGRO_BITMAP *bitmap)
 }
 
 static SCM
-get_image_width (SCM image_smob)
+image_width (SCM image_smob)
 {
     Image *image = check_image (image_smob);
 
@@ -71,7 +79,7 @@ get_image_width (SCM image_smob)
 }
 
 static SCM
-get_image_height (SCM image_smob)
+image_height (SCM image_smob)
 {
     Image *image = check_image (image_smob);
 
@@ -138,8 +146,8 @@ init_image_type (void)
 
     scm_c_define_gsubr ("load-image", 1, 0, 0, load_image);
     scm_c_define_gsubr ("make-image", 2, 0, 0, make_image);
-    scm_c_define_gsubr ("image-width", 1, 0, 0, get_image_width);
-    scm_c_define_gsubr ("image-height", 1, 0, 0, get_image_height);
+    scm_c_define_gsubr ("image-width", 1, 0, 0, image_width);
+    scm_c_define_gsubr ("image-height", 1, 0, 0, image_height);
     scm_c_define_gsubr ("draw-image", 3, 0, 0, draw_image);
     scm_c_define_gsubr ("set-target-image", 1, 0, 0, set_target_image);
 
