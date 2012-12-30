@@ -8,31 +8,27 @@
   #:use-module (gnumaku path)
   #:export (move-to move-by move-bezier move-bezier-path))
 
-(define-method (move-to (node <scene-node>) dst-x dst-y duration)
+(define-method (move-to (node <scene-node>) dest duration)
   "Moves linearly from current position to destination."
-  (let ((start-x (x node))
-        (start-y (y node))
-        (dx (- dst-x (x node)))
-        (dy (- dst-y (y node))))
+  (let* ((start (position node))
+         (distance (vector2-sub dest start)))
     (let tick ((t 0))
       (when (< t duration)
         (let ((alpha (/ t duration)))
-          (set! (x node) (+ start-x (* dx alpha)))
-          (set! (y node) (+ start-y (* dy alpha))))
+          (set! (position node) (vector2-add start (vector2-scale distance alpha))))
         (wait node 1)
         (tick (1+ t))))))
 
-(define-method (move-by (node <scene-node>) dx dy duration)
+(define-method (move-by (node <scene-node>) distance duration)
   "Moves linearly from current position by (dx, dy)."
-  (move-to node (+ (x node) dx) (+ (y node) dy) duration))
+  (move-to node (vector2-add (position node) distance) duration))
 
 (define-method (move-bezier (node <scene-node>) bezier duration)
   "Moves along a bezier curve."
   (let tick ((t 0))
     (when (< t duration)
       (let ((p (bezier-at bezier (/ t duration))))
-        (set! (x node) (first p))
-        (set! (y node) (second p)))
+        (set! (position node) p))
       (wait node 1)
       (tick (1+ t)))))
 

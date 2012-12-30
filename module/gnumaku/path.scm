@@ -2,7 +2,6 @@
   #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-1)
   #:use-module (gnumaku core)
-  #:use-module (gnumaku vector)
   #:export (make-bezier make-bezier-path bezier-at bezier-path draw-bezier draw-bezier-path))
 
 (define-record-type <bezier>
@@ -16,10 +15,10 @@
 (define (bezier-at bezier t)
   "Returns the position along the bezier curve at time t, where 0 <= t <= 1."
   (let ((u (- 1 t)))
-    (vadd (vscale (* u u u) (bezier-p0 bezier))
-          (vscale (* 3 u u t) (bezier-p1 bezier))
-          (vscale (* 3 u t t) (bezier-p2 bezier))
-          (vscale (* t t t) (bezier-p3 bezier)))))
+    (vector2-add (vector2-scale (bezier-p0 bezier) (* u u u) )
+                 (vector2-scale (bezier-p1 bezier) (* 3 u u t))
+                 (vector2-scale (bezier-p2 bezier) (* 3 u t t))
+                 (vector2-scale (bezier-p3 bezier) (* t t t)))))
 
 (define (make-bezier-path . points)
   "Builds a list of bezier curves from the given points that form a connected path."
@@ -38,7 +37,9 @@
                      (last (bezier-at bezier 0)))
     (when (<= i segments)
       (let ((current (bezier-at bezier (/ i segments))))
-        (draw-line (first last) (second last) (first current) (second current) color thickness)
+        (draw-line (vector2-x last) (vector2-y last)
+                   (vector2-x current) (vector2-y current)
+                   color thickness)
         (draw-segment (1+ i) current)))))
 
 (define* (draw-bezier-path bezier-path #:optional #:key (segments 32)
@@ -47,3 +48,5 @@
   (for-each (lambda (b) (draw-bezier b #:segments segments
                                      #:color color #:thickness thickness))
             bezier-path))
+
+
