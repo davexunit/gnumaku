@@ -31,7 +31,8 @@
       path))
   (build-path points '()))
 
-(define* (draw-bezier bezier #:optional #:key (segments 32) (color '(1 1 1 1)) (thickness 2))
+(define* (draw-bezier bezier #:optional #:key (segments 32) (color (make-color-f 1 1 1 1))
+                      (thickness 2))
   "Draws a bezier curve approximation as a series of line segments."
   (let draw-segment ((i 1)
                      (last (bezier-at bezier 0)))
@@ -43,7 +44,7 @@
         (draw-segment (1+ i) current)))))
 
 (define* (draw-bezier-path bezier-path #:optional #:key (segments 32)
-                           (color '(1 1 1 1)) (thickness 2))
+                           (color (make-color-f 1 1 1 1)) (thickness 2))
   "Draws a series of connected bezier curves."
   (for-each (lambda (b) (draw-bezier b #:segments segments
                                      #:color color #:thickness thickness))
