@@ -1,27 +1,33 @@
 #include "vector.h"
 #include <math.h>
 
-bool vector2_equal (Vector2 a, Vector2 b) {
+bool
+vector2_equal (Vector2 a, Vector2 b) {
     return a.x == b.x && a.y == b.y;
 }
 
-float vector2_mag (Vector2 v) {
+float
+vector2_mag (Vector2 v) {
     return sqrt (v.x * v.x + v.y * v.y);
 }
 
-float vector2_dot (Vector2 a, Vector2 b) {
+float
+vector2_dot (Vector2 a, Vector2 b) {
     return a.x * b.x + a.y * b.y;
 }
 
-float vector2_cross (Vector2 a, Vector2 b) {
+float
+vector2_cross (Vector2 a, Vector2 b) {
     return a.x * b.y - b.x * a.y;
 }
 
-float vector2_angle (Vector2 v) {
+float
+vector2_angle (Vector2 v) {
     return atan2 (v.y, v.x);
 }
 
-Vector2 vector2_zero () {
+Vector2
+vector2_zero () {
     Vector2 v;
 
     v.x = 0;
@@ -30,7 +36,8 @@ Vector2 vector2_zero () {
     return v;
 }
 
-Vector2 vector2_new (float x, float y) {
+Vector2
+vector2_new (float x, float y) {
     Vector2 v;
 
     v.x = x;
@@ -39,7 +46,8 @@ Vector2 vector2_new (float x, float y) {
     return v;
 }
 
-Vector2 vector2_add (Vector2 a, Vector2 b) {
+Vector2
+vector2_add (Vector2 a, Vector2 b) {
     Vector2 c;
 
     c.x = a.x + b.x;
@@ -48,7 +56,8 @@ Vector2 vector2_add (Vector2 a, Vector2 b) {
     return c;
 }
 
-Vector2 vector2_sub (Vector2 a, Vector2 b) {
+Vector2
+vector2_sub (Vector2 a, Vector2 b) {
     Vector2 c;
 
     c.x = a.x - b.x;
@@ -57,7 +66,8 @@ Vector2 vector2_sub (Vector2 a, Vector2 b) {
     return c;
 }
 
-Vector2 vector2_scale (Vector2 v, float scalar) {
+Vector2
+vector2_scale (Vector2 v, float scalar) {
     Vector2 a;
 
     a.x = v.x * scalar;
@@ -66,7 +76,8 @@ Vector2 vector2_scale (Vector2 v, float scalar) {
     return a;
 }
 
-Vector2 vector2_norm (Vector2 v) {
+Vector2
+vector2_norm (Vector2 v) {
     float m = vector2_mag (v);
     Vector2 n = vector2_zero ();
 
@@ -78,7 +89,8 @@ Vector2 vector2_norm (Vector2 v) {
     return n;
 }
 
-Vector2 vector2_from_polar (float radius, float angle) {
+Vector2
+vector2_from_polar (float radius, float angle) {
     Vector2 v;
 
     v.x = cos (angle) * radius;
@@ -87,7 +99,8 @@ Vector2 vector2_from_polar (float radius, float angle) {
     return v;
 }
 
-Vector2 vector2_right_normal (Vector2 v) {
+Vector2
+vector2_right_normal (Vector2 v) {
     Vector2 right;
 
     right.x = -v.y;
@@ -96,7 +109,8 @@ Vector2 vector2_right_normal (Vector2 v) {
     return right;
 }
 
-Vector2 vector2_left_normal (Vector2 v) {
+Vector2
+vector2_left_normal (Vector2 v) {
     Vector2 left;
 
     left.x = v.y;
