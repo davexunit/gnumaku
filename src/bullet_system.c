@@ -235,6 +235,16 @@ bullet_system_bounds (SCM bullet_system_smob) {
     return make_rect(x, y, width, height);
 }
 
+static SCM
+bullet_system_count (SCM bullet_system_smob) {
+    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
+    int count = bullet_system->bullet_count;
+        
+    scm_remember_upto_here_1 (bullet_system_smob);
+
+    return scm_from_int (count);
+}
+
 static bool
 bullet_has_script (Bullet *bullet) {
     return scm_to_bool (scm_procedure_p (bullet->script));
@@ -838,6 +848,7 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("bullet-system-collide-rect", 3, 0, 0,
                         bullet_system_collide_rect);
     scm_c_define_gsubr ("bullet-system-bounds", 1, 0, 0, bullet_system_bounds);
+    scm_c_define_gsubr ("bullet-system-count", 1, 0, 0, bullet_system_count);
     scm_c_define_gsubr ("set-bullet-system-bounds", 5, 0, 0, set_bullet_system_bounds);
     scm_c_define_gsubr ("%emit-bullet", 5, 0, 1, emit_bullet);
     scm_c_define_gsubr ("%emit-simple-bullet", 5, 0, 0, emit_simple_bullet);
@@ -889,6 +900,7 @@ init_bullet_system_type (void) {
     scm_c_export ("bullet-system-sprite-sheet", NULL);
     scm_c_export ("bullet-system-collide-rect", NULL);
     scm_c_export ("bullet-system-bounds", NULL);
+    scm_c_export ("bullet-system-count", NULL);
     scm_c_export ("set-bullet-system-bounds", NULL);
     scm_c_export ("%emit-bullet", NULL);
     scm_c_export ("%emit-simple-bullet", NULL);
