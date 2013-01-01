@@ -58,7 +58,8 @@
                                                (field-height scene)))
   (set! (hud scene) (make-hud (current-level scene) 800 600))
   (set! (position (current-level scene)) (make-vector2 20 20))
-  (run (current-level scene)))
+  (run (current-level scene))
+  (play-audio-stream (music scene) .8 0 1))
 
 (define-method (load-assets (scene <shmup-scene>))
   (set! (background scene) (load-asset "background.png"))
@@ -73,7 +74,7 @@
 
 (define-coroutine (player-shot-1 player)
   (when (shooting player)
-    (play-sample (shot-sound player) .3 0 1)
+    (play-sample (shot-sound player) .8 0 1)
     (let* ((pos (position player))
            (speed 15)
            (bullets (bullet-system player))

@@ -24,7 +24,7 @@
     level))
 
 (define-method (run (level <demo-level>))
-  (display "run demo")(newline))
+  #f)
 
 ;; (define (emit-test level)
 ;;   (coroutine
