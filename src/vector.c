@@ -177,7 +177,7 @@ static SCM
 s_vector2_from_polar (SCM s_radius, SCM s_angle)
 {
     float radius = scm_to_double (s_radius);
-    float angle = scm_to_double (s_angle);
+    float angle = deg2rad (scm_to_double (s_angle));
     Vector2 v = vector2_from_polar (radius, angle);
 
     return scm_from_vector2 (v);

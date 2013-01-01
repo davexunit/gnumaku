@@ -2,7 +2,8 @@
 #define GNUMAKU_VECTOR2_H
 
 #include <allegro5/allegro.h>
-#include "libguile.h"
+#include <libguile.h>
+#include "math.h"
 
 typedef struct {
     float x, y;
