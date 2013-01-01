@@ -11,11 +11,12 @@
 #include <allegro5/allegro_acodec.h>
 #include <libguile.h>
 
-typedef struct
-{
+typedef struct {
     ALLEGRO_DISPLAY *display;
     ALLEGRO_EVENT_QUEUE *event_queue;
     ALLEGRO_TIMER *timer;
+    ALLEGRO_VOICE *voice;
+    ALLEGRO_MIXER *mixer;
     char *title;
     float timestep;
     float last_update_time;

@@ -3,8 +3,7 @@
 static scm_t_bits game_tag;
 
 static Game*
-check_game (SCM game_smob)
-{
+check_game (SCM game_smob) {
     scm_assert_smob_type (game_tag, game_smob);
 
     return (Game *) SCM_SMOB_DATA (game_smob);
@@ -95,7 +94,7 @@ game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscre
     int height = scm_to_int (s_height);
     bool fullscreen = scm_to_bool (s_fullscreen);
 
-    /* Initialize Allegro things */ 
+    /* Initialize Allegro things */
     /* TODO: Handle these errors in a proper way */
     if (!al_init ()) {
 	fprintf (stderr, "failed to initialize allegro!\n");
@@ -134,6 +133,27 @@ game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscre
         exit (-1);
     }
 
+    game->voice = al_create_voice (44100, ALLEGRO_AUDIO_DEPTH_INT16,
+                             ALLEGRO_CHANNEL_CONF_2);
+
+    if (!game->voice) {
+        fprintf (stderr, "failed to create voice!.\n");
+        exit (-1);
+    }
+
+    game->mixer = al_create_mixer (44100, ALLEGRO_AUDIO_DEPTH_FLOAT32,
+                             ALLEGRO_CHANNEL_CONF_2);
+
+    if (!game->mixer) {
+        fprintf (stderr, "failed to create mixer!\n");
+        exit (-1);
+    }
+
+    if (!al_attach_mixer_to_voice (game->mixer, game->voice)) {
+        fprintf (stderr, "failed to attach mixer to voice!\n");
+        exit (-1);
+    }
+
     if(!al_install_keyboard ()) {
 	fprintf (stderr, "failed to initialize keyboard!\n");
         exit (-1);
@@ -152,7 +172,7 @@ game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscre
     /* Set window title. */
     game->title = title;
     al_set_window_title (game->display, title);
-    
+
     game->timer = al_create_timer (game->timestep);
     game->event_queue = al_create_event_queue ();
     al_register_event_source (game->event_queue,
