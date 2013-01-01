@@ -10,6 +10,11 @@ typedef struct {
     ALLEGRO_SAMPLE *sample;
 } Sample;
 
+typedef struct {
+    ALLEGRO_AUDIO_STREAM *stream;
+} AudioStream;
+
 void init_sample_type (void);
+void init_audio_stream_type (void);
 
 #endif
