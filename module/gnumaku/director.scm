@@ -17,9 +17,8 @@
             director-reset-draw-target
             director-current-scene))
 
-(define director-game (make-game))
 (define director-scenes '())
-(define director-fps (make-fps director-game))
+(define director-fps (make-fps))
 (define director-font #f)
 (define director-show-fps #f)
 
@@ -56,59 +55,51 @@
     (on-start (director-current-scene))))
 
 (define* (director-init title width height #:optional (fullscreen #f))
-  (game-init director-game title width height fullscreen))
+  (game-init title width height fullscreen))
 
 (define (director-run scene)
   (director-push-scene scene)
-  (game-run director-game))
+  (game-run))
 
 (define (director-pause)
-  (game-pause director-game))
+  (game-pause))
 
 (define (director-resume)
-  (game-resume director-game))
+  (game-resume))
 
 (define (director-draw-fps)
   (font-draw-text director-font 730 575 (make-color-f 1 1 1 0.7)
-                  (string-append "FPS: " (number->string (fps-last-frames director-fps)))))
+                  (string-append "FPS: "
+                                 (number->string (fps-last-frames director-fps)))))
 
 (define (director-set-draw-target image)
   (set-target-image image))
 
 (define (director-reset-draw-target)
-  (game-reset-draw-target director-game))
+  (game-reset-draw-target ))
 
-(game-on-start-hook
- director-game
- (lambda ()
-   (set! director-font (load-asset "CarroisGothic-Regular.ttf" 18))))
+(game-on-start-hook (lambda ()
+                      (set! director-font (load-asset "CarroisGothic-Regular.ttf" 18))))
 
-(game-on-update-hook
- director-game
- (lambda ()
-   (update-fps! director-fps)
-   ;; Update current scene. If the scene stack is empty, exit the game.
-   (if (director-current-scene)
-       (update (director-current-scene))
-       (game-stop director-game))))
+(game-on-update-hook (lambda ()
+                       (update-fps! director-fps)
+                       ;; Update current scene. If the scene stack is
+                       ;; empty, exit the game.
+                       (if (director-current-scene)
+                           (update (director-current-scene))
+                           (game-stop ))))
 
-(game-on-draw-hook
- director-game
- (lambda ()
-   (when (director-current-scene)
-     (draw (director-current-scene)))
-   (when director-show-fps
-     (director-draw-fps))))
+(game-on-draw-hook (lambda ()
+                     (when (director-current-scene)
+                       (draw (director-current-scene)))
+                     (when director-show-fps
+                       (director-draw-fps))))
 
-(game-on-key-pressed-hook
- director-game
- (lambda (key)
-   (when (director-current-scene)
-     (on-key-pressed (director-current-scene) key))))
+(game-on-key-pressed-hook (lambda (key)
+                            (when (director-current-scene)
+                              (on-key-pressed (director-current-scene) key))))
 
-(game-on-key-released-hook
- director-game
- (lambda (key)
-   (when (director-current-scene)
-     (on-key-released (director-current-scene) key))))
+(game-on-key-released-hook (lambda (key)
+                             (when (director-current-scene)
+                               (on-key-released (director-current-scene) key))))
 

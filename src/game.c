@@ -1,94 +1,60 @@
 #include "game.h"
 
-static scm_t_bits game_tag;
-
-static Game*
-check_game (SCM game_smob) {
-    scm_assert_smob_type (game_tag, game_smob);
-
-    return (Game *) SCM_SMOB_DATA (game_smob);
-}
-
-static SCM
-make_game () {
-    SCM smob;
-    Game *game;
-
-    /* Step 1: Allocate the memory block.
-     */
-    game = (Game *) scm_gc_malloc (sizeof (Game), "game");
-
-    /* Step 2: Initialize it with straight code.
-     */
-    game->display = NULL;
-    game->event_queue = NULL;
-    game->timer = NULL;
-    game->timestep = 1.0 / 60.0;
-    game->time_accumulator = 0;
-    game->last_update_time = 0;
-    game->on_start = SCM_BOOL_F;
-    game->on_update = SCM_BOOL_F;
-    game->on_draw = SCM_BOOL_F;
-    game->on_key_pressed = SCM_BOOL_F;
-    game->on_key_released = SCM_BOOL_F;
-    game->running = true;
-    game->redraw = true;
-
-    /* Step 3: Create the smob.
-     */
-    SCM_NEWSMOB (smob, game_tag, game);
-
-    return smob;
-}
+static ALLEGRO_DISPLAY *display = NULL;
+static ALLEGRO_EVENT_QUEUE *event_queue = NULL;
+static ALLEGRO_TIMER *timer = NULL;
+static ALLEGRO_VOICE *voice = NULL;
+static ALLEGRO_MIXER *mixer = NULL;
+static char *title = NULL;
+static float timestep = 1.0f / 60.0f;
+static float last_update_time = 0;
+static float time_accumulator = 0;
+static bool running = false;
+static bool paused = false;
+static bool redraw = true;
+static SCM on_start = SCM_BOOL_F;
+static SCM on_update = SCM_BOOL_F;
+static SCM on_draw = SCM_BOOL_F;
+static SCM on_key_pressed = SCM_BOOL_F;
+static SCM on_key_released = SCM_BOOL_F;
 
 static SCM
-on_start_hook (SCM game_smob, SCM callback) {
-    Game *game = check_game (game_smob);
-
-    game->on_start = callback;
+on_start_hook (SCM callback) {
+    on_start = callback;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-on_update_hook (SCM game_smob, SCM callback) {
-    Game *game = check_game (game_smob);
-
-    game->on_update = callback;
+on_update_hook (SCM callback) {
+    on_update = callback;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-on_draw_hook (SCM game_smob, SCM callback) {
-    Game *game = check_game (game_smob);
-
-    game->on_draw = callback;
+on_draw_hook (SCM callback) {
+    on_draw = callback;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-on_key_pressed_hook (SCM game_smob, SCM callback) {
-    Game *game = check_game (game_smob);
-
-    game->on_key_pressed = callback;
+on_key_pressed_hook (SCM callback) {
+    on_key_pressed = callback;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-on_key_released_hook (SCM game_smob, SCM callback) {
-    Game *game = check_game (game_smob);
-
-    game->on_key_released = callback;
+on_key_released_hook (SCM callback) {
+    on_key_released = callback;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscreen) {
-    Game *game = check_game (game_smob);
+game_init (SCM s_title, SCM s_width, SCM s_height, SCM s_fullscreen) {
     char *title = scm_to_latin1_string (s_title);
     int width = scm_to_int (s_width);
     int height = scm_to_int (s_height);
@@ -133,23 +99,23 @@ game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscre
         exit (-1);
     }
 
-    game->voice = al_create_voice (44100, ALLEGRO_AUDIO_DEPTH_INT16,
+    voice = al_create_voice (44100, ALLEGRO_AUDIO_DEPTH_INT16,
                              ALLEGRO_CHANNEL_CONF_2);
 
-    if (!game->voice) {
+    if (!voice) {
         fprintf (stderr, "failed to create voice!.\n");
         exit (-1);
     }
 
-    game->mixer = al_create_mixer (44100, ALLEGRO_AUDIO_DEPTH_FLOAT32,
+    mixer = al_create_mixer (44100, ALLEGRO_AUDIO_DEPTH_FLOAT32,
                              ALLEGRO_CHANNEL_CONF_2);
 
-    if (!game->mixer) {
+    if (!mixer) {
         fprintf (stderr, "failed to create mixer!\n");
         exit (-1);
     }
 
-    if (!al_attach_mixer_to_voice (game->mixer, game->voice)) {
+    if (!al_attach_mixer_to_voice (mixer, voice)) {
         fprintf (stderr, "failed to attach mixer to voice!\n");
         exit (-1);
     }
@@ -163,271 +129,208 @@ game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscre
         al_set_new_display_flags (ALLEGRO_FULLSCREEN);
     }
 
-    game->display = al_create_display (width, height);
+    display = al_create_display (width, height);
 
-    if (!game->display) {
+    if (!display) {
 	fprintf (stderr, "failed to create display!\n");
     }
 
     /* Set window title. */
-    game->title = title;
-    al_set_window_title (game->display, title);
+    title = title;
+    al_set_window_title (display, title);
 
-    game->timer = al_create_timer (game->timestep);
-    game->event_queue = al_create_event_queue ();
-    al_register_event_source (game->event_queue,
-                              al_get_display_event_source (game->display));
-    al_register_event_source (game->event_queue,
-                              al_get_timer_event_source (game->timer));
-    al_register_event_source (game->event_queue, al_get_keyboard_event_source ());
+    timer = al_create_timer (timestep);
+    event_queue = al_create_event_queue ();
+    al_register_event_source (event_queue,
+                              al_get_display_event_source (display));
+    al_register_event_source (event_queue,
+                              al_get_timer_event_source (timer));
+    al_register_event_source (event_queue, al_get_keyboard_event_source ());
 
     return SCM_UNSPECIFIED;
 }
 
 static void
-game_destroy (Game *game) {
-    al_destroy_timer (game->timer);
-    al_destroy_event_queue (game->event_queue);
-    al_destroy_display (game->display);
+game_destroy () {
+    al_destroy_timer (timer);
+    al_destroy_event_queue (event_queue);
+    al_destroy_display (display);
 }
 
 static void
-game_update (Game *game) {
+game_update () {
     float time = al_get_time();
-    float dt = time - game->last_update_time;
+    float dt = time - last_update_time;
 
-    game->redraw = true;
-    game->last_update_time = time;
+    redraw = true;
+    last_update_time = time;
 
     /* No updates while paused. */
-    if (!game->paused) {
-        game->time_accumulator += dt;
+    if (!paused) {
+        time_accumulator += dt;
 
-        while (game->time_accumulator >= game->timestep) {
-            game->time_accumulator -= game->timestep;
-            if (scm_is_true (game->on_update)) {
-                scm_call_0 (game->on_update);
+        while (time_accumulator >= timestep) {
+            time_accumulator -= timestep;
+            if (scm_is_true (on_update)) {
+                scm_call_0 (on_update);
             }
         }
     }
 }
 
 static void
-game_process_event (Game *game) {
+game_process_event () {
     static ALLEGRO_EVENT event;
 
-    al_wait_for_event(game->event_queue, &event);
+    al_wait_for_event(event_queue, &event);
 
     if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-	game->running = false;
+	running = false;
     }
     else if (event.type == ALLEGRO_EVENT_TIMER) {
-	game_update (game);
+	game_update ();
     }
     else if (event.type == ALLEGRO_EVENT_KEY_UP) {
-	if (scm_is_true (game->on_key_released)) {
-	    scm_call_1 (game->on_key_released, scm_from_int (event.keyboard.keycode));
+	if (scm_is_true (on_key_released)) {
+	    scm_call_1 (on_key_released, scm_from_int (event.keyboard.keycode));
 	}
     }
     else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-	if (scm_is_true (game->on_key_pressed)) {
-	    scm_call_1 (game->on_key_pressed, scm_from_int (event.keyboard.keycode));
+	if (scm_is_true (on_key_pressed)) {
+	    scm_call_1 (on_key_pressed, scm_from_int (event.keyboard.keycode));
 	}
     }
 }
 
 static void
-game_draw (Game *game) {
+game_draw () {
     al_clear_to_color (al_map_rgb(0, 0, 0));
 
-    if (scm_is_true (game->on_draw)) {
-	scm_call_0 (game->on_draw);
+    if (scm_is_true (on_draw)) {
+	scm_call_0 (on_draw);
     }
 
     al_flip_display ();
 }
 
 static SCM
-game_pause (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    game->paused = true;
+game_pause () {
+    paused = true;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_resume (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    game->paused = false;
+game_resume () {
+    paused = false;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_run (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    if (scm_is_true (game->on_start)) {
-	scm_call_0 (game->on_start);
+game_run () {
+    running = true;
+    
+    if (scm_is_true (on_start)) {
+	scm_call_0 (on_start);
     }
 
-    al_start_timer (game->timer);
-    game->last_update_time = al_get_time ();
+    al_start_timer (timer);
+    last_update_time = al_get_time ();
 
-    while (game->running) {
-	game_process_event (game);
+    while (running) {
+	game_process_event ();
 
-	if (game->redraw && al_is_event_queue_empty (game->event_queue)) {
-	    game->redraw = false;
-	    game_draw (game);
+	if (redraw && al_is_event_queue_empty (event_queue)) {
+	    redraw = false;
+	    game_draw ();
 	}
     }
 
-    game_destroy (game);
+    game_destroy ();
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_time (SCM game_smob) {
-    /* We don't actually need to use the game struct here. */
-    check_game (game_smob);
-
+game_time () {
     return scm_from_double (al_get_time ());
 }
 
 static SCM
-game_title (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    return scm_from_latin1_string (game->title);
+game_title () {
+    return scm_from_latin1_string (title);
 }
 
 static SCM
-game_stop (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    game->running = false;
+game_stop () {
+    running = false;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_display_width (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    return scm_from_int (al_get_display_width (game->display));
+game_display_width () {
+    return scm_from_int (al_get_display_width (display));
 }
 
 static SCM
-game_display_height (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    return scm_from_int (al_get_display_height (game->display));
+game_display_height () {
+    return scm_from_int (al_get_display_height (display));
 }
 
 static SCM
-game_resize_display (SCM game_smob, SCM s_width, SCM s_height) {
-    Game *game = check_game (game_smob);
+game_resize_display (SCM s_width, SCM s_height) {
     int width = scm_to_int (s_width);
     int height = scm_to_int (s_height);
 
-    al_resize_display (game->display, width, height);
+    al_resize_display (display, width, height);
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_fullscreen (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    return scm_from_bool (al_get_display_flags (game->display) &  ALLEGRO_FULLSCREEN);
+game_fullscreen () {
+    return scm_from_bool (al_get_display_flags (display) &  ALLEGRO_FULLSCREEN);
 }
 
 static SCM
-set_game_fullscreen (SCM game_smob, SCM s_fullscreen) {
-    Game *game = check_game (game_smob);
+set_game_fullscreen (SCM s_fullscreen) {
     bool fullscreen = scm_to_bool (s_fullscreen);
 
-    al_set_display_flag (game->display, ALLEGRO_FULLSCREEN, fullscreen);
+    al_set_display_flag (display, ALLEGRO_FULLSCREEN, fullscreen);
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-reset_draw_target (SCM game_smob) {
-    Game *game = check_game (game_smob);
-
-    al_set_target_backbuffer (game->display);
+reset_draw_target () {
+    al_set_target_backbuffer (display);
 
     return SCM_UNSPECIFIED;
-}
-
-static SCM
-mark_game (SCM game_smob) {
-    Game *game = (Game *) SCM_SMOB_DATA (game_smob);
-
-    /* Mark callbacks. */
-    scm_gc_mark (game->on_start);
-    scm_gc_mark (game->on_update);
-    scm_gc_mark (game->on_draw);
-    scm_gc_mark (game->on_key_pressed);
-    scm_gc_mark (game->on_key_released);
-
-    return game->on_draw;
-}
-
-static size_t
-free_game (SCM game_smob) {
-    Game *game = (Game *) SCM_SMOB_DATA (game_smob);
-
-    scm_gc_free (game, sizeof (Game), "game");
-
-    return 0;
-}
-
-static int
-print_game (SCM game_smob, SCM port, scm_print_state *pstate) {
-    Game *game = check_game (game_smob);
-
-    scm_puts ("#<game \"", port);
-    scm_puts (game->title, port);
-    scm_puts ("\" >", port);
-
-    /* non-zero means success */
-    return 1;
 }
 
 void
-init_game_type (void) {
-    game_tag = scm_make_smob_type ("Game", sizeof (Game));
-    scm_set_smob_mark (game_tag, mark_game);
-    scm_set_smob_free (game_tag, free_game);
-    scm_set_smob_print (game_tag, print_game);
+init_game_bindings (void) {
+    scm_c_define_gsubr ("game-on-start-hook", 1, 0, 0, on_start_hook);
+    scm_c_define_gsubr ("game-on-update-hook", 1, 0, 0, on_update_hook);
+    scm_c_define_gsubr ("game-on-draw-hook", 1, 0, 0, on_draw_hook);
+    scm_c_define_gsubr ("game-on-key-pressed-hook", 1, 0, 0, on_key_pressed_hook);
+    scm_c_define_gsubr ("game-on-key-released-hook", 1, 0, 0, on_key_released_hook);
+    scm_c_define_gsubr ("game-init", 4, 0, 0, game_init);
+    scm_c_define_gsubr ("game-run", 0, 0, 0, game_run);
+    scm_c_define_gsubr ("game-stop", 0, 0, 0, game_stop);
+    scm_c_define_gsubr ("game-pause", 0, 0, 0, game_pause);
+    scm_c_define_gsubr ("game-resume", 0, 0, 0, game_resume);
+    scm_c_define_gsubr ("game-time", 0, 0, 0, game_time);
+    scm_c_define_gsubr ("game-title", 0, 0, 0, game_title);
+    scm_c_define_gsubr ("game-display-width", 0, 0, 0, game_display_width);
+    scm_c_define_gsubr ("game-display-height", 0, 0, 0, game_display_height);
+    scm_c_define_gsubr ("game-resize-display", 2, 0, 0, game_resize_display);
+    scm_c_define_gsubr ("game-fullscreen?", 0, 0, 0, game_fullscreen);
+    scm_c_define_gsubr ("set-game-fullscreen", 1, 0, 0, set_game_fullscreen);
+    scm_c_define_gsubr ("game-reset-draw-target", 0, 0, 0, reset_draw_target);
 
-    scm_c_define_gsubr ("make-game", 0, 0, 0, make_game);
-    scm_c_define_gsubr ("game-on-start-hook", 2, 0, 0, on_start_hook);
-    scm_c_define_gsubr ("game-on-update-hook", 2, 0, 0, on_update_hook);
-    scm_c_define_gsubr ("game-on-draw-hook", 2, 0, 0, on_draw_hook);
-    scm_c_define_gsubr ("game-on-key-pressed-hook", 2, 0, 0, on_key_pressed_hook);
-    scm_c_define_gsubr ("game-on-key-released-hook", 2, 0, 0, on_key_released_hook);
-    scm_c_define_gsubr ("game-init", 5, 0, 0, game_init);
-    scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
-    scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
-    scm_c_define_gsubr ("game-pause", 1, 0, 0, game_pause);
-    scm_c_define_gsubr ("game-resume", 1, 0, 0, game_resume);
-    scm_c_define_gsubr ("game-time", 1, 0, 0, game_time);
-    scm_c_define_gsubr ("game-title", 1, 0, 0, game_title);
-    scm_c_define_gsubr ("game-display-width", 1, 0, 0, game_display_width);
-    scm_c_define_gsubr ("game-display-height", 1, 0, 0, game_display_height);
-    scm_c_define_gsubr ("game-resize-display", 3, 0, 0, game_resize_display);
-    scm_c_define_gsubr ("game-fullscreen?", 1, 0, 0, game_fullscreen);
-    scm_c_define_gsubr ("set-game-fullscreen", 2, 0, 0, set_game_fullscreen);
-    scm_c_define_gsubr ("game-reset-draw-target", 1, 0, 0, reset_draw_target);
-
-    scm_c_export ("make-game", NULL);
     scm_c_export ("game-on-start-hook", NULL);
     scm_c_export ("game-on-update-hook", NULL);
     scm_c_export ("game-on-draw-hook", NULL);
