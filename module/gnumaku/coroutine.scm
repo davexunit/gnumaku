@@ -1,6 +1,6 @@
 (define-module (gnumaku coroutine)
   #:use-module (oop goops)
-  #:export (define-coroutine wait))
+  #:export (coroutine define-coroutine wait))
 
 (define (do-coroutine thunk)
   "Creates a procedure that be yield and resume at any point. Used for cooperative multi-threading."
@@ -15,6 +15,12 @@
 
   ;; Call procedure.
   (call-with-prompt 'coroutine-prompt thunk handler))
+
+(define-syntax coroutine
+  (syntax-rules ()
+    ((_ (. args) . body)
+     (lambda (. args)
+       (do-coroutine (lambda () . body))))))
 
 ;; Creates a procedure that is executed as a coroutine.
 (define-syntax define-coroutine
