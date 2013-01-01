@@ -15,7 +15,7 @@
 
 void
 init_gnumaku () {
-    // Create smobs so we can call C code from Scheme
+    /* Create smobs so we can call C code from Scheme. */
     init_vector2_type();
     init_transform_type ();
     init_color_type ();
@@ -33,6 +33,6 @@ init_gnumaku () {
 
 void
 init_gnumaku_module (void) {
-    // Create the gnumaku core module and export all procedures
+    /* Create the gnumaku core module and export all procedures. */
     scm_c_define_module ("gnumaku core", init_gnumaku, NULL);
 }

@@ -6,8 +6,7 @@
 #include <allegro5/allegro_acodec.h>
 #include <libguile.h>
 
-typedef struct
-{
+typedef struct {
     ALLEGRO_SAMPLE *sample;
 } Sample;
 

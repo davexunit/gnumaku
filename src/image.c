@@ -106,7 +106,7 @@ static size_t
 free_image (SCM image_smob) {
     Image *image = (Image *) SCM_SMOB_DATA (image_smob);
 
-    // Do not free sub bitmaps
+    /* Do not free sub bitmaps. */
     if (!al_is_sub_bitmap (image->bitmap)) {
         al_destroy_bitmap (image->bitmap);
     }
@@ -118,8 +118,6 @@ free_image (SCM image_smob) {
 
 static int
 print_image (SCM image_smob, SCM port, scm_print_state *pstate) {
-    // Image *image = (Image *) SCM_SMOB_DATA (image_smob);
-
     scm_puts ("#<image >", port);
 
     /* non-zero means success */

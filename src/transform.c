@@ -162,9 +162,7 @@ free_transform (SCM transform_smob)
 static int
 print_transform (SCM transform_smob, SCM port, scm_print_state *pstate)
 {
-    // Transform *transform = (Transform *) SCM_SMOB_DATA (transform_smob);
-
-    scm_puts ("#<Transform >", port);
+    scm_puts ("#<transform >", port);
 
     /* non-zero means success */
     return 1;

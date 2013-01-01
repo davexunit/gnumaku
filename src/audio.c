@@ -3,16 +3,14 @@
 static scm_t_bits sample_tag;
 
 Sample*
-check_sample (SCM sample_smob)
-{
+check_sample (SCM sample_smob) {
     scm_assert_smob_type (sample_tag, sample_smob);
 
     return (Sample *) SCM_SMOB_DATA (sample_smob);
 }
 
 static SCM
-load_sample (SCM s_file)
-{
+load_sample (SCM s_file) {
     SCM smob;
     const char *file = scm_to_locale_string (s_file);
     Sample *sample = (Sample *) scm_gc_malloc (sizeof (Sample), "sample");
@@ -31,8 +29,7 @@ load_sample (SCM s_file)
 }
 
 static SCM
-play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed)
-{
+play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
     Sample *sample = check_sample (sample_smob);
     float gain = scm_to_double (s_gain);
     float pan = scm_to_double (s_pan);
@@ -46,8 +43,7 @@ play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed)
 }
 
 static size_t
-free_sample (SCM sample_smob)
-{
+free_sample (SCM sample_smob) {
     Sample *sample = (Sample *) SCM_SMOB_DATA (sample_smob);
 
     al_destroy_sample (sample->sample);
@@ -58,19 +54,15 @@ free_sample (SCM sample_smob)
 }
 
 static int
-print_sample (SCM sample_smob, SCM port, scm_print_state *pstate)
-{
-    // Sample *sample = (Sample *) SCM_SMOB_DATA (sample_smob);
-
-    scm_puts ("#<Sample >", port);
+print_sample (SCM sample_smob, SCM port, scm_print_state *pstate) {
+    scm_puts ("#<sample >", port);
 
     /* non-zero means success */
     return 1;
 }
 
 void
-init_sample_type (void)
-{
+init_sample_type (void) {
     sample_tag = scm_make_smob_type ("Sample", sizeof (Sample));
     scm_set_smob_mark (sample_tag, 0);
     scm_set_smob_free (sample_tag, free_sample);
