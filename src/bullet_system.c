@@ -573,29 +573,6 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
 }
 
 static SCM
-emit_simple_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed,
-                    SCM s_direction, SCM s_type) {
-    BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    Vector2 pos = scm_to_vector2 (s_pos);
-    Vector2 scale = vector2_new (1, 1);
-    float speed = scm_to_double (s_speed);
-    float direction = scm_to_double (s_direction);
-    float acceleration = 0;
-    float angular_velocity = 0;
-    int life = 0;
-    BulletType *type = check_bullet_type (s_type);
-    ALLEGRO_COLOR color = al_map_rgba_f (1, 1, 1, 1);
-    Bullet *bullet = new_bullet (bullet_system);
-
-    if (bullet) {
-        init_bullet (bullet, bullet_system, pos, speed, direction, acceleration,
-                     angular_velocity, life, SCM_BOOL_F, color, scale, type);
-    }
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
 emit_script_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_type, SCM script) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
@@ -851,7 +828,6 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("bullet-system-count", 1, 0, 0, bullet_system_count);
     scm_c_define_gsubr ("set-bullet-system-bounds", 5, 0, 0, set_bullet_system_bounds);
     scm_c_define_gsubr ("%emit-bullet", 5, 0, 1, emit_bullet);
-    scm_c_define_gsubr ("%emit-simple-bullet", 5, 0, 0, emit_simple_bullet);
     scm_c_define_gsubr ("%emit-script-bullet", 4, 0, 0, emit_script_bullet);
 
     /* BulletRef bindings */
@@ -903,7 +879,6 @@ init_bullet_system_type (void) {
     scm_c_export ("bullet-system-count", NULL);
     scm_c_export ("set-bullet-system-bounds", NULL);
     scm_c_export ("%emit-bullet", NULL);
-    scm_c_export ("%emit-simple-bullet", NULL);
     scm_c_export ("%emit-script-bullet", NULL);
     scm_c_export ("set-bullet-movement", NULL);
     scm_c_export ("kill-bullet", NULL);
