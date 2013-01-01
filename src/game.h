@@ -11,6 +11,6 @@
 #include <allegro5/allegro_acodec.h>
 #include <libguile.h>
 
-void init_game_bindings ();
+void init_game_bindings (void);
 
 #endif

@@ -3,8 +3,6 @@
 static ALLEGRO_DISPLAY *display = NULL;
 static ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 static ALLEGRO_TIMER *timer = NULL;
-static ALLEGRO_VOICE *voice = NULL;
-static ALLEGRO_MIXER *mixer = NULL;
 static char *title = NULL;
 static float timestep = 1.0f / 60.0f;
 static float last_update_time = 0;
@@ -99,27 +97,6 @@ game_init (SCM s_title, SCM s_width, SCM s_height, SCM s_fullscreen) {
         exit (-1);
     }
 
-    voice = al_create_voice (44100, ALLEGRO_AUDIO_DEPTH_INT16,
-                             ALLEGRO_CHANNEL_CONF_2);
-
-    if (!voice) {
-        fprintf (stderr, "failed to create voice!.\n");
-        exit (-1);
-    }
-
-    mixer = al_create_mixer (44100, ALLEGRO_AUDIO_DEPTH_FLOAT32,
-                             ALLEGRO_CHANNEL_CONF_2);
-
-    if (!mixer) {
-        fprintf (stderr, "failed to create mixer!\n");
-        exit (-1);
-    }
-
-    if (!al_attach_mixer_to_voice (mixer, voice)) {
-        fprintf (stderr, "failed to attach mixer to voice!\n");
-        exit (-1);
-    }
-
     if(!al_install_keyboard ()) {
 	fprintf (stderr, "failed to initialize keyboard!\n");
         exit (-1);
@@ -151,14 +128,14 @@ game_init (SCM s_title, SCM s_width, SCM s_height, SCM s_fullscreen) {
 }
 
 static void
-game_destroy () {
+game_destroy (void) {
     al_destroy_timer (timer);
     al_destroy_event_queue (event_queue);
     al_destroy_display (display);
 }
 
 static void
-game_update () {
+game_update (void) {
     float time = al_get_time();
     float dt = time - last_update_time;
 
@@ -179,7 +156,7 @@ game_update () {
 }
 
 static void
-game_process_event () {
+game_process_event (void) {
     static ALLEGRO_EVENT event;
 
     al_wait_for_event(event_queue, &event);
@@ -203,7 +180,7 @@ game_process_event () {
 }
 
 static void
-game_draw () {
+game_draw (void) {
     al_clear_to_color (al_map_rgb(0, 0, 0));
 
     if (scm_is_true (on_draw)) {
@@ -214,21 +191,21 @@ game_draw () {
 }
 
 static SCM
-game_pause () {
+game_pause (void) {
     paused = true;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_resume () {
+game_resume (void) {
     paused = false;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_run () {
+game_run (void) {
     running = true;
     
     if (scm_is_true (on_start)) {
@@ -253,29 +230,29 @@ game_run () {
 }
 
 static SCM
-game_time () {
+game_time (void) {
     return scm_from_double (al_get_time ());
 }
 
 static SCM
-game_title () {
+game_title (void) {
     return scm_from_latin1_string (title);
 }
 
 static SCM
-game_stop () {
+game_stop (void) {
     running = false;
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-game_display_width () {
+game_display_width (void) {
     return scm_from_int (al_get_display_width (display));
 }
 
 static SCM
-game_display_height () {
+game_display_height (void) {
     return scm_from_int (al_get_display_height (display));
 }
 
@@ -290,7 +267,7 @@ game_resize_display (SCM s_width, SCM s_height) {
 }
 
 static SCM
-game_fullscreen () {
+game_fullscreen (void) {
     return scm_from_bool (al_get_display_flags (display) &  ALLEGRO_FULLSCREEN);
 }
 
@@ -304,7 +281,7 @@ set_game_fullscreen (SCM s_fullscreen) {
 }
 
 static SCM
-reset_draw_target () {
+reset_draw_target (void) {
     al_set_target_backbuffer (display);
 
     return SCM_UNSPECIFIED;
