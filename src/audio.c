@@ -36,9 +36,7 @@ play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
 
-    if (sample->sample) {
-        al_play_sample (sample->sample, gain, pan, speed, ALLEGRO_PLAYMODE_ONCE, NULL);
-    }
+    al_play_sample (sample->sample, gain, pan, speed, ALLEGRO_PLAYMODE_ONCE, NULL);
 
     return SCM_UNSPECIFIED;
 }
@@ -97,10 +95,10 @@ play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
 
-    if (audio_stream->stream) {
-        /* al_play_audio_stream (audio_stream->stream, gain, pan, speed, */
-        /*                       ALLEGRO_PLAYMODE_ONCE, NULL); */
-    }
+    al_set_audio_stream_gain (audio_stream->stream, gain);
+    al_set_audio_stream_pan (audio_stream->stream, pan);
+    al_set_audio_stream_speed (audio_stream->stream, speed);
+    al_attach_audio_stream_to_mixer (audio_stream->stream, al_get_default_mixer ());
 
     return SCM_UNSPECIFIED;
 }
