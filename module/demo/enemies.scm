@@ -11,7 +11,7 @@
   #:use-module (demo actor)
   #:use-module (demo enemy)
   #:use-module (demo level)
-  #:export (make-enemy-1))
+  #:export (make-enemy-1 make-enemy-2))
 
 (define (make-enemy-1 x y)
   (let ((image (sprite-sheet-tile (load-asset "enemy.png" 64 48 0 0) 0)))
@@ -23,3 +23,8 @@
       (set! (action enemy) (lambda (enemy)
                              (spiral1 enemy)))
       enemy)))
+
+(define (make-enemy-2 pos)
+  (let ((image (sprite-sheet-tile (load-asset "enemy.png" 64 48 0 0) 0)))
+    (make <enemy> #:sprite (make-sprite image) #:health 100 #:points 200
+          #:position pos #:hitbox (make-rect -24 -16 48 32) #:action double-spiral)))

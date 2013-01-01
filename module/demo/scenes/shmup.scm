@@ -44,10 +44,10 @@
 (define-method (on-start (scene <shmup-scene>))
   (load-assets scene)
   (init-player scene)
-  (set! (hud scene) (make-hud (player scene) 800 600))
   (set! (current-level scene) (make-demo-level (player scene)
                                                (field-width scene)
                                                (field-height scene)))
+  (set! (hud scene) (make-hud (current-level scene) 800 600))
   (set! (position (current-level scene)) (make-vector2 20 20))
   (run (current-level scene)))
 
@@ -66,8 +66,6 @@
   (when (shooting player)
     (play-sample (shot-sound player) 1.0 0.0 1.0)
     (let* ((pos (position player))
-           (x (vector2-x pos))
-           (y (vector2-y pos))
            (speed 15)
            (bullets (bullet-system player)))
       (emit-simple-bullet bullets (vector2-sub pos (make-vector2 16 0)) speed 269 'sword)
@@ -80,9 +78,17 @@
   (let ((enemy (make-enemy-1 (random (field-width scene)) (random 150))))
     (add-enemy (current-level scene) enemy)))
 
+(define-method (add-test-enemy-2 (scene <shmup-scene>))
+  (add-enemy (current-level scene)
+             (make-enemy-2 (make-vector2 (/ (field-width scene) 2) 60))))
+
 (define-method (add-boss (scene <shmup-scene>))
   (let ((boss (make-boss (/ (field-width scene) 2) 50)))
     (add-enemy (current-level scene) boss)))
+
+(define-method (toggle-player-invincible (scene <shmup-scene>))
+  (let ((player (player scene)))
+    (set! (invincible player) (not (invincible player)))))
 
 (define-method (on-key-pressed (scene <shmup-scene>) key)
   (when (eq? key (keycode 'up))
@@ -113,5 +119,9 @@
      (clear-enemies (current-level scene)))
    (when (eq? key (keycode 'q))
      (add-test-enemy scene))
+   (when (eq? key (keycode 'e))
+     (add-test-enemy-2 scene))
+   (when (eq? key (keycode 't))
+     (toggle-player-invincible scene))
    (when (eq? key (keycode 'b))
      (add-boss scene)))

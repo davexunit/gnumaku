@@ -2,6 +2,7 @@
   #:use-module (oop goops)
   #:use-module (gnumaku generics)
   #:use-module (gnumaku core)
+  #:use-module (gnumaku math)
   #:use-module (gnumaku coroutine)
   #:use-module (gnumaku events)
   #:use-module (gnumaku scene-graph)
@@ -22,7 +23,7 @@
     hash))
 
 (define (make-bounds)
-  (make-rect -24 -24 48 48))
+  (make-rect -16 -16 32 32))
 
 (define (make-hitbox)
   (make-rect -4 -4 8 8))
@@ -131,7 +132,7 @@
       (set! y (- y 1)))
     (when (direction? player 'down)
       (set! y (+ y 1)))
-    (atan y x)))
+    (atan-deg y x)))
 
 (define-method (restrict-bounds (player <player>))
   (let* ((level (level player))

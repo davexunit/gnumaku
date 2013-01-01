@@ -17,7 +17,7 @@
 
 (define (init-bullet-types)
   (register-bullet-type 'medium-blue
-                        (make-bullet-type 0 (make-rect -4 -4 8 8) 'add #f))
+                        (make-bullet-type 0 (make-rect -4 -4 8 8) 'alpha #f))
 
   (register-bullet-type 'small-diamond
                         (make-bullet-type 1 (make-rect -2 -2 4 4) 'alpha #t))

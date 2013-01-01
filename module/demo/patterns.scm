@@ -8,7 +8,7 @@
   #:use-module (gnumaku scene-graph)
   #:use-module (demo actor)
   #:use-module (demo level)
-  #:export (spiral1 spiral2 polar-rose fire-at-player))
+  #:export (spiral1 spiral2 arch-spiral double-spiral fire-at-player))
 
 (define (clamp n min-n max-n)
   (max min-n (min max-n n)))
@@ -72,3 +72,49 @@
                    #:scale (make-vector2 scale scale)))
     (wait actor 2)
     (loop (+ angle 20))))
+
+(define-coroutine (arch-spiral actor)
+  (define step (quotient 360 20))
+  
+  (define-coroutine (script bullet angle)
+    (set-bullet-movement bullet 0 angle 0 0)
+    (bullet-wait bullet 15)
+    (set-bullet-movement bullet 3 angle 0 0))
+
+  (define (emit angle)
+    (let* ((angle (+ angle (random 20)))
+           (a .01)
+           (b .1)
+           (system (bullet-system actor))
+           (r (+ a (* b angle)))
+           (pos (vector2-add (position actor)
+                             (vector2-from-polar r angle))))
+      (emit-script-bullet system pos 'medium-blue
+                          (lambda (bullet) (script bullet angle)))))
+  
+  (define (spiral angle)
+      (when (< angle (* 3 360))
+        (emit angle)
+        (wait actor 1)
+        (spiral (+ angle step))))
+  
+  (spiral 0)
+  (arch-spiral actor))
+
+(define-coroutine (double-spiral actor)
+  (define (emit i total offset color)
+    (let* ((angle (+ offset (* 360 (/ i total))))
+           (pos (vector2-add (position actor) (vector2-from-polar 50 angle))))
+      (emit-bullet (bullet-system actor) pos 3 angle 'medium-blue #:color color)))
+
+  (define (spiral angle-a angle-b)
+    (let ((step (/ 360 20))
+          (num-bullets 16)
+          (color-a (make-color-f 1 0 0 1))
+          (color-b (make-color-f 1 1 1 1)))
+      (repeat num-bullets (lambda (i) (emit i num-bullets angle-a color-a)))
+      (repeat num-bullets (lambda (i) (emit i num-bullets angle-b color-b)))
+      (wait actor 10)
+      (spiral (+ angle-a step) (- angle-b step))))
+
+  (spiral 0 0))

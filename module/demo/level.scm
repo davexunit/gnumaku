@@ -118,7 +118,7 @@
   (draw-bullet-system (player-bullet-system level))
   (draw (player level))
   (draw-bullet-system (enemy-bullet-system level))
-  (draw-bullet-system-hitboxes (enemy-bullet-system level))
+  ;(draw-bullet-system-hitboxes (enemy-bullet-system level))
   (draw-enemies level)
   (director-reset-draw-target)
   (draw-image (buffer level) 0 0))
