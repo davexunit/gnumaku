@@ -88,13 +88,14 @@ on_key_released_hook (SCM game_smob, SCM callback) {
 }
 
 static SCM
-game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen) {
+game_init (SCM game_smob, SCM s_title, SCM s_width, SCM s_height, SCM s_fullscreen) {
     Game *game = check_game (game_smob);
+    char *title = scm_to_latin1_string (s_title);
     int width = scm_to_int (s_width);
     int height = scm_to_int (s_height);
     bool fullscreen = scm_to_bool (s_fullscreen);
 
-    /* Initialize Allegro things */
+    /* Initialize Allegro things */ 
     /* TODO: Handle these errors in a proper way */
     if (!al_init ()) {
 	fprintf (stderr, "failed to initialize allegro!\n");
@@ -148,10 +149,16 @@ game_init (SCM game_smob, SCM s_width, SCM s_height, SCM s_fullscreen) {
 	fprintf (stderr, "failed to create display!\n");
     }
 
+    /* Set window title. */
+    game->title = title;
+    al_set_window_title (game->display, title);
+    
     game->timer = al_create_timer (game->timestep);
     game->event_queue = al_create_event_queue ();
-    al_register_event_source (game->event_queue, al_get_display_event_source (game->display));
-    al_register_event_source (game->event_queue, al_get_timer_event_source (game->timer));
+    al_register_event_source (game->event_queue,
+                              al_get_display_event_source (game->display));
+    al_register_event_source (game->event_queue,
+                              al_get_timer_event_source (game->timer));
     al_register_event_source (game->event_queue, al_get_keyboard_event_source ());
 
     return SCM_UNSPECIFIED;
@@ -172,9 +179,10 @@ game_update (Game *game) {
     game->redraw = true;
     game->last_update_time = time;
 
+    /* No updates while paused. */
     if (!game->paused) {
         game->time_accumulator += dt;
-        
+
         while (game->time_accumulator >= game->timestep) {
             game->time_accumulator -= game->timestep;
             if (scm_is_true (game->on_update)) {
@@ -263,11 +271,18 @@ game_run (SCM game_smob) {
 }
 
 static SCM
-game_get_time (SCM game_smob) {
-    // We don't actually need to use the game struct here.
+game_time (SCM game_smob) {
+    /* We don't actually need to use the game struct here. */
     check_game (game_smob);
 
     return scm_from_double (al_get_time ());
+}
+
+static SCM
+game_title (SCM game_smob) {
+    Game *game = check_game (game_smob);
+
+    return scm_from_latin1_string (game->title);
 }
 
 static SCM
@@ -334,7 +349,7 @@ static SCM
 mark_game (SCM game_smob) {
     Game *game = (Game *) SCM_SMOB_DATA (game_smob);
 
-    // Mark callbacks
+    /* Mark callbacks. */
     scm_gc_mark (game->on_start);
     scm_gc_mark (game->on_update);
     scm_gc_mark (game->on_draw);
@@ -355,9 +370,11 @@ free_game (SCM game_smob) {
 
 static int
 print_game (SCM game_smob, SCM port, scm_print_state *pstate) {
-    //Game *game = (Game *) SCM_SMOB_DATA (game_smob);
+    Game *game = check_game (game_smob);
 
-    scm_puts ("#<Game>", port);
+    scm_puts ("#<game \"", port);
+    scm_puts (game->title, port);
+    scm_puts ("\" >", port);
 
     /* non-zero means success */
     return 1;
@@ -376,12 +393,13 @@ init_game_type (void) {
     scm_c_define_gsubr ("game-on-draw-hook", 2, 0, 0, on_draw_hook);
     scm_c_define_gsubr ("game-on-key-pressed-hook", 2, 0, 0, on_key_pressed_hook);
     scm_c_define_gsubr ("game-on-key-released-hook", 2, 0, 0, on_key_released_hook);
-    scm_c_define_gsubr ("game-init", 4, 0, 0, game_init);
+    scm_c_define_gsubr ("game-init", 5, 0, 0, game_init);
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
     scm_c_define_gsubr ("game-pause", 1, 0, 0, game_pause);
     scm_c_define_gsubr ("game-resume", 1, 0, 0, game_resume);
-    scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
+    scm_c_define_gsubr ("game-time", 1, 0, 0, game_time);
+    scm_c_define_gsubr ("game-title", 1, 0, 0, game_title);
     scm_c_define_gsubr ("game-display-width", 1, 0, 0, game_display_width);
     scm_c_define_gsubr ("game-display-height", 1, 0, 0, game_display_height);
     scm_c_define_gsubr ("game-resize-display", 3, 0, 0, game_resize_display);
@@ -400,7 +418,8 @@ init_game_type (void) {
     scm_c_export ("game-stop", NULL);
     scm_c_export ("game-pause", NULL);
     scm_c_export ("game-resume", NULL);
-    scm_c_export ("game-get-time", NULL);
+    scm_c_export ("game-time", NULL);
+    scm_c_export ("game-title", NULL);
     scm_c_export ("game-display-width", NULL);
     scm_c_export ("game-display-height", NULL);
     scm_c_export ("game-resize-display", NULL);

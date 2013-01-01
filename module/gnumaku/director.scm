@@ -55,8 +55,8 @@
   (when (director-current-scene)
     (on-start (director-current-scene))))
 
-(define* (director-init width height #:optional (fullscreen #f))
-  (game-init director-game width height fullscreen))
+(define* (director-init title width height #:optional (fullscreen #f))
+  (game-init director-game title width height fullscreen))
 
 (define (director-run scene)
   (director-push-scene scene)

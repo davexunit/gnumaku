@@ -22,7 +22,7 @@
   (set-fps-frames! fps (1+ (fps-frames fps))))
 
 (define (update-fps! fps)
-  (let ((time (game-get-time (fps-game fps))))
+  (let ((time (game-time (fps-game fps))))
     (inc-fps-time-acc! fps (- time (fps-last-time fps)))
     (inc-fps-frames! fps)
     (set-fps-last-time! fps time)
