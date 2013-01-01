@@ -38,12 +38,13 @@
   (register-asset-manager "images" load-image)
   (register-asset-manager "sprite_sheets" load-sprite-sheet)
   (register-asset-manager "sounds" load-sample)
+  (register-asset-manager "music" load-audio-stream)
   (register-asset-manager "fonts" load-font))
 
 (define (main)
   (init-assets-manager)
   (init-bullet-types)
   ;; Start up director
-  (director-init 800 600)
+  (director-init "Sample Shmup" 800 600)
   (set! director-show-fps #t)
   (director-run (make <shmup-scene>)))

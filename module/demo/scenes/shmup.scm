@@ -19,8 +19,16 @@
   #:use-module (demo hud)
   #:use-module (demo levels demo)
   #:duplicates (merge-generics)
-  #:export (<shmup-scene> background field-width field-height player hud current-level))
+  #:export (<shmup-scene>
+            background
+            field-width
+            field-height
+            player
+            hud
+            current-level))
 
+(define (load-music)
+  (load-asset "01-speedway.ogg"))
 
 (define-class <shmup-scene> (<scene>)
   (background #:accessor background #:init-keyword #:background #:init-value #f)
@@ -31,6 +39,7 @@
   (player-sheet #:accessor player-sheet #:init-keyword #:player-sheet #:init-value #f)
   (enemy-sheet #:accessor enemy-sheet #:init-keyword #:enemy-sheet #:init-value #f)
   (shot-sound #:accessor shot-sound #:init-keyword #:shot-sound #:init-value #f)
+  (music #:accessor music #:init-thunk load-music)
   (current-level #:accessor current-level #:init-keyword #:current-level #:init-value #f))
 
 (define-method (draw (scene <shmup-scene>))
@@ -57,20 +66,21 @@
 
 (define-method (init-player (scene <shmup-scene>))
   (let ((player (player scene)))
-    (set! (shot player) player-shot-1)
+    (set! (shot player) (lambda (player) (player-shot-1 player)))
     (set! (shot-sound player) (shot-sound scene))
     (set! (position player) (make-vector2 (/ (field-width scene) 2)
                                           (- (field-height scene) 32)))))
 
 (define-coroutine (player-shot-1 player)
   (when (shooting player)
-    (play-sample (shot-sound player) 1.0 0.0 1.0)
+    (play-sample (shot-sound player) .3 0 1)
     (let* ((pos (position player))
            (speed 15)
-           (bullets (bullet-system player)))
-      (emit-bullet bullets (vector2-sub pos (make-vector2 16 0)) speed 269 'sword)
-      (emit-bullet bullets (vector2-sub pos (make-vector2 0 20)) speed 270 'sword)
-      (emit-bullet bullets (vector2-add pos (make-vector2 16 0)) speed 271 'sword))
+           (bullets (bullet-system player))
+           (type 'sword))
+      (emit-bullet bullets (vector2-sub pos (make-vector2 16 0)) speed 269 type)
+      (emit-bullet bullets (vector2-sub pos (make-vector2 0 20)) speed 270 type)
+      (emit-bullet bullets (vector2-add pos (make-vector2 16 0)) speed 271 type))
     (wait player 3)
     (player-shot-1 player)))
 
