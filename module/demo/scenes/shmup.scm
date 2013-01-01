@@ -68,9 +68,9 @@
     (let* ((pos (position player))
            (speed 15)
            (bullets (bullet-system player)))
-      (emit-simple-bullet bullets (vector2-sub pos (make-vector2 16 0)) speed 269 'sword)
-      (emit-simple-bullet bullets (vector2-sub pos (make-vector2 0 20)) speed 270 'sword)
-      (emit-simple-bullet bullets (vector2-add pos (make-vector2 16 0)) speed 271 'sword))
+      (emit-bullet bullets (vector2-sub pos (make-vector2 16 0)) speed 269 'sword)
+      (emit-bullet bullets (vector2-sub pos (make-vector2 0 20)) speed 270 'sword)
+      (emit-bullet bullets (vector2-add pos (make-vector2 16 0)) speed 271 'sword))
     (wait player 3)
     (player-shot-1 player)))
 

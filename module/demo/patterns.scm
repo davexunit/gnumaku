@@ -36,8 +36,7 @@
   
   (define (emit i)
     (let ((direction (+ (* i step) (random angle-var))))
-      (emit-simple-bullet system (bullet-position bullet)
-                          speed direction 'sword)))
+      (emit-bullet system (bullet-position bullet) speed direction 'sword)))
   
   (bullet-wait bullet delay)
   (kill-bullet bullet)
