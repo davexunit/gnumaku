@@ -20,6 +20,7 @@ typedef struct
     float last_update_time;
     float time_accumulator;
     bool running;
+    bool paused;
     bool redraw;
     SCM on_start;
     SCM on_update;

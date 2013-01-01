@@ -171,12 +171,15 @@ game_update (Game *game) {
 
     game->redraw = true;
     game->last_update_time = time;
-    game->time_accumulator += dt;
 
-    while (game->time_accumulator >= game->timestep) {
-        game->time_accumulator -= game->timestep;
-        if (scm_is_true (game->on_update)) {
-            scm_call_0 (game->on_update);
+    if (!game->paused) {
+        game->time_accumulator += dt;
+        
+        while (game->time_accumulator >= game->timestep) {
+            game->time_accumulator -= game->timestep;
+            if (scm_is_true (game->on_update)) {
+                scm_call_0 (game->on_update);
+            }
         }
     }
 }
@@ -214,6 +217,24 @@ game_draw (Game *game) {
     }
 
     al_flip_display ();
+}
+
+static SCM
+game_pause (SCM game_smob) {
+    Game *game = check_game (game_smob);
+
+    game->paused = true;
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
+game_resume (SCM game_smob) {
+    Game *game = check_game (game_smob);
+
+    game->paused = false;
+
+    return SCM_UNSPECIFIED;
 }
 
 static SCM
@@ -358,6 +379,8 @@ init_game_type (void) {
     scm_c_define_gsubr ("game-init", 4, 0, 0, game_init);
     scm_c_define_gsubr ("game-run", 1, 0, 0, game_run);
     scm_c_define_gsubr ("game-stop", 1, 0, 0, game_stop);
+    scm_c_define_gsubr ("game-pause", 1, 0, 0, game_pause);
+    scm_c_define_gsubr ("game-resume", 1, 0, 0, game_resume);
     scm_c_define_gsubr ("game-get-time", 1, 0, 0, game_get_time);
     scm_c_define_gsubr ("game-display-width", 1, 0, 0, game_display_width);
     scm_c_define_gsubr ("game-display-height", 1, 0, 0, game_display_height);
@@ -375,6 +398,8 @@ init_game_type (void) {
     scm_c_export ("game-init", NULL);
     scm_c_export ("game-run", NULL);
     scm_c_export ("game-stop", NULL);
+    scm_c_export ("game-pause", NULL);
+    scm_c_export ("game-resume", NULL);
     scm_c_export ("game-get-time", NULL);
     scm_c_export ("game-display-width", NULL);
     scm_c_export ("game-display-height", NULL);

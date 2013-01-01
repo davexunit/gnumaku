@@ -5,9 +5,17 @@
   #:use-module (gnumaku scene)
   #:use-module (gnumaku fps)
   #:use-module (gnumaku assets)
-  #:export (director-init director-run director-show-fps director-push-scene director-pop-scene
-                          director-replace-scene director-set-draw-target director-reset-draw-target
-                          director-current-scene))
+  #:export (director-init
+            director-run
+            director-pause
+            director-resume
+            director-show-fps
+            director-push-scene
+            director-pop-scene
+            director-replace-scene
+            director-set-draw-target
+            director-reset-draw-target
+            director-current-scene))
 
 (define director-game (make-game))
 (define director-scenes '())
@@ -53,6 +61,12 @@
 (define (director-run scene)
   (director-push-scene scene)
   (game-run director-game))
+
+(define (director-pause)
+  (game-pause director-game))
+
+(define (director-resume)
+  (game-resume director-game))
 
 (define (director-draw-fps)
   (font-draw-text director-font 730 575 (make-color-f 1 1 1 0.7)
