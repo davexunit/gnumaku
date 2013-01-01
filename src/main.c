@@ -25,6 +25,7 @@ init_gnumaku () {
     init_rect_type ();
     init_font_type ();
     init_sample_type ();
+    init_audio_stream_type ();
     init_game_type ();
     init_particle_system_type ();
     init_bullet_system_type ();
