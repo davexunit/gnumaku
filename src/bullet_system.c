@@ -474,26 +474,32 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
 }
 
 static void
+init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, BulletType *type) {
+    SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
+
+    bullet->directional = type->directional;
+    bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
+    bullet->blend_mode = type->blend_mode;
+    bullet->hitbox = rect_scale (type->hitbox, bullet->scale);
+}
+
+static void
 init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
              float speed, float direction, float acceleration, float angular_velocity,
              int life, SCM script, ALLEGRO_COLOR color, Vector2 scale,
              BulletType *type) {
-    SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
 
     bullet->active = true;
     bullet->kill = false;
-    bullet->directional = type->directional;
     bullet->life = life;
     bullet->script_time = 0;
     bullet->life_count = 0;
     bullet->pos = pos;
     bullet->scale = scale;
-    bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
     bullet->color = color;
-    bullet->blend_mode = type->blend_mode;
     bullet->script = script;
-    bullet->hitbox = rect_scale (type->hitbox, scale);
     init_bullet_movement (bullet, speed, direction, acceleration, angular_velocity);
+    init_bullet_type (bullet, bullet_system, type);
 }
 
 static SCM
@@ -612,6 +618,17 @@ set_bullet_script (SCM bullet_ref_smob, SCM s_dt, SCM script) {
 
     bullet->script = script;
     bullet->script_time = bullet->life_count + dt;
+
+    return SCM_UNSPECIFIED;
+}
+
+static SCM
+set_bullet_type (SCM bullet_ref_smob, SCM bullet_type_smob) {
+    BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
+    BulletType *type = check_bullet_type (bullet_type_smob);
+    Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
+
+    init_bullet_type (bullet, bullet_ref->system, type);
 
     return SCM_UNSPECIFIED;
 }
@@ -796,7 +813,7 @@ init_bullet_system_type (void) {
     sym_blend_add = scm_from_latin1_symbol ("add");
 
     keyword_acceleration = scm_from_latin1_keyword ("acceleration");
-    keyword_angular_velocity = scm_from_latin1_keyword ("angular_velocity");
+    keyword_angular_velocity = scm_from_latin1_keyword ("angular-velocity");
     keyword_life = scm_from_latin1_keyword ("life");
     keyword_color = scm_from_latin1_keyword ("color");
     keyword_scale = scm_from_latin1_keyword ("scale");
@@ -847,6 +864,7 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("bullet-color", 1, 0, 0, bullet_color);
     scm_c_define_gsubr ("bullet-scale", 1, 0, 0, bullet_scale);
     scm_c_define_gsubr ("set-bullet-script", 3, 0, 0, set_bullet_script);
+    scm_c_define_gsubr ("%set-bullet-type", 2, 0, 0, set_bullet_type);
     scm_c_define_gsubr ("set-bullet-position", 2, 0, 0, set_bullet_position);
     scm_c_define_gsubr ("set-bullet-speed", 2, 0, 0, set_bullet_speed);
     scm_c_define_gsubr ("set-bullet-direction", 2, 0, 0, set_bullet_direction);
@@ -891,6 +909,7 @@ init_bullet_system_type (void) {
     scm_c_export ("bullet-color", NULL);
     scm_c_export ("bullet-scale", NULL);
     scm_c_export ("set-bullet-script", NULL);
+    scm_c_export ("%set-bullet-type", NULL);
     scm_c_export ("set-bullet-position", NULL);
     scm_c_export ("set-bullet-speed", NULL);
     scm_c_export ("set-bullet-direction", NULL);
@@ -900,3 +919,4 @@ init_bullet_system_type (void) {
     scm_c_export ("set-bullet-color", NULL);
     scm_c_export ("set-bullet-scale", NULL);
 }
+ 
