@@ -262,7 +262,7 @@ static void
 update_bullet(Bullet *bullet) {
     update_bullet_script (bullet);
     al_transform_coordinates (&bullet->angular_velocity,
-                              &bullet->pos.x, &bullet->pos.y);
+                              &bullet->vel.x, &bullet->vel.y);
     al_transform_coordinates (&bullet->angular_velocity,
                               &bullet->acc.x, &bullet->acc.y);
     bullet->pos = vector2_add (bullet->pos, bullet->vel);
