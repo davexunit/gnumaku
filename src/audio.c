@@ -89,16 +89,22 @@ load_audio_stream (SCM s_file) {
 }
 
 static SCM
-play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
+play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed,
+                   SCM s_loop) {
     AudioStream *audio_stream = check_audio_stream (audio_stream_smob);
     float gain = scm_to_double (s_gain);
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
+    bool loop = scm_to_bool (s_loop);
+    ALLEGRO_PLAYMODE playmode = loop ? ALLEGRO_PLAYMODE_LOOP : ALLEGRO_PLAYMODE_ONCE;
 
     al_set_audio_stream_gain (audio_stream->stream, gain);
     al_set_audio_stream_pan (audio_stream->stream, pan);
     al_set_audio_stream_speed (audio_stream->stream, speed);
+    al_set_audio_stream_playmode (audio_stream->stream, playmode);
     al_attach_audio_stream_to_mixer (audio_stream->stream, al_get_default_mixer ());
+
+    scm_remember_upto_here_1 (audio_stream_smob);
 
     return SCM_UNSPECIFIED;
 }
@@ -144,7 +150,7 @@ init_audio_stream_type (void) {
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
 
     scm_c_define_gsubr ("load-audio-stream", 1, 0, 0, load_audio_stream);
-    scm_c_define_gsubr ("play-audio-stream", 4, 0, 0, play_audio_stream);
+    scm_c_define_gsubr ("play-audio-stream", 5, 0, 0, play_audio_stream);
 
     scm_c_export ("load-audio-stream", NULL);
     scm_c_export ("play-audio-stream", NULL);
