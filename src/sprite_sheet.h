@@ -5,8 +5,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 
-typedef struct
-{
+typedef struct {
     ALLEGRO_BITMAP *image;
     int tile_width;
     int tile_height;
@@ -16,8 +15,8 @@ typedef struct
     ALLEGRO_BITMAP **tiles;
 } SpriteSheet;
 
-ALLEGRO_BITMAP* sprite_sheet_tile (SpriteSheet *sprite_sheet, int index);
-SpriteSheet* check_sprite_sheet (SCM sprite_sheet_smob);
+ALLEGRO_BITMAP *sprite_sheet_tile (SpriteSheet *sprite_sheet, int index);
+SpriteSheet *check_sprite_sheet (SCM sprite_sheet_smob);
 void init_sprite_sheet_type (void);
 
 #endif
