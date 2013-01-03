@@ -2,9 +2,6 @@
 
 static scm_t_bits bullet_system_tag;
 static scm_t_bits bullet_ref_tag;
-static scm_t_bits bullet_type_tag;
-static SCM sym_blend_alpha;
-static SCM sym_blend_add;
 static SCM keyword_acceleration;
 static SCM keyword_angular_velocity;
 static SCM keyword_life;
@@ -15,60 +12,6 @@ static SCM default_angular_velocity;
 static SCM default_life;
 static SCM default_color;
 static SCM default_scale;
-
-static BlendMode
-scm_to_blend_mode (SCM blend_mode) {
-    if (scm_is_true (scm_eq_p (blend_mode, sym_blend_alpha))) {
-        return BLEND_ALPHA;
-    } else if (scm_is_true (scm_eq_p (blend_mode, sym_blend_add))) {
-        return BLEND_ADD;
-    }
-
-    return BLEND_ALPHA;
-}
-
-static SCM
-make_bullet_type (SCM s_image, SCM s_hitbox, SCM s_blend_mode, SCM s_directional) {
-    SCM smob;
-    BulletType *bullet_type;
-    int image = scm_to_int (s_image);
-    Rect hitbox = scm_to_rect (s_hitbox);
-    BlendMode blend_mode = scm_to_blend_mode (s_blend_mode);
-    bool directional = scm_to_bool (s_directional);
-
-    bullet_type = (BulletType *) scm_gc_malloc (sizeof (BulletType), "bullet_type");
-    bullet_type->image = image;
-    bullet_type->hitbox = hitbox;
-    bullet_type->blend_mode = blend_mode;
-    bullet_type->directional = directional;
-    SCM_NEWSMOB (smob, bullet_type_tag, bullet_type);
-
-    return smob;
-}
-
-static BulletType*
-check_bullet_type (SCM bullet_type_smob) {
-    scm_assert_smob_type (bullet_type_tag, bullet_type_smob);
-
-    return (BulletType *) SCM_SMOB_DATA (bullet_type_smob);
-}
-
-static size_t
-free_bullet_type (SCM bullet_type_smob) {
-    BulletType *bullet_type = (BulletType *) SCM_SMOB_DATA (bullet_type_smob);
-
-    scm_gc_free (bullet_type, sizeof (BulletType), "bullet_type");
-
-    return 0;
-}
-
-static int
-print_bullet_type (SCM bullet_type_smob, SCM port, scm_print_state *pstate) {
-    scm_puts ("#<bullet-type>", port);
-
-    /* non-zero means success */
-    return 1;
-}
 
 static BulletSystem*
 check_bullet_system (SCM bullet_system_smob) {
@@ -809,9 +752,6 @@ set_bullet_scale (SCM bullet_ref_smob, SCM s_scale) {
 
 void
 init_bullet_system_type (void) {
-    sym_blend_alpha = scm_from_latin1_symbol ("alpha");
-    sym_blend_add = scm_from_latin1_symbol ("add");
-
     keyword_acceleration = scm_from_latin1_keyword ("acceleration");
     keyword_angular_velocity = scm_from_latin1_keyword ("angular-velocity");
     keyword_life = scm_from_latin1_keyword ("life");
@@ -875,16 +815,6 @@ init_bullet_system_type (void) {
     scm_c_define_gsubr ("set-bullet-color", 2, 0, 0, set_bullet_color);
     scm_c_define_gsubr ("set-bullet-scale", 2, 0, 0, set_bullet_scale);
 
-    /* BulletType bindings */
-    bullet_type_tag = scm_make_smob_type ("<bullet-type>", sizeof (BulletType));
-    scm_set_smob_mark (bullet_type_tag, 0);
-    scm_set_smob_free (bullet_type_tag, free_bullet_type);
-    scm_set_smob_print (bullet_type_tag, print_bullet_type);
-
-    scm_c_define_gsubr ("make-bullet-type", 4, 0, 0, make_bullet_type);
-
-    /* Exports */
-    scm_c_export ("make-bullet-type", NULL);
     scm_c_export ("make-bullet-system", NULL);
     scm_c_export ("clear-bullet-system", NULL);
     scm_c_export ("draw-bullet-system", NULL);
@@ -919,4 +849,3 @@ init_bullet_system_type (void) {
     scm_c_export ("set-bullet-color", NULL);
     scm_c_export ("set-bullet-scale", NULL);
 }
- 

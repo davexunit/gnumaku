@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "game.h"
 #include "particle_system.h"
+#include "bullet_type.h"
 #include "bullet_system.h"
 #include "draw.h"
 
@@ -27,6 +28,7 @@ init_gnumaku () {
     init_sample_type ();
     init_audio_stream_type ();
     init_particle_system_type ();
+    init_bullet_type_type ();
     init_bullet_system_type ();
     bind_draw_funcs ();
     init_game_bindings ();

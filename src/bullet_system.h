@@ -11,18 +11,8 @@
 #include "sprite_sheet.h"
 #include "rect.h"
 #include "color.h"
-
-typedef enum {
-    BLEND_ALPHA,
-    BLEND_ADD,
-} BlendMode;
-
-typedef struct {
-    bool directional; /* Rotate sprite to reflect direction? */
-    int image;
-    Rect hitbox;
-    BlendMode blend_mode;
-} BulletType;
+#include "blend_mode.h"
+#include "bullet_type.h"
 
 /* God damn this struct has gotten quite large. */
 typedef struct {
