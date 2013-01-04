@@ -8,7 +8,6 @@ SOURCES = $(wildcard src/*.c)
 SNARFS = $(SOURCES:.c=.x)
 OBJECTS = $(SOURCES:.c=.o)
 BIN = gnumaku.so
-.SUFFIXES: .x
 
 $(BIN): $(SNARFS) $(OBJECTS)
 	$(CC) -shared $(OBJECTS) -o $@ $(LIBS)
