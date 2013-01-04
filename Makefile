@@ -20,4 +20,4 @@ src/%.x: src/%.c
 	guile-snarf -o $@ $< $(GUILE_CFLAGS)
 
 .PHONY clean:
-	rm -f $(BIN) $(OBJECTS)
+	rm -f $(BIN) $(OBJECTS) $(SNARFS)
