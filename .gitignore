@@ -3,3 +3,4 @@ gnumaku.so
 *.lo
 *~
 /TAGS
+*.x
