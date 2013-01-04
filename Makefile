@@ -3,7 +3,7 @@ GUILE_CFLAGS = `pkg-config --cflags guile-2.0`
 CFLAGS = -std=c99 -Wall -g -fPIC $(GUILE_CFLAGS)
 LIBS = `pkg-config --libs allegro-5.0 allegro_image-5.0 \
 	allegro_font-5.0 allegro_ttf-5.0 allegro_primitives-5.0 \
-	allegro_acodec-5.0 allegro_audio-5.0 guile-2.0` -lpthread -lm
+	allegro_acodec-5.0 allegro_audio-5.0 guile-2.0`
 SOURCES = $(wildcard src/*.c)
 SNARFS = $(SOURCES:.c=.x)
 OBJECTS = $(SOURCES:.c=.o)
