@@ -33,9 +33,3 @@ init_gnumaku () {
     bind_draw_funcs ();
     init_game_bindings ();
 }
-
-void
-init_gnumaku_module (void) {
-    /* Create the gnumaku core module and export all procedures. */
-    scm_c_define_module ("gnumaku core", init_gnumaku, NULL);
-}
