@@ -70,7 +70,7 @@ init_bullet_type_type (void) {
     scm_set_smob_free (bullet_type_tag, free_bullet_type);
     scm_set_smob_print (bullet_type_tag, print_bullet_type);
 
-    #include "bullet_type.x"
+#include "bullet_type.x"
 
-    scm_c_export ("make-bullet-type", NULL);
+    scm_c_export (s_make_bullet_type, NULL);
 }
