@@ -24,8 +24,14 @@ SCM gmk_sprite_rotation (SCM sprite);
 SCM gmk_sprite_color (SCM sprite);
 SCM gmk_sprite_opacity (SCM sprite);
 SCM gmk_sprite_anchor (SCM sprite);
-SCM gmk_sprite_image (SCM sprite);
-SCM gmk_draw_sprite (SCM sprite);
+SCM gmk_set_sprite_image (SCM sprite, SCM image);
+SCM gmk_set_sprite_position (SCM sprite, SCM position);
+SCM gmk_set_sprite_scale (SCM sprite, SCM scale);
+SCM gmk_set_sprite_rotation (SCM sprite, SCM rotation);
+SCM gmk_set_sprite_color (SCM sprite, SCM color);
+SCM gmk_set_sprite_opacity (SCM sprite, SCM opacity);
+SCM gmk_set_sprite_anchor (SCM sprite, SCM anchor);
+SCM gmk_set_draw_sprite (SCM sprite);
 void gmk_init_sprite (void);
 
 #endif
