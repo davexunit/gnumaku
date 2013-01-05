@@ -290,7 +290,7 @@ draw_bullet (Bullet *bullet, int cx, int cy, GmkBlendMode prev_blend_mode) {
 static SCM
 draw_bullet_system (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
+    GmkSpriteSheet *sprite_sheet = gmk_scm_to_sprite_sheet (bullet_system->sprite_sheet);
     GmkBlendMode prev_blend_mode = -1;
     ALLEGRO_STATE state;
 
@@ -409,10 +409,10 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
 
 static void
 init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, GmkBulletType *type) {
-    SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
+    GmkSpriteSheet *sprite_sheet = gmk_scm_to_sprite_sheet (bullet_system->sprite_sheet);
 
     bullet->directional = type->directional;
-    bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
+    bullet->image = gmk_sprite_sheet_tile (sprite_sheet, type->image);
     bullet->blend_mode = type->blend_mode;
     bullet->hitbox = gmk_rect_scale (type->hitbox, bullet->scale);
 }

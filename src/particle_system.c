@@ -53,7 +53,7 @@ static void
 init_particle (ParticleSystem *system, Particle *particle) {
     ALLEGRO_COLOR start_color = variable_color (system->start_color, system->start_color_var);
     ALLEGRO_COLOR end_color = variable_color (system->end_color, system->end_color_var);
-    SpriteSheet *sprite_sheet = check_sprite_sheet (system->sprite_sheet);
+    GmkSpriteSheet *sprite_sheet = gmk_scm_to_sprite_sheet (system->sprite_sheet);
     int tile = (int) sprite_sheet->num_tiles * gmk_rand1 ();
     float theta = gmk_deg_to_rad (system->direction +
                                   system->direction_var * gmk_rand1 ());
@@ -62,7 +62,7 @@ init_particle (ParticleSystem *system, Particle *particle) {
     float end_scale = system->end_scale + system->end_scale_var * gmk_rand1 ();
 
     particle->life = (int) system->life + system->life_var * gmk_rand1 ();
-    particle->image = sprite_sheet_tile (sprite_sheet, tile);
+    particle->image = gmk_sprite_sheet_tile (sprite_sheet, tile);
     particle->color = start_color;
     particle->dcolor = delta_color (start_color, end_color, particle->life);
     particle->pos.x = system->pos.x + system->pos_var.x * gmk_rand1 ();

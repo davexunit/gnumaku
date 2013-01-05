@@ -21,7 +21,7 @@ init_gnumaku () {
     init_transform_type ();
     gmk_init_color ();
     gmk_init_blend_mode ();
-    init_sprite_sheet_type ();
+    gmk_init_sprite_sheet ();
     gmk_init_image ();
     gmk_init_sprite ();
     gmk_init_rect ();

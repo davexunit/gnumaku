@@ -6,7 +6,7 @@
 #include "rect.h"
 
 /*
- * BulletType
+ * GmkBulletType
  *
  * Common set of properties for bullets.
  */
