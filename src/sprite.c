@@ -43,7 +43,7 @@ gmk_scm_from_sprite (GmkSprite sprite)
 }
 
 
-SCM_DEFINE (gmk_make_sprite, "make-sprite", 1, 0, 1,
+SCM_DEFINE (gmk_s_make_sprite, "make-sprite", 1, 0, 1,
             (SCM image, SCM kw_args),
             "Make a new sprite instance.")
 {
@@ -81,7 +81,7 @@ SCM_DEFINE (gmk_make_sprite, "make-sprite", 1, 0, 1,
     return smob;
 }
 
-SCM_DEFINE (gmk_sprite_image, "sprite-image", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_image, "sprite-image", 1, 0, 0,
             (SCM sprite),
             "Return the sprite image.")
 {
@@ -91,7 +91,7 @@ SCM_DEFINE (gmk_sprite_image, "sprite-image", 1, 0, 0,
     return image;
 }
 
-SCM_DEFINE (gmk_sprite_position, "sprite-position", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_position, "sprite-position", 1, 0, 0,
             (SCM sprite),
             "Return sprite position vector.")
 {
@@ -101,7 +101,7 @@ SCM_DEFINE (gmk_sprite_position, "sprite-position", 1, 0, 0,
     return gmk_scm_from_vector2 (position);
 }
 
-SCM_DEFINE (gmk_sprite_scale, "sprite-scale", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_scale, "sprite-scale", 1, 0, 0,
             (SCM sprite),
             "Return sprite scale vector.")
 {
@@ -111,7 +111,7 @@ SCM_DEFINE (gmk_sprite_scale, "sprite-scale", 1, 0, 0,
     return gmk_scm_from_vector2 (scale);
 }
 
-SCM_DEFINE (gmk_sprite_rotation, "sprite-rotation", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_rotation, "sprite-rotation", 1, 0, 0,
             (SCM sprite),
             "Return sprite rotation angle.")
 {
@@ -121,7 +121,7 @@ SCM_DEFINE (gmk_sprite_rotation, "sprite-rotation", 1, 0, 0,
     return scm_from_double (rotation);
 }
 
-SCM_DEFINE (gmk_sprite_color, "sprite-color", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_color, "sprite-color", 1, 0, 0,
             (SCM sprite),
             "Return sprite tint color.")
 {
@@ -131,7 +131,7 @@ SCM_DEFINE (gmk_sprite_color, "sprite-color", 1, 0, 0,
     return gmk_scm_from_color (color);
 }
 
-SCM_DEFINE (gmk_sprite_opacity, "sprite-opacity", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_opacity, "sprite-opacity", 1, 0, 0,
             (SCM sprite),
             "Return sprite tint opacity.")
 {
@@ -141,7 +141,7 @@ SCM_DEFINE (gmk_sprite_opacity, "sprite-opacity", 1, 0, 0,
     return scm_from_double (opacity);
 }
 
-SCM_DEFINE (gmk_sprite_anchor, "sprite-anchor", 1, 0, 0,
+SCM_DEFINE (gmk_s_sprite_anchor, "sprite-anchor", 1, 0, 0,
             (SCM sprite),
             "Return sprite anchor vector.")
 {
@@ -151,7 +151,7 @@ SCM_DEFINE (gmk_sprite_anchor, "sprite-anchor", 1, 0, 0,
     return gmk_scm_from_vector2 (anchor);
 }
 
-SCM_DEFINE (gmk_set_sprite_position, "set-sprite-position", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_position, "set-sprite-position", 2, 0, 0,
             (SCM sprite, SCM position),
             "Set sprite position vector.")
 {
@@ -163,7 +163,7 @@ SCM_DEFINE (gmk_set_sprite_position, "set-sprite-position", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_scale, "set-sprite-scale", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_scale, "set-sprite-scale", 2, 0, 0,
             (SCM sprite, SCM scale),
             "Set sprite scale vector.")
 {
@@ -175,7 +175,7 @@ SCM_DEFINE (gmk_set_sprite_scale, "set-sprite-scale", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_rotation, "set-sprite-rotation", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_rotation, "set-sprite-rotation", 2, 0, 0,
             (SCM sprite, SCM rotation),
             "Set sprite rotation angle.")
 {
@@ -187,7 +187,7 @@ SCM_DEFINE (gmk_set_sprite_rotation, "set-sprite-rotation", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_color, "set-sprite-color", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_color, "set-sprite-color", 2, 0, 0,
             (SCM sprite, SCM color),
             "Set sprite color.")
 {
@@ -199,7 +199,7 @@ SCM_DEFINE (gmk_set_sprite_color, "set-sprite-color", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_opacity, "set-sprite-opacity", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_opacity, "set-sprite-opacity", 2, 0, 0,
             (SCM sprite, SCM opacity),
             "Set sprite opacity.")
 {
@@ -211,7 +211,7 @@ SCM_DEFINE (gmk_set_sprite_opacity, "set-sprite-opacity", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_anchor, "set-sprite-anchor", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_anchor, "set-sprite-anchor", 2, 0, 0,
             (SCM sprite, SCM anchor),
             "Set sprite anchor vector.")
 {
@@ -223,7 +223,7 @@ SCM_DEFINE (gmk_set_sprite_anchor, "set-sprite-anchor", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_set_sprite_image, "set-sprite-image", 2, 0, 0,
+SCM_DEFINE (gmk_s_set_sprite_image, "set-sprite-image", 2, 0, 0,
             (SCM sprite, SCM image),
             "Set sprite image.")
 {
@@ -234,7 +234,7 @@ SCM_DEFINE (gmk_set_sprite_image, "set-sprite-image", 2, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_draw_sprite, "draw-sprite", 1, 0, 0,
+SCM_DEFINE (gmk_s_draw_sprite, "draw-sprite", 1, 0, 0,
             (SCM sprite),
             "Draw sprite.")
 {
@@ -274,18 +274,17 @@ static int
 print_sprite (SCM sprite, SCM port, scm_print_state *pstate)
 {
     scm_puts ("#<sprite position: ", port);
-    scm_display (gmk_sprite_position (sprite), port);
+    scm_display (gmk_s_sprite_position (sprite), port);
     scm_puts (" scale: ", port);
-    scm_display (gmk_sprite_scale (sprite), port);
+    scm_display (gmk_s_sprite_scale (sprite), port);
     scm_puts (" anchor: ", port);
-    scm_display (gmk_sprite_anchor (sprite), port);
+    scm_display (gmk_s_sprite_anchor (sprite), port);
     scm_puts (" rotation: ", port);
-    scm_display (gmk_sprite_rotation (sprite), port);
+    scm_display (gmk_s_sprite_rotation (sprite), port);
     scm_puts (" color: ", port);
-    scm_display (gmk_sprite_color (sprite), port);
+    scm_display (gmk_s_sprite_color (sprite), port);
     scm_puts (">", port);
 
-    /* non-zero means success */
     return 1;
 }
 
@@ -299,21 +298,21 @@ gmk_init_sprite (void)
 
 #include "sprite.x"
 
-    scm_c_export (s_gmk_make_sprite,
-                  s_gmk_sprite_image,
-                  s_gmk_sprite_position,
-                  s_gmk_sprite_anchor,
-                  s_gmk_sprite_scale,
-                  s_gmk_sprite_rotation,
-                  s_gmk_sprite_color,
-                  s_gmk_sprite_opacity,
-                  s_gmk_set_sprite_image,
-                  s_gmk_set_sprite_position,
-                  s_gmk_set_sprite_anchor,
-                  s_gmk_set_sprite_scale,
-                  s_gmk_set_sprite_rotation,
-                  s_gmk_set_sprite_color,
-                  s_gmk_set_sprite_opacity,
-                  s_gmk_draw_sprite,
+    scm_c_export (s_gmk_s_make_sprite,
+                  s_gmk_s_sprite_image,
+                  s_gmk_s_sprite_position,
+                  s_gmk_s_sprite_anchor,
+                  s_gmk_s_sprite_scale,
+                  s_gmk_s_sprite_rotation,
+                  s_gmk_s_sprite_color,
+                  s_gmk_s_sprite_opacity,
+                  s_gmk_s_set_sprite_image,
+                  s_gmk_s_set_sprite_position,
+                  s_gmk_s_set_sprite_anchor,
+                  s_gmk_s_set_sprite_scale,
+                  s_gmk_s_set_sprite_rotation,
+                  s_gmk_s_set_sprite_color,
+                  s_gmk_s_set_sprite_opacity,
+                  s_gmk_s_draw_sprite,
                   NULL);
 }

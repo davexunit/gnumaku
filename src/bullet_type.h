@@ -19,7 +19,7 @@ typedef struct {
 
 GmkBulletType *gmk_check_bullet_type (SCM bullet_type_smob);
 
-SCM gmk_make_bullet_type (SCM s_image, SCM s_hitbox, SCM s_blend_mode,
+SCM gmk_s_make_bullet_type (SCM s_image, SCM s_hitbox, SCM s_blend_mode,
                           SCM s_directional);
 
 void gmk_init_bullet_type (void);

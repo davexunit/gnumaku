@@ -10,7 +10,7 @@ gmk_check_bullet_type (SCM bullet_type_smob)
     return (GmkBulletType *) SCM_SMOB_DATA (bullet_type_smob);
 }
 
-SCM_DEFINE (gmk_make_bullet_type, "make-bullet-type", 4, 0, 0,
+SCM_DEFINE (gmk_s_make_bullet_type, "make-bullet-type", 4, 0, 0,
             (SCM s_image, SCM s_hitbox, SCM s_blend_mode, SCM s_directional),
             "Make a new bullet type instance.")
 {
@@ -58,5 +58,5 @@ gmk_init_bullet_type (void)
 
 #include "bullet_type.x"
 
-    scm_c_export (s_gmk_make_bullet_type, NULL);
+    scm_c_export (s_gmk_s_make_bullet_type, NULL);
 }
