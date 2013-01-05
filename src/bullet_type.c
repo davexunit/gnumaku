@@ -1,8 +1,8 @@
 #include "bullet_type.h"
 
 static scm_t_bits bullet_type_tag;
-static SCM sym_blend_alpha;
-static SCM sym_blend_add;
+SCM_SYMBOL (sym_blend_alpha, "alpha");
+SCM_SYMBOL (sym_blend_add, "add");
 
 BlendMode
 scm_to_blend_mode (SCM blend_mode) {
@@ -62,9 +62,6 @@ print_bullet_type (SCM bullet_type_smob, SCM port, scm_print_state *pstate) {
 
 void
 init_bullet_type_type (void) {
-    sym_blend_alpha = scm_from_latin1_symbol ("alpha");
-    sym_blend_add = scm_from_latin1_symbol ("add");
-
     bullet_type_tag = scm_make_smob_type ("<bullet-type>", sizeof (BulletType));
     scm_set_smob_mark (bullet_type_tag, 0);
     scm_set_smob_free (bullet_type_tag, free_bullet_type);
