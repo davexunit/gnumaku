@@ -20,11 +20,13 @@ SCM_DEFINE (gmk_make_bullet_type, "make-bullet-type", 4, 0, 0,
     GmkBlendMode blend_mode = gmk_scm_to_blend_mode (s_blend_mode);
     bool directional = scm_to_bool (s_directional);
 
-    bullet_type = (GmkBulletType *) scm_gc_malloc (sizeof (GmkBulletType), "bullet_type");
+    bullet_type = (GmkBulletType *) scm_gc_malloc (sizeof (GmkBulletType),
+                                                   "bullet_type");
     bullet_type->image = image;
     bullet_type->hitbox = hitbox;
     bullet_type->blend_mode = blend_mode;
     bullet_type->directional = directional;
+    
     SCM_RETURN_NEWSMOB (bullet_type_tag, bullet_type);
 }
 
