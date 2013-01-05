@@ -278,7 +278,7 @@ bullet_sprite_angle (Bullet *bullet) {
 static void
 draw_bullet (Bullet *bullet, int cx, int cy, GmkBlendMode prev_blend_mode) {
     float angle = bullet_sprite_angle (bullet);
-    ALLEGRO_COLOR color = color_mult_alpha (bullet->color);
+    ALLEGRO_COLOR color = gmk_color_mult_alpha (bullet->color);
 
     set_bullet_blend_mode (bullet, prev_blend_mode);
     al_draw_tinted_scaled_rotated_bitmap (bullet->image, color, cx, cy,
@@ -499,7 +499,7 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
                                                      default_scale));
     int life = scm_to_int (scm_get_keyword (keyword_life, keyword_args,
                                             default_life));
-    ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, keyword_args,
+    ALLEGRO_COLOR color = gmk_scm_to_color (scm_get_keyword (keyword_color, keyword_args,
                                                          default_color));
     GmkBulletType *type = gmk_check_bullet_type (s_type);
     Bullet *bullet = new_bullet (bullet_system);
@@ -637,7 +637,7 @@ bullet_color (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_color (bullet->color);
+    return gmk_scm_from_color (bullet->color);
 }
 
 static SCM
@@ -723,7 +723,7 @@ static SCM
 set_bullet_color (SCM bullet_ref_smob, SCM s_color) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    ALLEGRO_COLOR color = scm_to_color (s_color);
+    ALLEGRO_COLOR color = gmk_scm_to_color (s_color);
 
     bullet->color = color;
 
@@ -751,7 +751,7 @@ init_bullet_system_type (void) {
     default_acceleration = scm_from_double (0);
     default_angular_velocity = scm_from_double (0);
     default_life = scm_from_int (0);
-    default_color = scm_from_color (al_map_rgba_f (1, 1, 1, 1));
+    default_color = gmk_scm_from_color (al_map_rgba_f (1, 1, 1, 1));
     default_scale = scm_from_vector2 (vector2_new (1, 1));
 
     /* BulletSystem bindings */

@@ -38,9 +38,9 @@ font_draw_text (SCM font_smob, SCM s_x, SCM s_y, SCM s_color, SCM s_text)
     Font *font = check_font (font_smob);
     float x = scm_to_double (s_x);
     float y = scm_to_double (s_y);
-    ALLEGRO_COLOR color = color_mult_alpha (scm_to_color (s_color));
+    ALLEGRO_COLOR color = gmk_color_mult_alpha (gmk_scm_to_color (s_color));
     const char *text = scm_to_latin1_string (s_text);
-    
+
     al_draw_text (font->font, color, x, y, 0, text);
 
     return SCM_UNSPECIFIED;

@@ -6,9 +6,9 @@ static SCM
 get_clipping_rect ()
 {
     int x, y, width, height;
-    
+
     al_get_clipping_rectangle (&x, &y, &width, &height);
-    
+
     return make_rect (scm_from_int (x), scm_from_int (y), scm_from_int (width), scm_from_int (height));
 }
 
@@ -38,7 +38,7 @@ draw_line (SCM s_x1, SCM s_y1, SCM s_x2, SCM s_y2, SCM s_color, SCM s_thickness)
     float x2 = scm_to_double (s_x2);
     float y2 = scm_to_double (s_y2);
     float thickness = scm_to_double (s_thickness);
-    ALLEGRO_COLOR color = scm_to_color (s_color);
+    ALLEGRO_COLOR color = gmk_scm_to_color (s_color);
 
     al_draw_line (x1, y1, x2, y2, color, thickness);
 

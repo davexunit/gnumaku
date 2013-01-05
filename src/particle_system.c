@@ -502,7 +502,7 @@ particle_system_start_color (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_color (particle_system->start_color);
+    return gmk_scm_from_color (particle_system->start_color);
 }
 
 static SCM
@@ -511,7 +511,7 @@ particle_system_start_color_var (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_color (particle_system->start_color_var);
+    return gmk_scm_from_color (particle_system->start_color_var);
 }
 
 static SCM
@@ -520,7 +520,7 @@ particle_system_end_color (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_color (particle_system->end_color);
+    return gmk_scm_from_color (particle_system->end_color);
 }
 
 static SCM
@@ -529,7 +529,7 @@ particle_system_end_color_var (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_color (particle_system->end_color_var);
+    return gmk_scm_from_color (particle_system->end_color_var);
 }
 
 static SCM
@@ -785,7 +785,7 @@ set_particle_system_end_scale_var (SCM particle_system_smob, SCM s_end_scale_var
 static SCM
 set_particle_system_start_color (SCM particle_system_smob, SCM s_start_color) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR start_color = scm_to_color (s_start_color);
+    ALLEGRO_COLOR start_color = gmk_scm_to_color (s_start_color);
 
     particle_system->start_color = start_color;
 
@@ -797,7 +797,7 @@ set_particle_system_start_color (SCM particle_system_smob, SCM s_start_color) {
 static SCM
 set_particle_system_start_color_var (SCM particle_system_smob, SCM s_start_color_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR start_color_var = scm_to_color (s_start_color_var);
+    ALLEGRO_COLOR start_color_var = gmk_scm_to_color (s_start_color_var);
 
     particle_system->start_color_var = start_color_var;
 
@@ -810,7 +810,7 @@ set_particle_system_start_color_var (SCM particle_system_smob, SCM s_start_color
 static SCM
 set_particle_system_end_color (SCM particle_system_smob, SCM s_end_color) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR end_color = scm_to_color (s_end_color);
+    ALLEGRO_COLOR end_color = gmk_scm_to_color (s_end_color);
 
     particle_system->end_color = end_color;
 
@@ -822,7 +822,7 @@ set_particle_system_end_color (SCM particle_system_smob, SCM s_end_color) {
 static SCM
 set_particle_system_end_color_var (SCM particle_system_smob, SCM s_end_color_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR end_color_var = scm_to_color (s_end_color_var);
+    ALLEGRO_COLOR end_color_var = gmk_scm_to_color (s_end_color_var);
 
     particle_system->end_color_var = end_color_var;
 

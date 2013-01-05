@@ -64,7 +64,7 @@ SCM_DEFINE (gmk_make_sprite, "make-sprite", 1, 0, 1,
                                     scm_from_vector2 (default_anchor));
     SCM s_rotation = scm_get_keyword (keyword_rotation, kw_args, scm_from_double (0));
     SCM s_color = scm_get_keyword (keyword_color, kw_args,
-                                   scm_from_color (al_map_rgba_f (1, 1, 1, 1)));
+                                   gmk_scm_from_color (al_map_rgba_f (1, 1, 1, 1)));
 
     sprite = (GmkSprite *) scm_gc_malloc (sizeof (GmkSprite), "sprite");
     sprite->image = SCM_BOOL_F;
@@ -72,7 +72,7 @@ SCM_DEFINE (gmk_make_sprite, "make-sprite", 1, 0, 1,
     sprite->anchor = scm_to_vector2 (s_anchor);
     sprite->scale = scm_to_vector2 (s_scale);
     sprite->rotation = scm_to_double (s_rotation);
-    sprite->color = scm_to_color (s_color);
+    sprite->color = gmk_scm_to_color (s_color);
 
     SCM_NEWSMOB (smob, sprite_tag, sprite);
 
@@ -138,7 +138,7 @@ SCM_DEFINE (gmk_sprite_color, "sprite-color", 1, 0, 0,
 
     scm_remember_upto_here_1 (sprite);
 
-    return scm_from_color (color);
+    return gmk_scm_from_color (color);
 }
 
 SCM_DEFINE (gmk_sprite_opacity, "sprite-opacity", 1, 0, 0,
@@ -212,7 +212,7 @@ SCM_DEFINE (gmk_set_sprite_color, "set-sprite-color", 2, 0, 0,
             "Set sprite color.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    ALLEGRO_COLOR new_color = scm_to_color (color);
+    ALLEGRO_COLOR new_color = gmk_scm_to_color (color);
 
     c_sprite->color = new_color;
 
@@ -270,7 +270,7 @@ SCM_DEFINE (gmk_draw_sprite, "draw-sprite", 1, 0, 0,
     ALLEGRO_BITMAP *bitmap = gmk_scm_to_bitmap (c_sprite->image);
 
     al_draw_tinted_scaled_rotated_bitmap (bitmap,
-                                          color_mult_alpha (c_sprite->color),
+                                          gmk_color_mult_alpha (c_sprite->color),
                                           c_sprite->anchor.x, c_sprite->anchor.y,
                                           c_sprite->position.x, c_sprite->position.y,
                                           c_sprite->scale.x, c_sprite->scale.y,
