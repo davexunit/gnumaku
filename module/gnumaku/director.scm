@@ -73,7 +73,7 @@
                                  (number->string (fps-last-frames director-fps)))))
 
 (define (director-set-draw-target image)
-  (set-target-image image))
+  (set-render-image image))
 
 (define (director-reset-draw-target)
   (game-reset-draw-target ))
@@ -102,4 +102,3 @@
 (game-on-key-released-hook (lambda (key)
                              (when (director-current-scene)
                                (on-key-released (director-current-scene) key))))
-
