@@ -54,23 +54,23 @@ SCM_DEFINE (gmk_make_sprite, "make-sprite", 1, 0, 1,
      * Get optional arguments via a list of keywords.
      * If a keyword arg is not present, use a sane default.
      */
-    Vector2 default_anchor = vector2_new (al_get_bitmap_width (bitmap) / 2,
-                                          al_get_bitmap_height (bitmap) / 2);
+    GmkVector2 default_anchor = gmk_vector2_new (al_get_bitmap_width (bitmap) / 2,
+                                                 al_get_bitmap_height (bitmap) / 2);
     SCM s_position = scm_get_keyword (keyword_position, kw_args,
-                                      scm_from_vector2 (vector2_new (0, 0)));
+                                      gmk_scm_from_vector2 (gmk_vector2_new (0, 0)));
     SCM s_scale = scm_get_keyword (keyword_scale, kw_args,
-                                   scm_from_vector2 (vector2_new (1, 1)));
+                                   gmk_scm_from_vector2 (gmk_vector2_new (1, 1)));
     SCM s_anchor = scm_get_keyword (keyword_anchor, kw_args,
-                                    scm_from_vector2 (default_anchor));
+                                    gmk_scm_from_vector2 (default_anchor));
     SCM s_rotation = scm_get_keyword (keyword_rotation, kw_args, scm_from_double (0));
     SCM s_color = scm_get_keyword (keyword_color, kw_args,
                                    gmk_scm_from_color (al_map_rgba_f (1, 1, 1, 1)));
 
     sprite = (GmkSprite *) scm_gc_malloc (sizeof (GmkSprite), "sprite");
     sprite->image = SCM_BOOL_F;
-    sprite->position = scm_to_vector2 (s_position);
-    sprite->anchor = scm_to_vector2 (s_anchor);
-    sprite->scale = scm_to_vector2 (s_scale);
+    sprite->position = gmk_scm_to_vector2 (s_position);
+    sprite->anchor = gmk_scm_to_vector2 (s_anchor);
+    sprite->scale = gmk_scm_to_vector2 (s_scale);
     sprite->rotation = scm_to_double (s_rotation);
     sprite->color = gmk_scm_to_color (s_color);
 
@@ -98,11 +98,11 @@ SCM_DEFINE (gmk_sprite_position, "sprite-position", 1, 0, 0,
             "Return sprite position vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 position = c_sprite->position;
+    GmkVector2 position = c_sprite->position;
 
     scm_remember_upto_here_1 (sprite);
 
-    return scm_from_vector2 (position);
+    return gmk_scm_from_vector2 (position);
 }
 
 SCM_DEFINE (gmk_sprite_scale, "sprite-scale", 1, 0, 0,
@@ -110,11 +110,11 @@ SCM_DEFINE (gmk_sprite_scale, "sprite-scale", 1, 0, 0,
             "Return sprite scale vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 scale = c_sprite->scale;
+    GmkVector2 scale = c_sprite->scale;
 
     scm_remember_upto_here_1 (sprite);
 
-    return scm_from_vector2 (scale);
+    return gmk_scm_from_vector2 (scale);
 }
 
 SCM_DEFINE (gmk_sprite_rotation, "sprite-rotation", 1, 0, 0,
@@ -158,11 +158,11 @@ SCM_DEFINE (gmk_sprite_anchor, "sprite-anchor", 1, 0, 0,
             "Return sprite anchor vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 anchor = c_sprite->anchor;
+    GmkVector2 anchor = c_sprite->anchor;
 
     scm_remember_upto_here_1 (sprite);
 
-    return scm_from_vector2 (anchor);
+    return gmk_scm_from_vector2 (anchor);
 }
 
 SCM_DEFINE (gmk_set_sprite_position, "set-sprite-position", 2, 0, 0,
@@ -170,7 +170,7 @@ SCM_DEFINE (gmk_set_sprite_position, "set-sprite-position", 2, 0, 0,
             "Set sprite position vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 new_position = scm_to_vector2 (position);
+    GmkVector2 new_position = gmk_scm_to_vector2 (position);
 
     c_sprite->position = new_position;
 
@@ -184,7 +184,7 @@ SCM_DEFINE (gmk_set_sprite_scale, "set-sprite-scale", 2, 0, 0,
             "Set sprite scale vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 new_scale = scm_to_vector2 (scale);
+    GmkVector2 new_scale = gmk_scm_to_vector2 (scale);
 
     c_sprite->scale = new_scale;
 
@@ -240,7 +240,7 @@ SCM_DEFINE (gmk_set_sprite_anchor, "set-sprite-anchor", 2, 0, 0,
             "Set sprite anchor vector.")
 {
     GmkSprite *c_sprite = check_sprite (sprite);
-    Vector2 new_anchor = scm_to_vector2 (anchor);
+    GmkVector2 new_anchor = gmk_scm_to_vector2 (anchor);
 
     c_sprite->anchor = new_anchor;
 

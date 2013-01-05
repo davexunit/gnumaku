@@ -5,7 +5,7 @@ static scm_t_bits rect_tag;
 Rect
 rect_new (float x, float y, float width, float height) {
     Rect rect;
-    
+
     rect.x = x;
     rect.y = y;
     rect.width = width;
@@ -14,26 +14,26 @@ rect_new (float x, float y, float width, float height) {
     return rect;
 }
 
-bool rect_collide_point (Rect rect, Vector2 p) {
+bool rect_collide_point (Rect rect, GmkVector2 p) {
     return p.x >= rect.x && p.x < rect.x + rect.width &&
-	   p.y >= rect.y && p.y < rect.y + rect.height;
+           p.y >= rect.y && p.y < rect.y + rect.height;
 }
 
 bool rect_collide_rect (Rect rect, Rect other) {
     return ((rect.x >= other.x && rect.x < other.x + other.width) ||
-	    (other.x >= rect.x && other.x < rect.x + rect.width)) &&
-	((rect.y >= other.y && rect.y < other.y + other.height) ||
-	 (other.y >= rect.y && other.y < rect.y + rect.height));
+            (other.x >= rect.x && other.x < rect.x + rect.width)) &&
+        ((rect.y >= other.y && rect.y < other.y + other.height) ||
+         (other.y >= rect.y && other.y < rect.y + rect.height));
 }
 
-Vector2
+GmkVector2
 get_rect_center (Rect rect) {
-    return vector2_new (rect.x + rect.width / 2,
+    return gmk_vector2_new (rect.x + rect.width / 2,
                         rect.y + rect.height / 2);
 }
 
 Rect
-rect_center (Rect rect, Vector2 center) {
+rect_center (Rect rect, GmkVector2 center) {
     Rect new_rect;
 
     new_rect.x = center.x - rect.width / 2;
@@ -45,7 +45,7 @@ rect_center (Rect rect, Vector2 center) {
 }
 
 Rect
-rect_move (Rect rect, Vector2 delta) {
+rect_move (Rect rect, GmkVector2 delta) {
     Rect new_rect;
 
     new_rect.x = rect.x + delta.x;
@@ -57,9 +57,9 @@ rect_move (Rect rect, Vector2 delta) {
 }
 
 Rect
-rect_scale (Rect rect, Vector2 scale) {
+rect_scale (Rect rect, GmkVector2 scale) {
     Rect scale_rect = rect;
-    Vector2 center = get_rect_center (rect);
+    GmkVector2 center = get_rect_center (rect);
 
     scale_rect.width *= scale.x;
     scale_rect.height *= scale.y;
@@ -76,7 +76,7 @@ check_rect (SCM rect_smob) {
 
 Rect scm_to_rect (SCM rect_smob) {
     Rect *rect = check_rect (rect_smob);
-    
+
     return *rect;
 }
 
@@ -147,7 +147,7 @@ rect_height (SCM rect_smob) {
 static SCM
 scm_rect_move (SCM rect_smob, SCM s_delta) {
     Rect rect = scm_to_rect (rect_smob);
-    Vector2 delta = scm_to_vector2 (s_delta);
+    GmkVector2 delta = gmk_scm_to_vector2 (s_delta);
 
     scm_remember_upto_here_1 (rect_smob);
 
@@ -157,7 +157,7 @@ scm_rect_move (SCM rect_smob, SCM s_delta) {
 static SCM
 scm_rect_center (SCM rect_smob, SCM s_p) {
     Rect rect = scm_to_rect (rect_smob);
-    Vector2 p = scm_to_vector2 (s_p);
+    GmkVector2 p = gmk_scm_to_vector2 (s_p);
 
     scm_remember_upto_here_1 (rect_smob);
 
@@ -167,7 +167,7 @@ scm_rect_center (SCM rect_smob, SCM s_p) {
 static SCM
 scm_rect_collide_point (SCM rect_smob, SCM s_p) {
     Rect rect = scm_to_rect (rect_smob);
-    Vector2 p = scm_to_vector2 (s_p);
+    GmkVector2 p = gmk_scm_to_vector2 (s_p);
 
     scm_remember_upto_here_1 (rect_smob);
 

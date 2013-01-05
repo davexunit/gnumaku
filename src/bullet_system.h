@@ -23,10 +23,10 @@ typedef struct {
     bool active; /* Currently being drawn/updated? */
     bool kill; /* Remove the bullet on next update? */
     bool directional; /* Rotate sprite in bullet direction? */
-    Vector2 pos;
-    Vector2 vel;
-    Vector2 acc;
-    Vector2 scale;
+    GmkVector2 pos;
+    GmkVector2 vel;
+    GmkVector2 acc;
+    GmkVector2 scale;
     Rect hitbox;
     GmkBlendMode blend_mode;
     ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */

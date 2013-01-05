@@ -1,34 +1,41 @@
 #include "vector.h"
-#include <math.h>
+
+static scm_t_bits vector2_tag;
 
 bool
-vector2_equal (Vector2 a, Vector2 b) {
+gmk_vector2_equal (GmkVector2 a, GmkVector2 b)
+{
     return a.x == b.x && a.y == b.y;
 }
 
 float
-vector2_mag (Vector2 v) {
+gmk_vector2_mag (GmkVector2 v)
+{
     return sqrt (v.x * v.x + v.y * v.y);
 }
 
 float
-vector2_dot (Vector2 a, Vector2 b) {
+gmk_vector2_dot (GmkVector2 a, GmkVector2 b)
+{
     return a.x * b.x + a.y * b.y;
 }
 
 float
-vector2_cross (Vector2 a, Vector2 b) {
+gmk_vector2_cross (GmkVector2 a, GmkVector2 b)
+{
     return a.x * b.y - b.x * a.y;
 }
 
 float
-vector2_angle (Vector2 v) {
+gmk_vector2_angle (GmkVector2 v)
+{
     return atan2 (v.y, v.x);
 }
 
-Vector2
-vector2_zero () {
-    Vector2 v;
+GmkVector2
+gmk_vector2_zero ()
+{
+    GmkVector2 v;
 
     v.x = 0;
     v.y = 0;
@@ -36,9 +43,10 @@ vector2_zero () {
     return v;
 }
 
-Vector2
-vector2_new (float x, float y) {
-    Vector2 v;
+GmkVector2
+gmk_vector2_new (float x, float y)
+{
+    GmkVector2 v;
 
     v.x = x;
     v.y = y;
@@ -46,9 +54,10 @@ vector2_new (float x, float y) {
     return v;
 }
 
-Vector2
-vector2_add (Vector2 a, Vector2 b) {
-    Vector2 c;
+GmkVector2
+gmk_vector2_add (GmkVector2 a, GmkVector2 b)
+{
+    GmkVector2 c;
 
     c.x = a.x + b.x;
     c.y = a.y + b.y;
@@ -56,9 +65,10 @@ vector2_add (Vector2 a, Vector2 b) {
     return c;
 }
 
-Vector2
-vector2_sub (Vector2 a, Vector2 b) {
-    Vector2 c;
+GmkVector2
+gmk_vector2_sub (GmkVector2 a, GmkVector2 b)
+{
+    GmkVector2 c;
 
     c.x = a.x - b.x;
     c.y = a.y - b.y;
@@ -66,9 +76,10 @@ vector2_sub (Vector2 a, Vector2 b) {
     return c;
 }
 
-Vector2
-vector2_scale (Vector2 v, float scalar) {
-    Vector2 a;
+GmkVector2
+gmk_vector2_scale (GmkVector2 v, float scalar)
+{
+    GmkVector2 a;
 
     a.x = v.x * scalar;
     a.y = v.y * scalar;
@@ -76,10 +87,11 @@ vector2_scale (Vector2 v, float scalar) {
     return a;
 }
 
-Vector2
-vector2_norm (Vector2 v) {
-    float m = vector2_mag (v);
-    Vector2 n = vector2_zero ();
+GmkVector2
+gmk_vector2_norm (GmkVector2 v)
+{
+    float m = gmk_vector2_mag (v);
+    GmkVector2 n = gmk_vector2_zero ();
 
     if (m != 0) {
         n.x = v.x / m;
@@ -89,9 +101,10 @@ vector2_norm (Vector2 v) {
     return n;
 }
 
-Vector2
-vector2_from_polar (float radius, float angle) {
-    Vector2 v;
+GmkVector2
+gmk_vector2_from_polar (float radius, float angle)
+{
+    GmkVector2 v;
 
     v.x = cos (angle) * radius;
     v.y = sin (angle) * radius;
@@ -99,9 +112,10 @@ vector2_from_polar (float radius, float angle) {
     return v;
 }
 
-Vector2
-vector2_right_normal (Vector2 v) {
-    Vector2 right;
+GmkVector2
+gmk_vector2_right_normal (GmkVector2 v)
+{
+    GmkVector2 right;
 
     right.x = -v.y;
     right.y = v.x;
@@ -109,9 +123,10 @@ vector2_right_normal (Vector2 v) {
     return right;
 }
 
-Vector2
-vector2_left_normal (Vector2 v) {
-    Vector2 left;
+GmkVector2
+gmk_vector2_left_normal (GmkVector2 v)
+{
+    GmkVector2 left;
 
     left.x = v.y;
     left.y = -v.x;
@@ -119,18 +134,19 @@ vector2_left_normal (Vector2 v) {
     return left;
 }
 
-static scm_t_bits vector2_tag;
-
-Vector2
-scm_to_vector2 (SCM s_v) {
+GmkVector2
+gmk_scm_to_vector2 (SCM s_v)
+{
     scm_assert_smob_type (vector2_tag, s_v);
 
-    return *((Vector2 *) SCM_SMOB_DATA (s_v));
+    return *((GmkVector2 *) SCM_SMOB_DATA (s_v));
 }
 
-SCM scm_from_vector2 (Vector2 v) {
+SCM
+gmk_scm_from_vector2 (GmkVector2 v)
+{
     SCM smob;
-    Vector2 *new_v = (Vector2 *) scm_gc_malloc (sizeof (Vector2), "vector2");
+    GmkVector2 *new_v = (GmkVector2 *) scm_gc_malloc (sizeof (GmkVector2), "vector2");
 
     *new_v = v;
 
@@ -139,229 +155,193 @@ SCM scm_from_vector2 (Vector2 v) {
     return smob;
 }
 
-static SCM
-make_vector2 (SCM s_x, SCM s_y)
+SCM_DEFINE (gmk_make_vector2, "make-vector2", 2, 0, 0,
+            (SCM x, SCM y),
+            "Make a 2D vector.")
 {
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
+    return gmk_scm_from_vector2 (gmk_vector2_new (scm_to_double (x),
+                                                  scm_to_double (y)));
+}
 
-    return scm_from_vector2 (vector2_new (x, y));
+SCM_DEFINE (gmk_s_vector2_from_polar, "vector2-from-polar", 2, 0, 0,
+            (SCM radius, SCM angle),
+            "Make a 2D vector from a polar coordinate pair.")
+{
+    GmkVector2 v = gmk_vector2_from_polar (scm_to_double (radius),
+                                           gmk_deg_to_rad (scm_to_double (angle)));
+
+    return gmk_scm_from_vector2 (v);
+}
+
+SCM_DEFINE (gmk_s_vector2_x, "vector2-x", 1, 0, 0,
+            (SCM v),
+            "Return x coordinate.")
+{
+    GmkVector2 c_v = gmk_scm_to_vector2 (v);
+
+    return scm_from_double (c_v.x);
+}
+
+SCM_DEFINE (gmk_s_vector2_y, "vector2-y", 1, 0, 0,
+            (SCM v),
+            "Return y coordinate.")
+{
+    GmkVector2 c_v = gmk_scm_to_vector2 (v);
+
+    return scm_from_double (c_v.y);
+}
+
+
+SCM_DEFINE (gmk_s_vector2_add, "vector2-add", 0, 0, 1,
+            (SCM vectors),
+            "Sum of vectors.")
+{
+    GmkVector2 sum = gmk_vector2_zero ();
+
+    while (scm_is_false (scm_null_p (vectors))) {
+        SCM s_v = scm_car (vectors);
+        GmkVector2 v = gmk_scm_to_vector2 (s_v);
+
+        sum = gmk_vector2_add (sum, v);
+
+        vectors = scm_cdr (vectors);
+    }
+
+    return gmk_scm_from_vector2 (sum);
+}
+
+SCM_DEFINE (gmk_s_vector2_sub, "vector2-sub", 1, 0, 1,
+            (SCM v, SCM vectors),
+            "Difference of vectors.")
+{
+    GmkVector2 difference = gmk_scm_to_vector2 (v);
+
+    while (scm_is_false (scm_null_p (vectors))) {
+        SCM s_v = scm_car (vectors);
+        GmkVector2 v = gmk_scm_to_vector2 (s_v);
+
+        difference = gmk_vector2_sub (difference, v);
+
+        vectors = scm_cdr (vectors);
+    }
+
+    return gmk_scm_from_vector2 (difference);
+}
+
+SCM_DEFINE (gmk_s_vector2_scale, "vector2-scale", 2, 0, 0,
+            (SCM v, SCM scalar),
+            "Multiply vector by a scalar.")
+{
+    return gmk_scm_from_vector2 (gmk_vector2_scale (gmk_scm_to_vector2 (v),
+                                                    scm_to_double (scalar)));
+}
+
+SCM_DEFINE (gmk_s_vector2_norm, "vector2-norm", 1, 0, 0,
+            (SCM v),
+            "Return normalized vector.")
+{
+    return gmk_scm_from_vector2 (gmk_vector2_norm (gmk_scm_to_vector2 (v)));
+}
+
+SCM_DEFINE (gmk_s_vector2_mag, "vector2-mag", 1, 0, 0,
+            (SCM v),
+            "Return vector magnitude.")
+{
+    return scm_from_double (gmk_vector2_mag (gmk_scm_to_vector2 (v)));
+}
+
+SCM_DEFINE (gmk_s_vector2_angle, "vector2-angle", 1, 0, 0,
+            (SCM v),
+            "Return vector direction in degrees.")
+{
+    float theta = gmk_vector2_angle (gmk_scm_to_vector2 (v));
+
+    return scm_from_double (gmk_rad_to_deg (theta));
+}
+
+SCM_DEFINE (gmk_s_vector2_dot, "vector2-dot", 2, 0, 0,
+            (SCM v1, SCM v2),
+            "Return dot product of 2 vectors.")
+{
+    return scm_from_double (gmk_vector2_dot (gmk_scm_to_vector2 (v1),
+                                             gmk_scm_to_vector2 (v2)));
+}
+
+SCM_DEFINE (gmk_s_vector2_cross, "vector2-cross", 2, 0, 0,
+            (SCM v1, SCM v2),
+            "Return cross product of 2 vectors.")
+{
+    return scm_from_double (gmk_vector2_cross (gmk_scm_to_vector2 (v1),
+                                               gmk_scm_to_vector2 (v2)));
+}
+
+SCM_DEFINE (gmk_s_vector2_right_normal, "vector2-right-normal", 1, 0, 0,
+            (SCM v),
+            "Return right normal.")
+{
+    return gmk_scm_from_vector2 (gmk_vector2_right_normal (gmk_scm_to_vector2 (v)));
+}
+
+SCM_DEFINE (gmk_s_vector2_left_normal, "vector2-left-normal", 1, 0, 0,
+            (SCM v),
+            "Return left normal.")
+{
+    return gmk_scm_from_vector2 (gmk_vector2_left_normal (gmk_scm_to_vector2 (v)));
 }
 
 static size_t
-free_vector2 (SCM vector2_smob)
+free_vector2 (SCM v)
 {
-    Vector2 *vector2 = (Vector2 *) SCM_SMOB_DATA (vector2_smob);
+    GmkVector2 *vector = (GmkVector2 *) SCM_SMOB_DATA (v);
 
-    scm_gc_free (vector2, sizeof (Vector2), "vector2");
+    scm_gc_free (vector, sizeof (GmkVector2), "vector2");
 
     return 0;
 }
 
 static int
-print_vector2 (SCM vector2_smob, SCM port, scm_print_state *pstate)
+print_vector2 (SCM v, SCM port, scm_print_state *pstate)
 {
-    Vector2 *vector2 = (Vector2 *) SCM_SMOB_DATA (vector2_smob);
-
     scm_puts ("#<vector2 x: ", port);
-    scm_display (scm_from_double (vector2->x), port);
+    scm_display (gmk_s_vector2_x (v), port);
     scm_puts (" y: ", port);
-    scm_display (scm_from_double (vector2->y), port);
-    scm_puts (" >", port);
+    scm_display (gmk_s_vector2_y (v), port);
+    scm_puts (">", port);
 
-    /* non-zero means success */
     return 1;
 }
 
 static SCM
-s_vector2_from_polar (SCM s_radius, SCM s_angle)
+vector2_equal_p (SCM v1, SCM v2)
 {
-    float radius = scm_to_double (s_radius);
-    float angle = gmk_deg_to_rad (scm_to_double (s_angle));
-    Vector2 v = vector2_from_polar (radius, angle);
-
-    return scm_from_vector2 (v);
-}
-
-static SCM
-s_vector2_x (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-    SCM x = scm_from_double (v.x);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return x;
-}
-
-static SCM
-s_vector2_y (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-    SCM y = scm_from_double (v.y);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return y;
-}
-
-static SCM
-vector2_equal_p (SCM s_v1, SCM s_v2) {
-    Vector2 v1 = scm_to_vector2 (s_v1);
-    Vector2 v2 = scm_to_vector2 (s_v2);
-
-    scm_remember_upto_here_1 (s_v1);
-    scm_remember_upto_here_1 (s_v2);
-
-    return scm_from_bool (vector2_equal (v1, v2));
-}
-
-static SCM
-s_vector2_add (SCM s_vectors) {
-    Vector2 sum = vector2_zero ();
-
-    while (scm_is_false (scm_null_p (s_vectors))) {
-        SCM s_v = scm_car (s_vectors);
-        Vector2 v = scm_to_vector2 (s_v);
-
-        sum = vector2_add (sum, v);
-
-        s_vectors = scm_cdr (s_vectors);
-    }
-
-    scm_remember_upto_here_1 (s_vectors);
-
-    return scm_from_vector2 (sum);
-}
-
-static SCM
-s_vector2_sub (SCM s_v, SCM s_vectors) {
-    Vector2 difference = scm_to_vector2 (s_v);
-
-    while (scm_is_false (scm_null_p (s_vectors))) {
-        SCM s_v = scm_car (s_vectors);
-        Vector2 v = scm_to_vector2 (s_v);
-
-        difference = vector2_sub (difference, v);
-
-        s_vectors = scm_cdr (s_vectors);
-    }
-
-    scm_remember_upto_here_1 (s_vectors);
-
-    return scm_from_vector2 (difference);
-}
-
-static SCM
-s_vector2_scale (SCM s_v, SCM s_scalar) {
-    Vector2 v = scm_to_vector2 (s_v);
-    float scalar = scm_to_double (s_scalar);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_vector2 (vector2_scale (v, scalar));
-}
-
-static SCM
-s_vector2_norm (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_vector2 (vector2_norm (v));
-}
-
-static SCM
-s_vector2_mag (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_double (vector2_mag (v));
-}
-
-static SCM
-s_vector2_angle (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_double (vector2_angle (v));
-}
-
-static SCM
-s_vector2_dot (SCM s_v1, SCM s_v2) {
-    Vector2 v1 = scm_to_vector2 (s_v1);
-    Vector2 v2 = scm_to_vector2 (s_v2);
-
-    scm_remember_upto_here_1 (s_v1);
-    scm_remember_upto_here_1 (s_v2);
-
-    return scm_from_double (vector2_dot (v1, v2));
-}
-
-static SCM
-s_vector2_cross (SCM s_v1, SCM s_v2) {
-    Vector2 v1 = scm_to_vector2 (s_v1);
-    Vector2 v2 = scm_to_vector2 (s_v2);
-
-    scm_remember_upto_here_1 (s_v1);
-    scm_remember_upto_here_1 (s_v2);
-
-    return scm_from_double (vector2_cross (v1, v2));;
-}
-
-static SCM
-s_vector2_right_normal (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_vector2 (vector2_right_normal (v));
-}
-
-static SCM
-s_vector2_left_normal (SCM s_v) {
-    Vector2 v = scm_to_vector2 (s_v);
-
-    scm_remember_upto_here_1 (s_v);
-
-    return scm_from_vector2 (vector2_left_normal (v));
+    return scm_from_bool (gmk_vector2_equal (gmk_scm_to_vector2 (v1),
+                                             gmk_scm_to_vector2 (v2)));
 }
 
 void
-init_vector2_type (void) {
-    vector2_tag = scm_make_smob_type ("<vector2>", sizeof (Vector2));
+gmk_init_vector2 (void)
+{
+    vector2_tag = scm_make_smob_type ("vector2", sizeof (GmkVector2));
     scm_set_smob_mark (vector2_tag, 0);
     scm_set_smob_free (vector2_tag, free_vector2);
     scm_set_smob_print (vector2_tag, print_vector2);
     scm_set_smob_equalp (vector2_tag, vector2_equal_p);
 
-    scm_c_define_gsubr ("make-vector2", 2, 0, 0, make_vector2);
-    scm_c_define_gsubr ("vector2-from-polar", 2, 0, 0, s_vector2_from_polar);
-    scm_c_define_gsubr ("vector2-x", 1, 0, 0, s_vector2_x);
-    scm_c_define_gsubr ("vector2-y", 1, 0, 0, s_vector2_y);
-    scm_c_define_gsubr ("vector2-add", 0, 0, 1, s_vector2_add);
-    scm_c_define_gsubr ("vector2-sub", 1, 0, 1, s_vector2_sub);
-    scm_c_define_gsubr ("vector2-scale", 2, 0, 0, s_vector2_scale);
-    scm_c_define_gsubr ("vector2-norm", 1, 0, 0, s_vector2_norm);
-    scm_c_define_gsubr ("vector2-mag", 1, 0, 0, s_vector2_mag);
-    scm_c_define_gsubr ("vector2-angle", 1, 0, 0, s_vector2_angle);
-    scm_c_define_gsubr ("vector2-dot", 2, 0, 0, s_vector2_dot);
-    scm_c_define_gsubr ("vector2-cross", 2, 0, 0, s_vector2_cross);
-    scm_c_define_gsubr ("vector2-left-normal", 1, 0, 0, s_vector2_left_normal);
-    scm_c_define_gsubr ("vector2-right-normal", 1, 0, 0, s_vector2_right_normal);
+#include "vector.x"
 
-    scm_c_export ("make-vector2", NULL);
-    scm_c_export ("vector2-from-polar", NULL);
-    scm_c_export ("vector2-x", NULL);
-    scm_c_export ("vector2-y", NULL);
-    scm_c_export ("vector2-add", NULL);
-    scm_c_export ("vector2-sub", NULL);
-    scm_c_export ("vector2-scale", NULL);
-    scm_c_export ("vector2-norm", NULL);
-    scm_c_export ("vector2-mag", NULL);
-    scm_c_export ("vector2-angle", NULL);
-    scm_c_export ("vector2-dot", NULL);
-    scm_c_export ("vector2-cross", NULL);
-    scm_c_export ("vector2-left-normal", NULL);
-    scm_c_export ("vector2-right-normal", NULL);
+    scm_c_export (s_gmk_make_vector2,
+                  s_gmk_s_vector2_from_polar,
+                  s_gmk_s_vector2_x,
+                  s_gmk_s_vector2_y,
+                  s_gmk_s_vector2_add,
+                  s_gmk_s_vector2_sub,
+                  s_gmk_s_vector2_scale,
+                  s_gmk_s_vector2_norm,
+                  s_gmk_s_vector2_mag,
+                  s_gmk_s_vector2_angle,
+                  s_gmk_s_vector2_dot,
+                  s_gmk_s_vector2_cross,
+                  s_gmk_s_vector2_left_normal,
+                  s_gmk_s_vector2_right_normal,
+                  NULL);
 }

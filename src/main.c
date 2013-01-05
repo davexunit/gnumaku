@@ -17,7 +17,7 @@
 void
 init_gnumaku () {
     /* Create smobs so we can call C code from Scheme. */
-    init_vector2_type();
+    gmk_init_vector2 ();
     init_transform_type ();
     init_color ();
     init_blend_mode ();

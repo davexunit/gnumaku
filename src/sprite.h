@@ -8,9 +8,9 @@
 typedef struct {
     SCM image;
     ALLEGRO_COLOR color;
-    Vector2 position;
-    Vector2 scale;
-    Vector2 anchor;
+    GmkVector2 position;
+    GmkVector2 scale;
+    GmkVector2 anchor;
     float rotation;
 } GmkSprite;
 

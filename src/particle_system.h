@@ -14,8 +14,8 @@ typedef struct {
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
     ALLEGRO_COLOR dcolor;
-    Vector2 pos;
-    Vector2 vel;
+    GmkVector2 pos;
+    GmkVector2 vel;
     float radial_accel;
     float tan_accel;
     float scale;
@@ -36,10 +36,10 @@ typedef struct {
     int amount;
     int life;
     int life_var;
-    Vector2 pos;
-    Vector2 pos_var;
-    Vector2 gravity;
-    Vector2 gravity_var;
+    GmkVector2 pos;
+    GmkVector2 pos_var;
+    GmkVector2 gravity;
+    GmkVector2 gravity_var;
     float direction;
     float direction_var;
     float speed;

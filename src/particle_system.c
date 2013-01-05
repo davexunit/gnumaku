@@ -67,7 +67,7 @@ init_particle (ParticleSystem *system, Particle *particle) {
     particle->dcolor = delta_color (start_color, end_color, particle->life);
     particle->pos.x = system->pos.x + system->pos_var.x * gmk_rand1 ();
     particle->pos.y = system->pos.y +  system->pos_var.y * gmk_rand1 ();
-    particle->vel = vector2_from_polar (speed, theta);
+    particle->vel = gmk_vector2_from_polar (speed, theta);
     particle->radial_accel = system->radial_accel + system->radial_accel_var * gmk_rand1 ();
     particle->tan_accel = system->tan_accel + system->tan_accel_var * gmk_rand1 ();
     particle->scale = start_scale;
@@ -244,19 +244,20 @@ particle_system_do_emit (ParticleSystem *system) {
 static void
 update_particle (ParticleSystem *system, int index) {
     Particle *particle = &system->particles[index];
-    Vector2 radial = vector2_zero();
-    Vector2 tangent;
+    GmkVector2 radial = gmk_vector2_zero();
+    GmkVector2 tangent;
 
     if (particle->active) {
-        if (!vector2_equal (particle->pos, system->pos)) {
-            radial = vector2_norm (vector2_sub (system->pos, particle->pos));
+        if (!gmk_vector2_equal (particle->pos, system->pos)) {
+            radial = gmk_vector2_norm (gmk_vector2_sub (system->pos, particle->pos));
         }
 
-        tangent = vector2_right_normal (radial);
-        radial = vector2_scale (radial, particle->radial_accel);
-        tangent = vector2_scale (tangent, particle->tan_accel);
-        particle->vel = vector2_add (particle->vel, (vector2_add (radial, tangent)));
-        particle->pos = vector2_add (particle->pos, particle->vel);
+        tangent = gmk_vector2_right_normal (radial);
+        radial = gmk_vector2_scale (radial, particle->radial_accel);
+        tangent = gmk_vector2_scale (tangent, particle->tan_accel);
+        particle->vel = gmk_vector2_add (particle->vel,
+                                         (gmk_vector2_add (radial, tangent)));
+        particle->pos = gmk_vector2_add (particle->pos, particle->vel);
         particle->scale += particle->dscale;
         particle->color = add_color (particle->color, particle->dcolor);
         ++particle->duration;
@@ -367,7 +368,7 @@ particle_system_position (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_vector2 (particle_system->pos);
+    return gmk_scm_from_vector2 (particle_system->pos);
 }
 
 static SCM
@@ -376,7 +377,7 @@ particle_system_position_var (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_vector2 (particle_system->pos_var);
+    return gmk_scm_from_vector2 (particle_system->pos_var);
 }
 
 static SCM
@@ -385,7 +386,7 @@ particle_system_gravity (SCM particle_system_smob) {
 
     scm_remember_upto_here_1 (particle_system_smob);
 
-    return scm_from_vector2 (particle_system->gravity);
+    return gmk_scm_from_vector2 (particle_system->gravity);
 }
 
 static SCM
@@ -606,7 +607,7 @@ set_particle_system_life_var (SCM particle_system_smob, SCM s_life_var) {
 static SCM
 set_particle_system_position (SCM particle_system_smob, SCM s_pos) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    Vector2 pos = scm_to_vector2 (s_pos);
+    GmkVector2 pos = gmk_scm_to_vector2 (s_pos);
 
     particle_system->pos = pos;
 
@@ -618,7 +619,7 @@ set_particle_system_position (SCM particle_system_smob, SCM s_pos) {
 static SCM
 set_particle_system_position_var (SCM particle_system_smob, SCM s_pos_var) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    Vector2 pos_var = scm_to_vector2 (s_pos_var);
+    GmkVector2 pos_var = gmk_scm_to_vector2 (s_pos_var);
 
     particle_system->pos_var = pos_var;
 
@@ -630,7 +631,7 @@ set_particle_system_position_var (SCM particle_system_smob, SCM s_pos_var) {
 static SCM
 set_particle_system_gravity (SCM particle_system_smob, SCM s_gravity) {
     ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    Vector2 gravity = scm_to_vector2 (s_gravity);
+    GmkVector2 gravity = gmk_scm_to_vector2 (s_gravity);
 
     particle_system->gravity = gravity;
 

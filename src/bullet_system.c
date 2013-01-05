@@ -208,8 +208,8 @@ update_bullet(Bullet *bullet) {
                               &bullet->vel.x, &bullet->vel.y);
     al_transform_coordinates (&bullet->angular_velocity,
                               &bullet->acc.x, &bullet->acc.y);
-    bullet->pos = vector2_add (bullet->pos, bullet->vel);
-    bullet->vel = vector2_add (bullet->vel, bullet->acc);
+    bullet->pos = gmk_vector2_add (bullet->pos, bullet->vel);
+    bullet->vel = gmk_vector2_add (bullet->vel, bullet->acc);
     bullet->life_count++;
 }
 
@@ -269,7 +269,7 @@ set_bullet_blend_mode (Bullet *bullet, GmkBlendMode prev_blend_mode) {
 static float
 bullet_sprite_angle (Bullet *bullet) {
     if (bullet->directional) {
-        return vector2_angle (bullet->vel);
+        return gmk_vector2_angle (bullet->vel);
     }
 
     return 0;
@@ -401,8 +401,8 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
                       float angular_velocity) {
     float theta = gmk_deg_to_rad (direction);
 
-    bullet->vel = vector2_from_polar (speed, theta);
-    bullet->acc = vector2_from_polar (acceleration, theta);
+    bullet->vel = gmk_vector2_from_polar (speed, theta);
+    bullet->acc = gmk_vector2_from_polar (acceleration, theta);
     al_build_transform (&bullet->angular_velocity, 0, 0, 1, 1,
                         gmk_deg_to_rad (angular_velocity));
 }
@@ -418,9 +418,9 @@ init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, GmkBulletType *ty
 }
 
 static void
-init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
+init_bullet (Bullet *bullet, BulletSystem *bullet_system, GmkVector2 pos,
              float speed, float direction, float acceleration, float angular_velocity,
-             int life, SCM script, ALLEGRO_COLOR color, Vector2 scale,
+             int life, SCM script, ALLEGRO_COLOR color, GmkVector2 scale,
              GmkBulletType *type) {
 
     bullet->active = true;
@@ -486,7 +486,7 @@ static SCM
 emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
              SCM s_type, SCM keyword_args) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    Vector2 pos = scm_to_vector2 (s_pos);
+    GmkVector2 pos = gmk_scm_to_vector2 (s_pos);
     float speed = scm_to_double (s_speed);
     float direction = scm_to_double (s_direction);
     float acceleration = scm_to_double (scm_get_keyword (keyword_acceleration,
@@ -495,7 +495,7 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
     float angular_velocity = scm_to_double (scm_get_keyword (keyword_angular_velocity,
                                                              keyword_args,
                                                              default_angular_velocity));
-    Vector2 scale = scm_to_vector2 (scm_get_keyword (keyword_scale, keyword_args,
+    GmkVector2 scale = gmk_scm_to_vector2 (scm_get_keyword (keyword_scale, keyword_args,
                                                      default_scale));
     int life = scm_to_int (scm_get_keyword (keyword_life, keyword_args,
                                             default_life));
@@ -515,8 +515,8 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
 static SCM
 emit_script_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_type, SCM script) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    Vector2 pos = scm_to_vector2 (s_pos);
-    Vector2 scale = vector2_new (1, 1);
+    GmkVector2 pos = gmk_scm_to_vector2 (s_pos);
+    GmkVector2 scale = gmk_vector2_new (1, 1);
     GmkBulletType *type = gmk_check_bullet_type (s_type);
     ALLEGRO_COLOR color = al_map_rgba_f (1, 1, 1, 1);
     Bullet *bullet = new_bullet (bullet_system);
@@ -582,7 +582,7 @@ bullet_position (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_vector2 (bullet->pos);
+    return gmk_scm_from_vector2 (bullet->pos);
 }
 
 static SCM
@@ -590,14 +590,14 @@ bullet_speed (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (vector2_mag (bullet->vel));
+    return scm_from_double (gmk_vector2_mag (bullet->vel));
 }
 
 static SCM
 bullet_direction (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float direction = gmk_rad_to_deg (vector2_angle (bullet->vel));
+    float direction = gmk_rad_to_deg (gmk_vector2_angle (bullet->vel));
 
     return scm_from_double (direction);
 }
@@ -607,7 +607,7 @@ bullet_acceleration (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_double (vector2_mag (bullet->acc));
+    return scm_from_double (gmk_vector2_mag (bullet->acc));
 }
 
 static SCM
@@ -645,14 +645,14 @@ bullet_scale (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
-    return scm_from_vector2 (bullet->scale);
+    return gmk_scm_from_vector2 (bullet->scale);
 }
 
 static SCM
 set_bullet_position (SCM bullet_ref_smob, SCM s_pos) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    Vector2 pos = scm_to_vector2 (s_pos);
+    GmkVector2 pos = gmk_scm_to_vector2 (s_pos);
 
     bullet->pos = pos;
 
@@ -665,7 +665,7 @@ set_bullet_speed (SCM bullet_ref_smob, SCM s_speed) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float speed = scm_to_double (s_speed);
 
-    bullet->vel = vector2_scale (vector2_norm (bullet->vel), speed);
+    bullet->vel = gmk_vector2_scale (gmk_vector2_norm (bullet->vel), speed);
 
     return SCM_UNSPECIFIED;
 }
@@ -676,11 +676,11 @@ set_bullet_direction (SCM bullet_ref_smob, SCM s_direction) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float direction = scm_to_double (s_direction);
     float theta = gmk_deg_to_rad (direction);
-    float speed = vector2_mag (bullet->vel);
-    float acceleration = vector2_mag (bullet->acc);
+    float speed = gmk_vector2_mag (bullet->vel);
+    float acceleration = gmk_vector2_mag (bullet->acc);
 
-    bullet->vel = vector2_from_polar (speed, theta);
-    bullet->acc = vector2_from_polar (acceleration, theta);
+    bullet->vel = gmk_vector2_from_polar (speed, theta);
+    bullet->acc = gmk_vector2_from_polar (acceleration, theta);
 
     return SCM_UNSPECIFIED;
 }
@@ -691,7 +691,7 @@ set_bullet_acceleration (SCM bullet_ref_smob, SCM s_acceleration) {
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float acceleration = scm_to_double (s_acceleration);
 
-    bullet->acc = vector2_scale (vector2_norm (bullet->acc), acceleration);
+    bullet->acc = gmk_vector2_scale (gmk_vector2_norm (bullet->acc), acceleration);
 
     return SCM_UNSPECIFIED;
 }
@@ -734,7 +734,7 @@ static SCM
 set_bullet_scale (SCM bullet_ref_smob, SCM s_scale) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    Vector2 scale = scm_to_vector2 (s_scale);
+    GmkVector2 scale = gmk_scm_to_vector2 (s_scale);
 
     bullet->scale = scale;
 
@@ -752,7 +752,7 @@ init_bullet_system_type (void) {
     default_angular_velocity = scm_from_double (0);
     default_life = scm_from_int (0);
     default_color = gmk_scm_from_color (al_map_rgba_f (1, 1, 1, 1));
-    default_scale = scm_from_vector2 (vector2_new (1, 1));
+    default_scale = gmk_scm_from_vector2 (gmk_vector2_new (1, 1));
 
     /* BulletSystem bindings */
     bullet_system_tag = scm_make_smob_type ("<bullet-system>", sizeof (BulletSystem));
