@@ -9,15 +9,15 @@ get_clipping_rect ()
 
     al_get_clipping_rectangle (&x, &y, &width, &height);
 
-    return make_rect (scm_from_int (x), scm_from_int (y), scm_from_int (width), scm_from_int (height));
+    return gmk_make_rect (scm_from_int (x), scm_from_int (y), scm_from_int (width), scm_from_int (height));
 }
 
 static SCM
 set_clipping_rect (SCM rect_smob)
 {
-    Rect *rect = check_rect (rect_smob);
+    GmkRect rect = gmk_scm_to_rect (rect_smob);
 
-    al_set_clipping_rectangle (rect->x, rect->y, rect->width, rect->height);
+    al_set_clipping_rectangle (rect.x, rect.y, rect.width, rect.height);
 
     return SCM_UNSPECIFIED;
 }

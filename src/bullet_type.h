@@ -13,7 +13,7 @@
 typedef struct {
     bool directional;
     int image;
-    Rect hitbox;
+    GmkRect hitbox;
     GmkBlendMode blend_mode;
 } GmkBulletType;
 

@@ -24,7 +24,7 @@ init_gnumaku () {
     init_sprite_sheet_type ();
     gmk_init_image ();
     gmk_init_sprite ();
-    init_rect_type ();
+    init_rect ();
     init_font_type ();
     init_sample_type ();
     init_audio_stream_type ();

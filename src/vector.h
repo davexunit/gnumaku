@@ -7,6 +7,7 @@ typedef struct {
     float x, y;
 } GmkVector2;
 
+/* C API. */
 bool gmk_vector2_equal (GmkVector2 a, GmkVector2 b);
 float gmk_vector2_mag (GmkVector2 v);
 float gmk_vector2_dot (GmkVector2 a, GmkVector2 b);
@@ -23,6 +24,8 @@ GmkVector2 gmk_vector2_norm (GmkVector2 v);
 GmkVector2 gmk_vector2_from_polar (float radius, float angle);
 GmkVector2 gmk_vector2_right_normal (GmkVector2 v);
 GmkVector2 gmk_vector2_left_normal (GmkVector2 v);
+
+/* Scheme bindings. */
 SCM gmk_make_vector2 (SCM x, SCM y);
 SCM gmk_s_vector2_from_polar (SCM radius, SCM angle);
 SCM gmk_s_vector2_x (SCM v);

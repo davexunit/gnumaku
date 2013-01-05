@@ -16,7 +16,7 @@ SCM_DEFINE (gmk_make_bullet_type, "make-bullet-type", 4, 0, 0,
 {
     GmkBulletType *bullet_type;
     int image = scm_to_int (s_image);
-    Rect hitbox = scm_to_rect (s_hitbox);
+    GmkRect hitbox = gmk_scm_to_rect (s_hitbox);
     GmkBlendMode blend_mode = gmk_scm_to_blend_mode (s_blend_mode);
     bool directional = scm_to_bool (s_directional);
 

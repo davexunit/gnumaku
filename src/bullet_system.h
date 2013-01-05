@@ -27,7 +27,7 @@ typedef struct {
     GmkVector2 vel;
     GmkVector2 acc;
     GmkVector2 scale;
-    Rect hitbox;
+    GmkRect hitbox;
     GmkBlendMode blend_mode;
     ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     ALLEGRO_BITMAP *image;
@@ -42,7 +42,7 @@ typedef struct {
     Bullet *bullets;
     int *bullet_ids; /* Maps bullet id to bullet pool index. */
     SCM sprite_sheet;
-    Rect bounds;
+    GmkRect bounds;
 } BulletSystem;
 
 typedef struct {

@@ -123,7 +123,7 @@ clear_bullet_system (SCM bullet_system_smob)
 
 static bool
 bullet_out_of_bounds(BulletSystem *bullet_system, Bullet *bullet) {
-    return !rect_collide_point(bullet_system->bounds, bullet->pos);
+    return !gmk_rect_collide_point (bullet_system->bounds, bullet->pos);
 }
 
 static void
@@ -167,7 +167,7 @@ set_bullet_system_bounds (SCM bullet_system_smob, SCM s_x, SCM s_y,
 static SCM
 bullet_system_bounds (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
-    Rect bounds = bullet_system->bounds;
+    GmkRect bounds = bullet_system->bounds;
     SCM x = scm_from_double (bounds.x);
     SCM y = scm_from_double (bounds.y);
     SCM width = scm_from_double (bounds.width);
@@ -175,7 +175,7 @@ bullet_system_bounds (SCM bullet_system_smob) {
 
     scm_remember_upto_here_1 (bullet_system_smob);
 
-    return make_rect(x, y, width, height);
+    return gmk_make_rect(x, y, width, height);
 }
 
 static SCM
@@ -321,7 +321,7 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
         Bullet *bullet = bullet_from_index (bullet_system, i);
 
         if (bullet->active && bullet->image) {
-            Rect hitbox = rect_move (bullet->hitbox, bullet->pos);
+            GmkRect hitbox = gmk_rect_move (bullet->hitbox, bullet->pos);
             al_draw_rectangle (hitbox.x, hitbox.y,
                                hitbox.x + hitbox.width, hitbox.y + hitbox.height,
                                al_map_rgba_f (1, 0, 1, 1), 2);
@@ -334,10 +334,10 @@ draw_bullet_system_hitboxes (SCM bullet_system_smob) {
 }
 
 static bool
-bullet_collision_check (Bullet *bullet, Rect rect, SCM callback) {
-    Rect hitbox = rect_move (bullet->hitbox, bullet->pos);
+bullet_collision_check (Bullet *bullet, GmkRect rect, SCM callback) {
+    GmkRect hitbox = gmk_rect_move (bullet->hitbox, bullet->pos);
 
-    if (rect_collide_rect (hitbox, rect)) {
+    if (gmk_rect_collide_rect (hitbox, rect)) {
         if (scm_procedure_p (callback)) {
             /* The callback can return true if the bullet should be
              * removed from the system. */
@@ -351,7 +351,7 @@ bullet_collision_check (Bullet *bullet, Rect rect, SCM callback) {
 static SCM
 bullet_system_collide_rect (SCM bullet_system_smob, SCM rect_smob, SCM callback) {
     BulletSystem *bullet_system = check_bullet_system(bullet_system_smob);
-    Rect rect = scm_to_rect (rect_smob);
+    GmkRect rect = gmk_scm_to_rect (rect_smob);
 
     for (int i = 0; i < bullet_system->bullet_count; ++i) {
         Bullet *bullet = bullet_from_index (bullet_system, i);
@@ -414,7 +414,7 @@ init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, GmkBulletType *ty
     bullet->directional = type->directional;
     bullet->image = sprite_sheet_tile (sprite_sheet, type->image);
     bullet->blend_mode = type->blend_mode;
-    bullet->hitbox = rect_scale (type->hitbox, bullet->scale);
+    bullet->hitbox = gmk_rect_scale (type->hitbox, bullet->scale);
 }
 
 static void
