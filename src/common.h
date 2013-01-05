@@ -6,5 +6,6 @@
 #include <allegro5/allegro_image.h>
 
 #include "math.h"
+#include "vector.h"
 
 #endif
