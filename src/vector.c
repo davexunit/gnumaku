@@ -155,7 +155,7 @@ gmk_scm_from_vector2 (GmkVector2 v)
     return smob;
 }
 
-SCM_DEFINE (gmk_make_vector2, "make-vector2", 2, 0, 0,
+SCM_DEFINE (gmk_s_make_vector2, "make-vector2", 2, 0, 0,
             (SCM x, SCM y),
             "Make a 2D vector.")
 {
@@ -329,7 +329,7 @@ gmk_init_vector2 (void)
 
 #include "vector.x"
 
-    scm_c_export (s_gmk_make_vector2,
+    scm_c_export (s_gmk_s_make_vector2,
                   s_gmk_s_vector2_from_polar,
                   s_gmk_s_vector2_x,
                   s_gmk_s_vector2_y,

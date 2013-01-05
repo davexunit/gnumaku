@@ -20,7 +20,7 @@ bool gmk_rect_collide_rect (GmkRect rect, GmkRect other);
 /* Scheme bindings. */
 GmkRect gmk_scm_to_rect (SCM rect_smob);
 SCM gmk_scm_from_rect (GmkRect rect);
-SCM gmk_make_rect (SCM x, SCM y, SCM width, SCM height);
+SCM gmk_s_make_rect (SCM x, SCM y, SCM width, SCM height);
 SCM gmk_s_rect_x (SCM rect);
 SCM gmk_s_rect_y (SCM rect);
 SCM gmk_s_rect_width (SCM rect);

@@ -37,7 +37,7 @@ gmk_scm_to_color (SCM color)
     return *c_color;
 }
 
-SCM_DEFINE (gmk_make_color, "make-color", 4, 0, 0,
+SCM_DEFINE (gmk_s_make_color, "make-color", 4, 0, 0,
             (SCM r, SCM g, SCM b, SCM a),
             "Make color from red, green, blue, and alpha components."
             "Each component is in the range [0, 255].")
@@ -50,7 +50,7 @@ SCM_DEFINE (gmk_make_color, "make-color", 4, 0, 0,
     return gmk_scm_from_color (color);
 }
 
-SCM_DEFINE (gmk_make_color_f, "make-color-f", 4, 0, 0,
+SCM_DEFINE (gmk_s_make_color_f, "make-color-f", 4, 0, 0,
             (SCM r, SCM g, SCM b, SCM a),
             "Make color from red, green, blue, and alpha components."
             "Each component is in the range [0, 1].")
@@ -63,7 +63,7 @@ SCM_DEFINE (gmk_make_color_f, "make-color-f", 4, 0, 0,
     return gmk_scm_from_color (color);
 }
 
-SCM_DEFINE (gmk_color_r, "color-r", 1, 0, 0,
+SCM_DEFINE (gmk_s_color_r, "color-r", 1, 0, 0,
             (SCM color),
             "Return red color component.")
 {
@@ -72,7 +72,7 @@ SCM_DEFINE (gmk_color_r, "color-r", 1, 0, 0,
     return scm_from_double (c_color.r);
 }
 
-SCM_DEFINE (gmk_color_g, "color-g", 1, 0, 0,
+SCM_DEFINE (gmk_s_color_g, "color-g", 1, 0, 0,
             (SCM color),
             "Return green color component.")
 {
@@ -81,7 +81,7 @@ SCM_DEFINE (gmk_color_g, "color-g", 1, 0, 0,
     return scm_from_double (c_color.g);
 }
 
-SCM_DEFINE (gmk_color_b, "color-b", 1, 0, 0,
+SCM_DEFINE (gmk_s_color_b, "color-b", 1, 0, 0,
             (SCM color),
             "Return blue color component.")
 {
@@ -90,7 +90,7 @@ SCM_DEFINE (gmk_color_b, "color-b", 1, 0, 0,
     return scm_from_double (c_color.b);
 }
 
-SCM_DEFINE (gmk_color_a, "color-a", 1, 0, 0,
+SCM_DEFINE (gmk_s_color_a, "color-a", 1, 0, 0,
             (SCM color),
             "Return alpha color component.")
 {
@@ -110,18 +110,16 @@ free_color (SCM color_smob)
 }
 
 static int
-print_color (SCM color_smob, SCM port, scm_print_state *pstate)
+print_color (SCM color, SCM port, scm_print_state *pstate)
 {
-    ALLEGRO_COLOR color = gmk_scm_to_color (color_smob);
-
     scm_puts ("#<color r:", port);
-    scm_display (scm_from_double (color.r), port);
+    scm_display (gmk_s_color_r (color), port);
     scm_puts (" g: ", port);
-    scm_display (scm_from_double (color.g), port);
+    scm_display (gmk_s_color_b (color), port);
     scm_puts (" b: ", port);
-    scm_display (scm_from_double (color.b), port);
+    scm_display (gmk_s_color_b (color), port);
     scm_puts (" a: ", port);
-    scm_display (scm_from_double (color.a), port);
+    scm_display (gmk_s_color_a (color), port);
     scm_puts (">", port);
 
     return 1;
@@ -137,11 +135,11 @@ gmk_init_color (void)
 
 #include "color.x"
 
-    scm_c_export (s_gmk_make_color,
-                  s_gmk_make_color_f,
-                  s_gmk_color_r,
-                  s_gmk_color_g,
-                  s_gmk_color_b,
-                  s_gmk_color_a,
+    scm_c_export (s_gmk_s_make_color,
+                  s_gmk_s_make_color_f,
+                  s_gmk_s_color_r,
+                  s_gmk_s_color_g,
+                  s_gmk_s_color_b,
+                  s_gmk_s_color_a,
                   NULL);
 }

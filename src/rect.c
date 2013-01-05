@@ -97,7 +97,7 @@ gmk_scm_from_rect (GmkRect rect) {
     SCM_RETURN_NEWSMOB (rect_tag, new_rect);
 }
 
-SCM_DEFINE (gmk_make_rect, "make-rect", 4, 0, 0,
+SCM_DEFINE (gmk_s_make_rect, "make-rect", 4, 0, 0,
             (SCM x, SCM y, SCM width, SCM height),
             "Make rectangle.")
 {
@@ -212,7 +212,7 @@ gmk_init_rect (void)
 
 #include "rect.x"
 
-    scm_c_export (s_gmk_make_rect,
+    scm_c_export (s_gmk_s_make_rect,
                   s_gmk_s_rect_x,
                   s_gmk_s_rect_y,
                   s_gmk_s_rect_width,
