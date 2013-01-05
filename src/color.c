@@ -2,7 +2,8 @@
 
 static scm_t_bits color_tag;
 
-ALLEGRO_COLOR gmk_color_mult_alpha (ALLEGRO_COLOR color)
+ALLEGRO_COLOR
+gmk_color_mult_alpha (ALLEGRO_COLOR color)
 {
     ALLEGRO_COLOR new_color;
 
