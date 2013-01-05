@@ -165,7 +165,7 @@ print_image (SCM image, SCM port, scm_print_state *pstate)
 void
 gmk_init_image (void)
 {
-    image_tag = scm_make_smob_type ("<image>", sizeof (GmkImage));
+    image_tag = scm_make_smob_type ("image", sizeof (GmkImage));
     scm_set_smob_mark (image_tag, 0);
     scm_set_smob_free (image_tag, free_image);
     scm_set_smob_print (image_tag, print_image);
