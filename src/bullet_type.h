@@ -1,5 +1,5 @@
-#ifndef BULLET_TYPE_H
-#define BULLET_TYPE_H
+#ifndef GMK_BULLET_TYPE_H
+#define GMK_BULLET_TYPE_H
 
 #include <allegro5/allegro.h>
 #include <libguile.h>
@@ -9,18 +9,21 @@
 /*
  * BulletType
  *
- * Common properties for bullets of the same type.
+ * Common set of properties for bullets.
  */
 typedef struct {
     bool directional;
     int image;
     Rect hitbox;
-    BlendMode blend_mode;
-} BulletType;
+    GmkBlendMode blend_mode;
+} GmkBulletType;
 
-BlendMode scm_to_blend_mode (SCM blend_mode);
-BulletType* check_bullet_type (SCM bullet_type_smob);
-/* Well, this name sure turned out silly. */
-void init_bullet_type_type (void);
+GmkBulletType *gmk_check_bullet_type (SCM bullet_type_smob);
+
+SCM gmk_make_bullet_type (SCM s_image, SCM s_hitbox, SCM s_blend_mode,
+                          SCM s_directional);
+
+    
+void gmk_init_bullet_type (void);
 
 #endif
