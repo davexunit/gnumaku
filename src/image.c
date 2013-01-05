@@ -136,7 +136,8 @@ SCM_DEFINE (gmk_set_render_image, "set-render-image", 1, 0, 0,
 }
 
 static size_t
-free_image (SCM image_smob) {
+free_image (SCM image_smob)
+{
     GmkImage *image = (GmkImage *) SCM_SMOB_DATA (image_smob);
 
     /* Do not free sub bitmaps. */
@@ -150,7 +151,8 @@ free_image (SCM image_smob) {
 }
 
 static int
-print_image (SCM image, SCM port, scm_print_state *pstate) {
+print_image (SCM image, SCM port, scm_print_state *pstate)
+{
     scm_puts ("#<image width: ", port);
     scm_display (gmk_image_width (image), port);
     scm_puts (" height: ", port);
@@ -161,7 +163,8 @@ print_image (SCM image, SCM port, scm_print_state *pstate) {
 }
 
 void
-gmk_init_image (void) {
+gmk_init_image (void)
+{
     image_tag = scm_make_smob_type ("<image>", sizeof (GmkImage));
     scm_set_smob_mark (image_tag, 0);
     scm_set_smob_free (image_tag, free_image);
