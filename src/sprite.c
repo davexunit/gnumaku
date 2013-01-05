@@ -88,8 +88,6 @@ SCM_DEFINE (gmk_sprite_image, "sprite-image", 1, 0, 0,
     GmkSprite *c_sprite = check_sprite (sprite);
     SCM image = c_sprite->image;
 
-    scm_remember_upto_here_1 (sprite);
-
     return image;
 }
 
@@ -99,8 +97,6 @@ SCM_DEFINE (gmk_sprite_position, "sprite-position", 1, 0, 0,
 {
     GmkSprite *c_sprite = check_sprite (sprite);
     GmkVector2 position = c_sprite->position;
-
-    scm_remember_upto_here_1 (sprite);
 
     return gmk_scm_from_vector2 (position);
 }
@@ -112,8 +108,6 @@ SCM_DEFINE (gmk_sprite_scale, "sprite-scale", 1, 0, 0,
     GmkSprite *c_sprite = check_sprite (sprite);
     GmkVector2 scale = c_sprite->scale;
 
-    scm_remember_upto_here_1 (sprite);
-
     return gmk_scm_from_vector2 (scale);
 }
 
@@ -123,8 +117,6 @@ SCM_DEFINE (gmk_sprite_rotation, "sprite-rotation", 1, 0, 0,
 {
     GmkSprite *c_sprite = check_sprite (sprite);
     float rotation = c_sprite->rotation;
-
-    scm_remember_upto_here_1 (sprite);
 
     return scm_from_double (rotation);
 }
@@ -136,8 +128,6 @@ SCM_DEFINE (gmk_sprite_color, "sprite-color", 1, 0, 0,
     GmkSprite *c_sprite = check_sprite (sprite);
     ALLEGRO_COLOR color = c_sprite->color;
 
-    scm_remember_upto_here_1 (sprite);
-
     return gmk_scm_from_color (color);
 }
 
@@ -148,8 +138,6 @@ SCM_DEFINE (gmk_sprite_opacity, "sprite-opacity", 1, 0, 0,
     GmkSprite *c_sprite = check_sprite (sprite);
     float opacity = c_sprite->color.a;
 
-    scm_remember_upto_here_1 (sprite);
-
     return scm_from_double (opacity);
 }
 
@@ -159,8 +147,6 @@ SCM_DEFINE (gmk_sprite_anchor, "sprite-anchor", 1, 0, 0,
 {
     GmkSprite *c_sprite = check_sprite (sprite);
     GmkVector2 anchor = c_sprite->anchor;
-
-    scm_remember_upto_here_1 (sprite);
 
     return gmk_scm_from_vector2 (anchor);
 }
@@ -174,8 +160,6 @@ SCM_DEFINE (gmk_set_sprite_position, "set-sprite-position", 2, 0, 0,
 
     c_sprite->position = new_position;
 
-    scm_remember_upto_here_1 (sprite);
-
     return SCM_UNSPECIFIED;
 }
 
@@ -187,8 +171,6 @@ SCM_DEFINE (gmk_set_sprite_scale, "set-sprite-scale", 2, 0, 0,
     GmkVector2 new_scale = gmk_scm_to_vector2 (scale);
 
     c_sprite->scale = new_scale;
-
-    scm_remember_upto_here_1 (sprite);
 
     return SCM_UNSPECIFIED;
 }
@@ -202,8 +184,6 @@ SCM_DEFINE (gmk_set_sprite_rotation, "set-sprite-rotation", 2, 0, 0,
 
     c_sprite->rotation = new_rotation;
 
-    scm_remember_upto_here_1 (sprite);
-
     return SCM_UNSPECIFIED;
 }
 
@@ -215,8 +195,6 @@ SCM_DEFINE (gmk_set_sprite_color, "set-sprite-color", 2, 0, 0,
     ALLEGRO_COLOR new_color = gmk_scm_to_color (color);
 
     c_sprite->color = new_color;
-
-    scm_remember_upto_here_1 (sprite);
 
     return SCM_UNSPECIFIED;
 }
@@ -230,8 +208,6 @@ SCM_DEFINE (gmk_set_sprite_opacity, "set-sprite-opacity", 2, 0, 0,
 
     c_sprite->color.a = new_opacity;
 
-    scm_remember_upto_here_1 (sprite);
-
     return SCM_UNSPECIFIED;
 }
 
@@ -244,8 +220,6 @@ SCM_DEFINE (gmk_set_sprite_anchor, "set-sprite-anchor", 2, 0, 0,
 
     c_sprite->anchor = new_anchor;
 
-    scm_remember_upto_here_1 (sprite);
-
     return SCM_UNSPECIFIED;
 }
 
@@ -256,8 +230,6 @@ SCM_DEFINE (gmk_set_sprite_image, "set-sprite-image", 2, 0, 0,
     GmkSprite *c_sprite = check_sprite (sprite);
 
     c_sprite->image = image;
-
-    scm_remember_upto_here_1 (sprite);
 
     return SCM_UNSPECIFIED;
 }
@@ -275,7 +247,6 @@ SCM_DEFINE (gmk_draw_sprite, "draw-sprite", 1, 0, 0,
                                           c_sprite->position.x, c_sprite->position.y,
                                           c_sprite->scale.x, c_sprite->scale.y,
                                           c_sprite->rotation, 0);
-
     scm_remember_upto_here_1 (sprite);
 
     return SCM_UNSPECIFIED;
