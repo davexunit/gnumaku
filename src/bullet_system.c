@@ -255,22 +255,13 @@ update_bullet_system (SCM bullet_system_smob) {
 }
 
 static void
-set_bullet_blend_mode (Bullet *bullet, BlendMode prev_blend_mode) {
+set_bullet_blend_mode (Bullet *bullet, GmkBlendMode prev_blend_mode) {
     if (bullet->blend_mode != prev_blend_mode) {
         /* It is not possible to hold bitmap drawing and
          * change the blending mode.
          */
         al_hold_bitmap_drawing (false);
-        
-        switch (bullet->blend_mode) {
-        case BLEND_ALPHA:
-            al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
-            break;
-        case BLEND_ADD:
-            al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
-            break;
-        }
-
+        gmk_set_blend_mode (bullet->blend_mode);
         al_hold_bitmap_drawing (true);
     }
 }
@@ -285,7 +276,7 @@ bullet_sprite_angle (Bullet *bullet) {
 }
 
 static void
-draw_bullet (Bullet *bullet, int cx, int cy, BlendMode prev_blend_mode) {
+draw_bullet (Bullet *bullet, int cx, int cy, GmkBlendMode prev_blend_mode) {
     float angle = bullet_sprite_angle (bullet);
     ALLEGRO_COLOR color = color_mult_alpha (bullet->color);
 
@@ -300,7 +291,7 @@ static SCM
 draw_bullet_system (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
-    BlendMode prev_blend_mode = BLEND_ALPHA;
+    GmkBlendMode prev_blend_mode = -1;
     ALLEGRO_STATE state;
 
     al_store_state (&state, ALLEGRO_STATE_BLENDER);
@@ -417,7 +408,7 @@ init_bullet_movement (Bullet *bullet, float speed, float direction, float accele
 }
 
 static void
-init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, BulletType *type) {
+init_bullet_type (Bullet *bullet, BulletSystem *bullet_system, GmkBulletType *type) {
     SpriteSheet *sprite_sheet = check_sprite_sheet (bullet_system->sprite_sheet);
 
     bullet->directional = type->directional;
@@ -430,7 +421,7 @@ static void
 init_bullet (Bullet *bullet, BulletSystem *bullet_system, Vector2 pos,
              float speed, float direction, float acceleration, float angular_velocity,
              int life, SCM script, ALLEGRO_COLOR color, Vector2 scale,
-             BulletType *type) {
+             GmkBulletType *type) {
 
     bullet->active = true;
     bullet->kill = false;
@@ -510,7 +501,7 @@ emit_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_speed, SCM s_direction,
                                             default_life));
     ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, keyword_args,
                                                          default_color));
-    BulletType *type = check_bullet_type (s_type);
+    GmkBulletType *type = gmk_check_bullet_type (s_type);
     Bullet *bullet = new_bullet (bullet_system);
 
     if (bullet) {
@@ -526,7 +517,7 @@ emit_script_bullet (SCM bullet_system_smob, SCM s_pos, SCM s_type, SCM script) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     Vector2 pos = scm_to_vector2 (s_pos);
     Vector2 scale = vector2_new (1, 1);
-    BulletType *type = check_bullet_type (s_type);
+    GmkBulletType *type = gmk_check_bullet_type (s_type);
     ALLEGRO_COLOR color = al_map_rgba_f (1, 1, 1, 1);
     Bullet *bullet = new_bullet (bullet_system);
 
@@ -568,7 +559,7 @@ set_bullet_script (SCM bullet_ref_smob, SCM s_dt, SCM script) {
 static SCM
 set_bullet_type (SCM bullet_ref_smob, SCM bullet_type_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
-    BulletType *type = check_bullet_type (bullet_type_smob);
+    GmkBulletType *type = gmk_check_bullet_type (bullet_type_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
 
     init_bullet_type (bullet, bullet_ref->system, type);

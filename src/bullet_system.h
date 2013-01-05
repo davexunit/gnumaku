@@ -27,9 +27,9 @@ typedef struct {
     Vector2 vel;
     Vector2 acc;
     Vector2 scale;
-    ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     Rect hitbox;
-    BlendMode blend_mode;
+    GmkBlendMode blend_mode;
+    ALLEGRO_TRANSFORM angular_velocity; /* Change in direction. */
     ALLEGRO_BITMAP *image;
     ALLEGRO_COLOR color;
     SCM script; /* Scheme procedure to run at a given time. */
