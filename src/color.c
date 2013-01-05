@@ -1,8 +1,11 @@
 #include "color.h"
 
-ALLEGRO_COLOR color_mult_alpha (ALLEGRO_COLOR color) {
+static scm_t_bits color_tag;
+
+ALLEGRO_COLOR color_mult_alpha (ALLEGRO_COLOR color)
+{
     ALLEGRO_COLOR new_color;
-    
+
     new_color.r = color.r * color.a;
     new_color.g = color.g * color.a;
     new_color.b = color.b * color.a;
@@ -11,29 +14,26 @@ ALLEGRO_COLOR color_mult_alpha (ALLEGRO_COLOR color) {
     return new_color;
 }
 
-static scm_t_bits color_tag;
-
 SCM
-scm_from_color (ALLEGRO_COLOR al_color) {
+scm_from_color (ALLEGRO_COLOR color)
+{
+    ALLEGRO_COLOR *new_color = (ALLEGRO_COLOR *) scm_gc_malloc (sizeof (ALLEGRO_COLOR),
+                                                               "color");
 
-    SCM smob;
-    Color *color = (Color *) scm_gc_malloc (sizeof (Color), "color");
+    *new_color = color;
 
-    color->color = al_color;
-
-    SCM_NEWSMOB (smob, color_tag, color);
-
-    return smob;
+    SCM_RETURN_NEWSMOB (color_tag, new_color);
 }
 
 ALLEGRO_COLOR
-scm_to_color (SCM s_color) {
-    Color *color;
-    
-    scm_assert_smob_type (color_tag, s_color);
-    color = (Color *) SCM_SMOB_DATA (s_color);
+scm_to_color (SCM s_color)
+{
+    ALLEGRO_COLOR *color;
 
-    return color->color;
+    scm_assert_smob_type (color_tag, s_color);
+    color = (ALLEGRO_COLOR *) SCM_SMOB_DATA (s_color);
+
+    return *color;
 }
 
 static SCM
@@ -61,9 +61,9 @@ make_color_f (SCM s_r, SCM s_g, SCM s_b, SCM s_a)
 static size_t
 free_color (SCM color_smob)
 {
-    Color *color = (Color *) SCM_SMOB_DATA (color_smob);
+    ALLEGRO_COLOR *color = (ALLEGRO_COLOR *) SCM_SMOB_DATA (color_smob);
 
-    scm_gc_free (color, sizeof (Color), "color");
+    scm_gc_free (color, sizeof (ALLEGRO_COLOR), "color");
 
     return 0;
 }
@@ -73,22 +73,22 @@ print_color (SCM color_smob, SCM port, scm_print_state *pstate)
 {
     ALLEGRO_COLOR color = scm_to_color (color_smob);
 
-    scm_puts ("#<color ", port);
+    scm_puts ("#<color r:", port);
     scm_display (scm_from_double (color.r), port);
-    scm_puts (" r: ", port);
-    scm_display (scm_from_double (color.g), port);
     scm_puts (" g: ", port);
-    scm_display (scm_from_double (color.b), port);
+    scm_display (scm_from_double (color.g), port);
     scm_puts (" b: ", port);
-    scm_display (scm_from_double (color.a), port);
+    scm_display (scm_from_double (color.b), port);
     scm_puts (" a: ", port);
+    scm_display (scm_from_double (color.a), port);
+    scm_puts (">", port);
 
-    /* non-zero means success */
     return 1;
 }
 
 static SCM
-color_r (SCM s_color) {
+color_r (SCM s_color)
+{
     ALLEGRO_COLOR color = scm_to_color (s_color);
 
     scm_remember_upto_here_1 (s_color);
@@ -97,7 +97,8 @@ color_r (SCM s_color) {
 }
 
 static SCM
-color_g (SCM s_color) {
+color_g (SCM s_color)
+{
     ALLEGRO_COLOR color = scm_to_color (s_color);
 
     scm_remember_upto_here_1 (s_color);
@@ -106,7 +107,8 @@ color_g (SCM s_color) {
 }
 
 static SCM
-color_b (SCM s_color) {
+color_b (SCM s_color)
+{
     ALLEGRO_COLOR color = scm_to_color (s_color);
 
     scm_remember_upto_here_1 (s_color);
@@ -115,7 +117,8 @@ color_b (SCM s_color) {
 }
 
 static SCM
-color_a (SCM s_color) {
+color_a (SCM s_color)
+{
     ALLEGRO_COLOR color = scm_to_color (s_color);
 
     scm_remember_upto_here_1 (s_color);
@@ -126,7 +129,7 @@ color_a (SCM s_color) {
 void
 init_color_type (void)
 {
-    color_tag = scm_make_smob_type ("Color", sizeof (Color));
+    color_tag = scm_make_smob_type ("Color", sizeof (ALLEGRO_COLOR));
     scm_set_smob_mark (color_tag, 0);
     scm_set_smob_free (color_tag, free_color);
     scm_set_smob_print (color_tag, print_color);
