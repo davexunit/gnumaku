@@ -1,20 +1,21 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef GMK_IMAGE_H
+#define GMK_IMAGE_H
+
+#include "common.h"
 
 /* A wrapper for ALLEGRO_BITMAP */
-
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_image.h>
-#include <libguile.h>
-
 typedef struct {
     ALLEGRO_BITMAP *bitmap;
 } Image;
 
-int get_image_width (Image *image);
-int get_image_height (Image *image);
-void init_image_type ();
-Image *check_image (SCM image_smob);
-SCM make_image_from_bitmap (ALLEGRO_BITMAP *bitmap);
+ALLEGRO_BITMAP *gmk_scm_to_bitmap (SCM image);
+SCM gmk_scm_from_bitmap (ALLEGRO_BITMAP *bitmap);
+SCM gmk_load_image (SCM filename);
+SCM gmk_image_width (SCM image);
+SCM gmk_image_height (SCM image);
+SCM gmk_draw_image(SCM image, SCM x, SCM y);
+SCM gmk_set_render_image (SCM image);
+
+void gmk_init_image (void);
 
 #endif

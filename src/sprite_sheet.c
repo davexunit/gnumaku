@@ -29,14 +29,14 @@ init_sprite_sheet_tiles (SpriteSheet *sprite_sheet)
                                                             "tiles");
 
     for (int y = 0; y < rows; ++y) {
-	for (int x = 0; x < columns; ++x) {
-	    int index = y * columns + x;
-	    int tile_x = margin + x * (tile_width + spacing);
-	    int tile_y = margin + y * (tile_height + spacing);
+        for (int x = 0; x < columns; ++x) {
+            int index = y * columns + x;
+            int tile_x = margin + x * (tile_width + spacing);
+            int tile_y = margin + y * (tile_height + spacing);
 
-	    ALLEGRO_BITMAP *tile = al_create_sub_bitmap (sprite_sheet->image, tile_x, tile_y, tile_width, tile_height);
-	    sprite_sheet->tiles[index] = tile;
-	}
+            ALLEGRO_BITMAP *tile = al_create_sub_bitmap (sprite_sheet->image, tile_x, tile_y, tile_width, tile_height);
+            sprite_sheet->tiles[index] = tile;
+        }
     }
 }
 
@@ -79,8 +79,8 @@ get_sprite_sheet_tile (SCM sprite_sheet_smob, SCM s_index)
 {
     SpriteSheet *sprite_sheet = check_sprite_sheet (sprite_sheet_smob);
     int index = scm_to_int (s_index);
-    
-    return make_image_from_bitmap (sprite_sheet_tile (sprite_sheet, index));
+
+    return gmk_scm_from_bitmap (sprite_sheet_tile (sprite_sheet, index));
 }
 
 static size_t
@@ -91,7 +91,7 @@ free_sprite_sheet (SCM sprite_sheet_smob)
     al_destroy_bitmap(sprite_sheet->image);
 
     for (int i = 0; i < sprite_sheet->num_tiles; ++i) {
-	al_destroy_bitmap (sprite_sheet->tiles[i]);
+        al_destroy_bitmap (sprite_sheet->tiles[i]);
     }
 
     scm_gc_free (sprite_sheet->tiles,
@@ -129,6 +129,6 @@ init_sprite_sheet_type (void)
 
     scm_c_define_gsubr ("load-sprite-sheet", 5, 0, 0, load_sprite_sheet);
     scm_c_define_gsubr ("sprite-sheet-tile", 2, 0, 0, get_sprite_sheet_tile);
-    
+
     scm_c_export ("load-sprite-sheet", "sprite-sheet-tile", NULL);
 }

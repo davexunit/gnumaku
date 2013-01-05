@@ -1,62 +1,62 @@
 #include "sprite.h"
 
 static scm_t_bits sprite_tag;
-static SCM keyword_pos;
-static SCM keyword_scale;
-static SCM keyword_rotation;
-static SCM keyword_color;
-static SCM keyword_anchor;
-static SCM default_pos;
-static SCM default_scale;
-static SCM default_rotation;
-static SCM default_color;
 
+SCM_KEYWORD (keyword_position, "position");
+SCM_KEYWORD (keyword_scale, "scale");
+SCM_KEYWORD (keyword_rotation, "rotation");
+SCM_KEYWORD (keyword_color, "color");
+SCM_KEYWORD (keyword_anchor, "anchor");
 
-static Sprite*
+static Sprite *
 check_sprite (SCM sprite_smob) {
     scm_assert_smob_type (sprite_tag, sprite_smob);
 
     return (Sprite *) SCM_SMOB_DATA (sprite_smob);
 }
 
-static SCM
-make_sprite (SCM image_smob, SCM rest) {
+SCM_DEFINE (make_sprite, "make-sprite", 1, 0, 1,
+            (SCM image_smob, SCM kw_args),
+            "Make a new sprite instance.")
+{
     SCM smob;
     Sprite *sprite;
-    Image *image = check_image (image_smob);
-    Vector2 pos = scm_to_vector2 (scm_get_keyword (keyword_pos, rest, default_pos));
-    Vector2 scale = scm_to_vector2 (scm_get_keyword (keyword_scale, rest,
-                                                     default_scale));
-    float rotation = scm_to_double (scm_get_keyword (keyword_rotation, rest,
-                                                     default_rotation));
-    ALLEGRO_COLOR color = scm_to_color (scm_get_keyword (keyword_color, rest,
-                                                         default_color));
+    ALLEGRO_BITMAP *bitmap = gmk_scm_to_bitmap (image_smob);
+    /*
+     * Get optional arguments via a list of keywords.
+     * If a keyword arg is not present, use a sane default.
+     */
+    Vector2 default_anchor = vector2_new (al_get_bitmap_width (bitmap) / 2,
+                                          al_get_bitmap_height (bitmap) / 2);
+    SCM s_position = scm_get_keyword (keyword_position, kw_args,
+                                      scm_from_vector2 (vector2_new (0, 0)));
+    SCM s_scale = scm_get_keyword (keyword_scale, kw_args,
+                                   scm_from_vector2 (vector2_new (1, 1)));
+    SCM s_anchor = scm_get_keyword (keyword_anchor, kw_args,
+                                    scm_from_vector2 (default_anchor));
+    SCM s_rotation = scm_get_keyword (keyword_rotation, kw_args, scm_from_double (0));
+    SCM s_color = scm_get_keyword (keyword_color, kw_args,
+                                   scm_from_color (al_map_rgba_f (1, 1, 1, 1)));
 
     sprite = (Sprite *) scm_gc_malloc (sizeof (Sprite), "sprite");
     sprite->image = SCM_BOOL_F;
-    sprite->position = pos;
-    sprite->scale = scale;
-    sprite->rotation = rotation;
-    sprite->color = color;
+    sprite->position = scm_to_vector2 (s_position);
+    sprite->anchor = scm_to_vector2 (s_anchor);
+    sprite->scale = scm_to_vector2 (s_scale);
+    sprite->rotation = scm_to_double (s_rotation);
+    sprite->color = scm_to_color (s_color);
 
     SCM_NEWSMOB (smob, sprite_tag, sprite);
 
     sprite->image = image_smob;
 
-    /* Center sprite if no center position is given. */
-    SCM s_anchor = SCM_BOOL_F;
-    if (s_anchor == SCM_BOOL_F) {
-        sprite->anchor = vector2_new (get_image_width (image) / 2,
-                                      get_image_height (image) / 2);
-    } else {
-        sprite->anchor = scm_to_vector2 (s_anchor);
-    }
-
     return smob;
 }
 
-static SCM
-sprite_image (SCM sprite_smob) {
+SCM_DEFINE (sprite_image, "sprite-image", 1, 0, 0,
+            (SCM sprite_smob),
+            "Return the sprite image.")
+{
     Sprite *sprite = check_sprite (sprite_smob);
 
     scm_remember_upto_here_1 (sprite_smob);
@@ -204,9 +204,9 @@ set_sprite_image (SCM sprite_smob, SCM image_smob) {
 static SCM
 sprite_draw (SCM sprite_smob) {
     Sprite *sprite = check_sprite (sprite_smob);
-    Image *image = check_image (sprite->image);
+    ALLEGRO_BITMAP *bitmap = gmk_scm_to_bitmap (sprite->image);
 
-    al_draw_tinted_scaled_rotated_bitmap (image->bitmap,
+    al_draw_tinted_scaled_rotated_bitmap (bitmap,
                                           color_mult_alpha (sprite->color),
                                           sprite->anchor.x, sprite->anchor.y,
                                           sprite->position.x, sprite->position.y,
@@ -256,23 +256,12 @@ print_sprite (SCM sprite_smob, SCM port, scm_print_state *pstate) {
 
 void
 init_sprite_type (void) {
-    keyword_pos = scm_from_latin1_keyword ("position");
-    keyword_scale = scm_from_latin1_keyword ("scale");
-    keyword_rotation = scm_from_latin1_keyword ("rotation");
-    keyword_color = scm_from_latin1_keyword ("color");
-    keyword_anchor = scm_from_latin1_keyword ("anchor");
-
-    default_pos = scm_from_vector2 (vector2_new (0, 0));
-    default_scale = scm_from_vector2 (vector2_new (1, 1));
-    default_rotation = scm_from_double (0);
-    default_color = scm_from_color (al_map_rgba_f (1, 1, 1, 1));
-
     sprite_tag = scm_make_smob_type ("<sprite>", sizeof (Sprite));
     scm_set_smob_mark (sprite_tag, mark_sprite);
     scm_set_smob_free (sprite_tag, free_sprite);
     scm_set_smob_print (sprite_tag, print_sprite);
 
-    scm_c_define_gsubr ("make-sprite", 1, 0, 1, make_sprite);
+#include "sprite.x"
     scm_c_define_gsubr ("sprite-image", 1, 0, 0, sprite_image);
     scm_c_define_gsubr ("sprite-position", 1, 0, 0, sprite_position);
     scm_c_define_gsubr ("sprite-scale", 1, 0, 0, sprite_scale);
@@ -289,21 +278,22 @@ init_sprite_type (void) {
     scm_c_define_gsubr ("set-sprite-anchor", 2, 0, 0, set_sprite_anchor);
     scm_c_define_gsubr ("draw-sprite", 1, 0, 0, sprite_draw);
 
-    scm_c_export ("make-sprite", NULL);
-    scm_c_export ("sprite-image", NULL);
-    scm_c_export ("sprite-position", NULL);
-    scm_c_export ("sprite-scale", NULL);
-    scm_c_export ("sprite-rotation", NULL);
-    scm_c_export ("sprite-color", NULL);
-    scm_c_export ("sprite-opacity", NULL);
-    scm_c_export ("sprite-anchor", NULL);
-    scm_c_export ("set-sprite-image", NULL);
-    scm_c_export ("set-sprite-position",NULL); 
-    scm_c_export ("set-sprite-scale", NULL);
-    scm_c_export ("set-sprite-rotation", NULL);
-    scm_c_export ("set-sprite-color", NULL);
-    scm_c_export ("set-sprite-opacity", NULL);
-    scm_c_export ("set-sprite-anchor", NULL);
-    scm_c_export ("set-sprite-sheet", NULL);
-    scm_c_export ("draw-sprite", NULL);
+    scm_c_export ("make-sprite",
+                  "sprite-image",
+                  "sprite-position",
+                  "sprite-scale",
+                  "sprite-rotation",
+                  "sprite-color",
+                  "sprite-opacity",
+                  "sprite-anchor",
+                  "set-sprite-image",
+                  "set-sprite-position",
+                  "set-sprite-scale",
+                  "set-sprite-rotation",
+                  "set-sprite-color",
+                  "set-sprite-opacity",
+                  "set-sprite-anchor",
+                  "set-sprite-sheet",
+                  "draw-sprite",
+                  NULL);
 }

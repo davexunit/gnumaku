@@ -22,7 +22,7 @@ init_gnumaku () {
     init_color_type ();
     init_blend_mode ();
     init_sprite_sheet_type ();
-    init_image_type ();
+    gmk_init_image ();
     init_sprite_type ();
     init_rect_type ();
     init_font_type ();
