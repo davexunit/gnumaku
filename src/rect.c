@@ -203,7 +203,7 @@ print_rect (SCM rect, SCM port, scm_print_state *pstate)
 }
 
 void
-init_rect (void)
+gmk_init_rect (void)
 {
     rect_tag = scm_make_smob_type ("rect", sizeof (GmkRect));
     scm_set_smob_mark (rect_tag, 0);

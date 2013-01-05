@@ -13,6 +13,6 @@ GmkBlendMode gmk_scm_to_blend_mode (SCM blend_mode);
 
 void gmk_set_blend_mode (GmkBlendMode blend_mode);
 
-void init_blend_mode (void);
+void gmk_init_blend_mode (void);
 
 #endif

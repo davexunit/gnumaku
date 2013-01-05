@@ -12,6 +12,6 @@ SCM gmk_color_r (SCM color);
 SCM gmk_color_g (SCM color);
 SCM gmk_color_b (SCM color);
 SCM gmk_color_a (SCM color);
-void init_color (void);
+void gmk_init_color (void);
 
 #endif

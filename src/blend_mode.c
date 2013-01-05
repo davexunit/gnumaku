@@ -7,7 +7,7 @@ GmkBlendMode
 gmk_scm_to_blend_mode (SCM s_blend_mode)
 {
     GmkBlendMode blend_mode;
-    
+
     if (scm_is_true (scm_eq_p (s_blend_mode, sym_blend_alpha))) {
         blend_mode = GMK_BLEND_ALPHA;
     } else if (scm_is_true (scm_eq_p (s_blend_mode, sym_blend_add))) {
@@ -36,7 +36,7 @@ gmk_set_blend_mode (GmkBlendMode blend_mode)
 }
 
 void
-init_blend_mode (void)
+gmk_init_blend_mode (void)
 {
 #include "blend_mode.x"
 }

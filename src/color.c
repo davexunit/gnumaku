@@ -128,7 +128,7 @@ print_color (SCM color_smob, SCM port, scm_print_state *pstate)
 }
 
 void
-init_color (void)
+gmk_init_color (void)
 {
     color_tag = scm_make_smob_type ("Color", sizeof (ALLEGRO_COLOR));
     scm_set_smob_mark (color_tag, 0);
