@@ -14,7 +14,7 @@
             director-pop-scene
             director-replace-scene
             director-set-draw-target
-            director-reset-draw-target
+            director-reset-render-image
             director-current-scene))
 
 (define director-scenes '())
@@ -75,8 +75,8 @@
 (define (director-set-draw-target image)
   (set-render-image image))
 
-(define (director-reset-draw-target)
-  (game-reset-draw-target ))
+(define (director-reset-render-image)
+  (game-reset-render-image))
 
 (game-on-start-hook (lambda ()
                       (set! director-font (load-asset "CarroisGothic-Regular.ttf" 18))))
