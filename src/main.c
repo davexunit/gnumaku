@@ -20,6 +20,7 @@ init_gnumaku () {
     init_vector2_type();
     init_transform_type ();
     init_color_type ();
+    init_blend_mode ();
     init_sprite_sheet_type ();
     init_image_type ();
     init_sprite_type ();
@@ -28,7 +29,7 @@ init_gnumaku () {
     init_sample_type ();
     init_audio_stream_type ();
     init_particle_system_type ();
-    init_bullet_type_type ();
+    gmk_init_bullet_type ();
     init_bullet_system_type ();
     bind_draw_funcs ();
     init_game_bindings ();
