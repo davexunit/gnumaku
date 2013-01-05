@@ -6,7 +6,7 @@
 /* A wrapper for ALLEGRO_BITMAP */
 typedef struct {
     ALLEGRO_BITMAP *bitmap;
-} Image;
+} GmkImage;
 
 ALLEGRO_BITMAP *gmk_scm_to_bitmap (SCM image);
 SCM gmk_scm_from_bitmap (ALLEGRO_BITMAP *bitmap);

@@ -2,27 +2,27 @@
 
 static scm_t_bits image_tag;
 
-Image *
+GmkImage *
 gmk_check_image (SCM image)
 {
     scm_assert_smob_type (image_tag, image);
 
-    return (Image *) SCM_SMOB_DATA (image);
+    return (GmkImage *) SCM_SMOB_DATA (image);
 }
 
-static Image *
+static GmkImage *
 malloc_image (void)
 {
-    return (Image *) scm_gc_malloc (sizeof (Image), "image");
+    return (GmkImage *) scm_gc_malloc (sizeof (GmkImage), "image");
 }
 
 ALLEGRO_BITMAP *
 gmk_scm_to_bitmap (SCM image)
 {
-    Image *c_image;
+    GmkImage *c_image;
 
     scm_assert_smob_type (image_tag, image);
-    c_image = (Image *) SCM_SMOB_DATA (image);
+    c_image = (GmkImage *) SCM_SMOB_DATA (image);
 
     return c_image->bitmap;
 }
@@ -31,7 +31,7 @@ SCM
 gmk_scm_from_bitmap (ALLEGRO_BITMAP *bitmap)
 {
     SCM smob;
-    Image *image = malloc_image ();
+    GmkImage *image = malloc_image ();
 
     image->bitmap = NULL;
 
@@ -47,7 +47,7 @@ SCM_DEFINE (gmk_load_image, "load-image", 1, 0, 0,
             "Load an image from a file.")
 {
     SCM smob;
-    Image *image = malloc_image ();
+    GmkImage *image = malloc_image ();
 
     image->bitmap = NULL;
 
@@ -70,7 +70,7 @@ SCM_DEFINE (gmk_make_image, "make-image", 2, 0, 0,
             "@var{width} x @var{height}.")
 {
     SCM smob;
-    Image *image = malloc_image ();
+    GmkImage *image = malloc_image ();
 
     image->bitmap = NULL;
 
@@ -137,14 +137,14 @@ SCM_DEFINE (gmk_set_render_image, "set-render-image", 1, 0, 0,
 
 static size_t
 free_image (SCM image_smob) {
-    Image *image = (Image *) SCM_SMOB_DATA (image_smob);
+    GmkImage *image = (GmkImage *) SCM_SMOB_DATA (image_smob);
 
     /* Do not free sub bitmaps. */
     if (!al_is_sub_bitmap (image->bitmap)) {
         al_destroy_bitmap (image->bitmap);
     }
 
-    scm_gc_free (image, sizeof (Image), "image");
+    scm_gc_free (image, sizeof (GmkImage), "image");
 
     return 0;
 }
@@ -162,7 +162,7 @@ print_image (SCM image, SCM port, scm_print_state *pstate) {
 
 void
 gmk_init_image (void) {
-    image_tag = scm_make_smob_type ("<image>", sizeof (Image));
+    image_tag = scm_make_smob_type ("<image>", sizeof (GmkImage));
     scm_set_smob_mark (image_tag, 0);
     scm_set_smob_free (image_tag, free_image);
     scm_set_smob_print (image_tag, print_image);
