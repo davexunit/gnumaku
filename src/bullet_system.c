@@ -182,7 +182,7 @@ static SCM
 bullet_system_count (SCM bullet_system_smob) {
     BulletSystem *bullet_system = check_bullet_system (bullet_system_smob);
     int count = bullet_system->bullet_count;
-        
+
     scm_remember_upto_here_1 (bullet_system_smob);
 
     return scm_from_int (count);
@@ -399,12 +399,12 @@ new_bullet (BulletSystem *bullet_system) {
 static void
 init_bullet_movement (Bullet *bullet, float speed, float direction, float acceleration,
                       float angular_velocity) {
-    float theta = deg2rad (direction);
+    float theta = gmk_deg_to_rad (direction);
 
     bullet->vel = vector2_from_polar (speed, theta);
     bullet->acc = vector2_from_polar (acceleration, theta);
     al_build_transform (&bullet->angular_velocity, 0, 0, 1, 1,
-                        deg2rad (angular_velocity));
+                        gmk_deg_to_rad (angular_velocity));
 }
 
 static void
@@ -597,7 +597,7 @@ static SCM
 bullet_direction (SCM bullet_ref_smob) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
-    float direction = rad2deg (vector2_angle (bullet->vel));
+    float direction = gmk_rad_to_deg (vector2_angle (bullet->vel));
 
     return scm_from_double (direction);
 }
@@ -619,7 +619,7 @@ bullet_angular_velocity (SCM bullet_ref_smob) {
     float angular_velocity;
 
     al_transform_coordinates (&bullet->angular_velocity, &vx, &vy);
-    angular_velocity = rad2deg (atan2 (vy, vx));
+    angular_velocity = gmk_rad_to_deg (atan2 (vy, vx));
 
     return scm_from_double (angular_velocity);
 }
@@ -675,7 +675,7 @@ set_bullet_direction (SCM bullet_ref_smob, SCM s_direction) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float direction = scm_to_double (s_direction);
-    float theta = deg2rad (direction);
+    float theta = gmk_deg_to_rad (direction);
     float speed = vector2_mag (bullet->vel);
     float acceleration = vector2_mag (bullet->acc);
 
@@ -701,7 +701,7 @@ set_bullet_angular_velocity (SCM bullet_ref_smob, SCM s_angular_velocity) {
     BulletRef *bullet_ref = check_bullet_ref (bullet_ref_smob);
     Bullet *bullet = bullet_from_id (bullet_ref->system, bullet_ref->id);
     float angular_velocity = scm_to_double (s_angular_velocity);
-    float theta = deg2rad (angular_velocity);
+    float theta = gmk_deg_to_rad (angular_velocity);
 
     al_build_transform (&bullet->angular_velocity, 0, 0, 1, 1, theta);
 

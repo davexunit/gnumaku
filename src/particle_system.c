@@ -10,10 +10,10 @@ variable_color (ALLEGRO_COLOR color, ALLEGRO_COLOR color_var) {
     al_unmap_rgba_f (color, &r, &g, &b, &a);
     al_unmap_rgba_f (color_var, &vr, &vg, &vb, &va);
 
-    return al_map_rgba_f (r + vr * rand1 (),
-                          g + vg * rand1 (),
-                          b + vb * rand1 (),
-                          a + va * rand1 ());
+    return al_map_rgba_f (r + vr * gmk_rand1 (),
+                          g + vg * gmk_rand1 (),
+                          b + vb * gmk_rand1 (),
+                          a + va * gmk_rand1 ());
 }
 
 ALLEGRO_COLOR
@@ -54,21 +54,22 @@ init_particle (ParticleSystem *system, Particle *particle) {
     ALLEGRO_COLOR start_color = variable_color (system->start_color, system->start_color_var);
     ALLEGRO_COLOR end_color = variable_color (system->end_color, system->end_color_var);
     SpriteSheet *sprite_sheet = check_sprite_sheet (system->sprite_sheet);
-    int tile = (int) sprite_sheet->num_tiles * rand1 ();
-    float theta = deg2rad (system->direction + system->direction_var * rand1 ());
-    float speed = system->speed + system->speed_var * rand1 ();
-    float start_scale = system->start_scale + system->start_scale_var * rand1 ();
-    float end_scale = system->end_scale + system->end_scale_var * rand1 ();
+    int tile = (int) sprite_sheet->num_tiles * gmk_rand1 ();
+    float theta = gmk_deg_to_rad (system->direction +
+                                  system->direction_var * gmk_rand1 ());
+    float speed = system->speed + system->speed_var * gmk_rand1 ();
+    float start_scale = system->start_scale + system->start_scale_var * gmk_rand1 ();
+    float end_scale = system->end_scale + system->end_scale_var * gmk_rand1 ();
 
-    particle->life = (int) system->life + system->life_var * rand1 ();
+    particle->life = (int) system->life + system->life_var * gmk_rand1 ();
     particle->image = sprite_sheet_tile (sprite_sheet, tile);
     particle->color = start_color;
     particle->dcolor = delta_color (start_color, end_color, particle->life);
-    particle->pos.x = system->pos.x + system->pos_var.x * rand1 ();
-    particle->pos.y = system->pos.y +  system->pos_var.y * rand1 ();
+    particle->pos.x = system->pos.x + system->pos_var.x * gmk_rand1 ();
+    particle->pos.y = system->pos.y +  system->pos_var.y * gmk_rand1 ();
     particle->vel = vector2_from_polar (speed, theta);
-    particle->radial_accel = system->radial_accel + system->radial_accel_var * rand1 ();
-    particle->tan_accel = system->tan_accel + system->tan_accel_var * rand1 ();
+    particle->radial_accel = system->radial_accel + system->radial_accel_var * gmk_rand1 ();
+    particle->tan_accel = system->tan_accel + system->tan_accel_var * gmk_rand1 ();
     particle->scale = start_scale;
     particle->dscale = (end_scale - start_scale) / particle->life;
     particle->duration = 0;
@@ -83,7 +84,8 @@ make_particle_system (SCM s_max_particles, SCM sprite_sheet_smob)
 
     /* Step 1: Allocate the memory block.
      */
-    particle_system = (ParticleSystem *) scm_gc_malloc (sizeof (ParticleSystem), "particle_system");
+    particle_system = (ParticleSystem *) scm_gc_malloc (sizeof (ParticleSystem),
+                                                        "particle_system");
 
     /* Step 2: Initialize it with straight code.
      */
@@ -122,7 +124,9 @@ make_particle_system (SCM s_max_particles, SCM sprite_sheet_smob)
 
     /* Step 4: Finish the initialization.
      */
-    particle_system->particles = (Particle *) scm_gc_malloc (sizeof (Particle) * max_particles, "particles");
+    particle_system->particles = (Particle *) scm_gc_malloc (sizeof (Particle) *
+                                                             max_particles,
+                                                             "particles");
     particle_system->sprite_sheet = sprite_sheet_smob;
 
     return smob;
@@ -131,7 +135,7 @@ make_particle_system (SCM s_max_particles, SCM sprite_sheet_smob)
 static SCM
 mark_particle_system (SCM particle_system_smob)
 {
-    ParticleSystem *particle_system = (ParticleSystem *) SCM_SMOB_DATA (particle_system_smob);
+    ParticleSystem *particle_system = (ParticleSystem *)SCM_SMOB_DATA (particle_system_smob);
 
     return particle_system->sprite_sheet;
 }
@@ -182,11 +186,11 @@ draw_particle_system (SCM particle_system_smob) {
     ALLEGRO_STATE state;
 
     al_store_state (&state, ALLEGRO_STATE_BLENDER);
-    
+
     if (system->blend_additive) {
         al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
     }
-    
+
     al_hold_bitmap_drawing (true);
 
     for (int i = 0; i < system->particle_count; ++i) {
@@ -213,7 +217,7 @@ free_particle (ParticleSystem *system, int index) {
     Particle temp;
     Particle *particle =  &system->particles[index];
     int particle_count = --system->particle_count;
-    
+
     /* Swap dead particle with active particle.
      * This keeps the array of particles balanced.
      * All of the active particles will be grouped together,
@@ -242,7 +246,7 @@ update_particle (ParticleSystem *system, int index) {
     Particle *particle = &system->particles[index];
     Vector2 radial = vector2_zero();
     Vector2 tangent;
-    
+
     if (particle->active) {
         if (!vector2_equal (particle->pos, system->pos)) {
             radial = vector2_norm (vector2_sub (system->pos, particle->pos));
@@ -266,7 +270,7 @@ update_particle (ParticleSystem *system, int index) {
 static SCM
 update_particle_system (SCM particle_system_smob) {
     ParticleSystem *system = check_particle_system (particle_system_smob);
-    
+
     for (int i = 0; i < system->particle_count; ++i) {
         update_particle (system, i);
     }

@@ -95,7 +95,7 @@ build_transform (SCM transform_smob, SCM s_x, SCM s_y, SCM s_scale_x, SCM s_scal
     float y = scm_to_double (s_y);
     float scale_x = scm_to_double (s_scale_x);
     float scale_y = scm_to_double (s_scale_y);
-    float theta = deg2rad (scm_to_double (s_rotation));
+    float theta = gmk_deg_to_rad (scm_to_double (s_rotation));
 
     al_build_transform (&transform->transform, x, y, scale_x, scale_y, theta);
 
@@ -118,7 +118,7 @@ static SCM
 rotate_transform (SCM transform_smob, SCM s_rotation)
 {
     Transform *transform = check_transform (transform_smob);
-    float theta = deg2rad (scm_to_double (s_rotation));
+    float theta = gmk_deg_to_rad (scm_to_double (s_rotation));
 
     al_rotate_transform (&transform->transform, theta);
 

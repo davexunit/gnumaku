@@ -26,7 +26,7 @@ SCM_DEFINE (gmk_make_bullet_type, "make-bullet-type", 4, 0, 0,
     bullet_type->hitbox = hitbox;
     bullet_type->blend_mode = blend_mode;
     bullet_type->directional = directional;
-    
+
     SCM_RETURN_NEWSMOB (bullet_type_tag, bullet_type);
 }
 
