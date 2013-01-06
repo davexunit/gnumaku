@@ -1,20 +1,17 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+#ifndef GMK_AUDIO_H
+#define GMK_AUDIO_H
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_audio.h>
-#include <allegro5/allegro_acodec.h>
-#include <libguile.h>
+#include "common.h"
 
 typedef struct {
     ALLEGRO_SAMPLE *sample;
-} Sample;
+} GmkSample;
 
 typedef struct {
     ALLEGRO_AUDIO_STREAM *stream;
-} AudioStream;
+} GmkAudioStream;
 
-void init_sample_type (void);
-void init_audio_stream_type (void);
+void gmk_init_sample (void);
+void gmk_init_audio_stream (void);
 
 #endif

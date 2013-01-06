@@ -3,18 +3,18 @@
 static scm_t_bits sample_tag;
 static scm_t_bits audio_stream_tag;
 
-Sample*
+GmkSample*
 check_sample (SCM sample_smob) {
     scm_assert_smob_type (sample_tag, sample_smob);
 
-    return (Sample *) SCM_SMOB_DATA (sample_smob);
+    return (GmkSample *) SCM_SMOB_DATA (sample_smob);
 }
 
 static SCM
 load_sample (SCM s_file) {
     SCM smob;
     const char *file = scm_to_locale_string (s_file);
-    Sample *sample = (Sample *) scm_gc_malloc (sizeof (Sample), "sample");
+    GmkSample *sample = (GmkSample *) scm_gc_malloc (sizeof (GmkSample), "sample");
 
     sample->sample = NULL;
 
@@ -31,7 +31,7 @@ load_sample (SCM s_file) {
 
 static SCM
 play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
-    Sample *sample = check_sample (sample_smob);
+    GmkSample *sample = check_sample (sample_smob);
     float gain = scm_to_double (s_gain);
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
@@ -43,11 +43,11 @@ play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
 
 static size_t
 free_sample (SCM sample_smob) {
-    Sample *sample = (Sample *) SCM_SMOB_DATA (sample_smob);
+    GmkSample *sample = (GmkSample *) SCM_SMOB_DATA (sample_smob);
 
     al_destroy_sample (sample->sample);
 
-    scm_gc_free (sample, sizeof (Sample), "sample");
+    scm_gc_free (sample, sizeof (GmkSample), "sample");
 
     return 0;
 }
@@ -60,18 +60,18 @@ print_sample (SCM sample_smob, SCM port, scm_print_state *pstate) {
     return 1;
 }
 
-AudioStream*
+GmkAudioStream*
 check_audio_stream (SCM audio_stream_smob) {
     scm_assert_smob_type (audio_stream_tag, audio_stream_smob);
 
-    return (AudioStream *) SCM_SMOB_DATA (audio_stream_smob);
+    return (GmkAudioStream *) SCM_SMOB_DATA (audio_stream_smob);
 }
 
 static SCM
 load_audio_stream (SCM s_file) {
     SCM smob;
     const char *file = scm_to_locale_string (s_file);
-    AudioStream *audio_stream = (AudioStream *) scm_gc_malloc (sizeof (AudioStream),
+    GmkAudioStream *audio_stream = (GmkAudioStream *) scm_gc_malloc (sizeof (GmkAudioStream),
                                                                "audio_stream");
 
     audio_stream->stream = NULL;
@@ -91,7 +91,7 @@ load_audio_stream (SCM s_file) {
 static SCM
 play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed,
                    SCM s_loop) {
-    AudioStream *audio_stream = check_audio_stream (audio_stream_smob);
+    GmkAudioStream *audio_stream = check_audio_stream (audio_stream_smob);
     float gain = scm_to_double (s_gain);
     float pan = scm_to_double (s_pan);
     float speed = scm_to_double (s_speed);
@@ -111,11 +111,11 @@ play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed,
 
 static size_t
 free_audio_stream (SCM audio_stream_smob) {
-    AudioStream *audio_stream = (AudioStream *) SCM_SMOB_DATA (audio_stream_smob);
+    GmkAudioStream *audio_stream = (GmkAudioStream *) SCM_SMOB_DATA (audio_stream_smob);
 
     al_destroy_audio_stream (audio_stream->stream);
 
-    scm_gc_free (audio_stream, sizeof (AudioStream), "audio_stream");
+    scm_gc_free (audio_stream, sizeof (GmkAudioStream), "audio_stream");
 
     return 0;
 }
@@ -129,8 +129,8 @@ print_audio_stream (SCM audio_stream_smob, SCM port, scm_print_state *pstate) {
 }
 
 void
-init_sample_type (void) {
-    sample_tag = scm_make_smob_type ("sample", sizeof (Sample));
+gmk_init_sample (void) {
+    sample_tag = scm_make_smob_type ("sample", sizeof (GmkSample));
     scm_set_smob_mark (sample_tag, 0);
     scm_set_smob_free (sample_tag, free_sample);
     scm_set_smob_print (sample_tag, print_sample);
@@ -143,8 +143,8 @@ init_sample_type (void) {
 }
 
 void
-init_audio_stream_type (void) {
-    audio_stream_tag = scm_make_smob_type ("audio-stream", sizeof (AudioStream));
+gmk_init_audio_stream (void) {
+    audio_stream_tag = scm_make_smob_type ("audio-stream", sizeof (GmkAudioStream));
     scm_set_smob_mark (audio_stream_tag, 0);
     scm_set_smob_free (audio_stream_tag, free_audio_stream);
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
