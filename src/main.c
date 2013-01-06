@@ -11,7 +11,8 @@
 #include "draw.h"
 
 void
-gmk_init () {
+gmk_init (void)
+{
     gmk_init_vector2 ();
     gmk_init_transform ();
     gmk_init_color ();
@@ -25,6 +26,6 @@ gmk_init () {
     gmk_init_particle_system ();
     gmk_init_bullet_type ();
     init_bullet_system_type ();
-    bind_draw_funcs ();
+    gmk_init_draw ();
     gmk_init_game ();
 }

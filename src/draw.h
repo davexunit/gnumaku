@@ -1,10 +1,8 @@
-#ifndef DRAW_H
-#define DRAW_H
+#ifndef GMK_DRAW_H
+#define GMK_DRAW_H
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_primitives.h>
-#include <libguile.h>
+#include "common.h"
 
-void bind_draw_funcs ();
+void gmk_init_draw (void);
 
 #endif
