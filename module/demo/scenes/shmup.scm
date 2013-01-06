@@ -101,6 +101,10 @@
   (let ((player (player scene)))
     (set! (invincible player) (not (invincible player)))))
 
+(define-method (clear-bullets (scene <shmup-scene>))
+  (let ((system (enemy-bullet-system (current-level scene))))
+    (clear-bullet-system system)))
+
 (define-method (on-key-pressed (scene <shmup-scene>) key)
   (when (eq? key (keycode 'up))
     (set-movement (player scene) 'up #t))
@@ -134,5 +138,7 @@
      (add-test-enemy-2 scene))
    (when (eq? key (keycode 't))
      (toggle-player-invincible scene))
+   (when (eq? key (keycode 'c))
+     (clear-bullets scene))
    (when (eq? key (keycode 'b))
      (add-boss scene)))

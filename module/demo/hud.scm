@@ -26,7 +26,7 @@
              (load-asset "heart.png")))
 
 (define (draw-lives hud x y)
-  (font-draw-text (hud-font hud) x y text-color "Lives")
+  (draw-text (hud-font hud) (make-vector2 x y) text-color "Lives")
   (let ((image (hud-life-image hud))
         (player (player (hud-level hud))))
     (let draw-life-icon ((i 0)
@@ -38,8 +38,8 @@
 
 (define (draw-graze hud x y)
   (let ((player (player (hud-level hud))))
-    (font-draw-text (hud-font hud) x y text-color "Graze")
-    (font-draw-text (hud-font hud) x (+ y 16) text-color
+    (draw-text (hud-font hud) (make-vector2 x y) text-color "Graze")
+    (draw-text (hud-font hud) (make-vector2 x (+ y 16)) text-color
                   (number->string (graze-count player)))))
 
 (define (draw-bullet-count hud x y)
@@ -47,8 +47,8 @@
     (let ((level (hud-level hud)))
       (+ (bullet-system-count (player-bullet-system level))
          (bullet-system-count (enemy-bullet-system level)))))
-  (font-draw-text (hud-font hud) x y text-color "Bullet Count")
-  (font-draw-text (hud-font hud) x (+ y 16) text-color (number->string (bullet-count))))
+  (draw-text (hud-font hud) (make-vector2 x y) text-color "Bullet Count")
+  (draw-text (hud-font hud) (make-vector2 x (+ y 16)) text-color (number->string (bullet-count))))
 
 (define (draw-hud hud)
   (draw-lives hud 520 20)

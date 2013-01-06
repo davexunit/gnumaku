@@ -35,12 +35,16 @@
   (define step (/ 360 count))
   
   (define (emit i)
-    (let ((direction (+ (* i step) (random angle-var))))
-      (emit-bullet system (bullet-position bullet) speed direction 'sword
-                   #:angular-velocity ang-vel)))
-  
+    (let ((direction (+ (* i step) (if (eq? angle-var 0) 0 (random angle-var)))))
+      (emit-script-bullet system (bullet-position bullet) 'medium-blue
+                          (coroutine (bullet)
+                            (set-bullet-movement bullet (* 2 speed) direction 0 ang-vel)
+                            (bullet-wait bullet 150)
+                            (set-bullet-type bullet 'sword)
+                            (let ((direction 90));;(+ 90 (- 10 (random 20)))))
+                              (set-bullet-movement bullet speed direction 0 0))))))
   (bullet-wait bullet delay)
-  (kill-bullet bullet)
+  ;;(kill-bullet bullet)
   (repeat count emit))
 
 (define-coroutine (spiral1 actor)
@@ -52,16 +56,11 @@
         (emit-script-bullet system (position actor) 'bright
                             (coroutine (bullet)
                               (set-bullet-movement bullet 2 direction 0 0)
-                              (set-bullet-color bullet
-                                                (make-color-f (random:exp) (random:exp)
-                                                              (random:exp) 1))
                               ;;(homing-bullet bullet player 3 1))))
-                              (bullet-wait bullet 30)
-                              (set-bullet-type bullet 'small-green)
                               (set-bullet-color bullet (make-color-f 1 1 1 1))
-                              (explode bullet system 45 6 2.5 30 .3))))
+                              (explode bullet system 60 3 2 0 4))))
                               ;; (sine-wave bullet))))
-      (wait actor 6)
+      (wait actor 10)
       (spiral (+ angle step)))
     (spiral 0)))
 
