@@ -2,8 +2,9 @@
 
 static scm_t_bits particle_system_tag;
 
-ALLEGRO_COLOR
-variable_color (ALLEGRO_COLOR color, ALLEGRO_COLOR color_var) {
+static ALLEGRO_COLOR
+variable_color (ALLEGRO_COLOR color, ALLEGRO_COLOR color_var)
+{
     float r, b, g, a;
     float vr, vb, vg, va;
 
@@ -16,8 +17,9 @@ variable_color (ALLEGRO_COLOR color, ALLEGRO_COLOR color_var) {
                           a + va * gmk_rand1 ());
 }
 
-ALLEGRO_COLOR
-delta_color (ALLEGRO_COLOR start_color, ALLEGRO_COLOR end_color, int duration) {
+static ALLEGRO_COLOR
+delta_color (ALLEGRO_COLOR start_color, ALLEGRO_COLOR end_color, int duration)
+{
     float r1, b1, g1, a1;
     float r2, b2, g2, a2;
 
@@ -30,29 +32,21 @@ delta_color (ALLEGRO_COLOR start_color, ALLEGRO_COLOR end_color, int duration) {
                           (a2 - a1) / duration);
 }
 
-ALLEGRO_COLOR
-add_color (ALLEGRO_COLOR a, ALLEGRO_COLOR b) {
-    ALLEGRO_COLOR color;
+static ParticleSystem *
+check_particle_system (SCM particle_system)
+{
+    scm_assert_smob_type (particle_system_tag, particle_system);
 
-    color.r = a.r + b.r;
-    color.g = a.g + b.g;
-    color.b = a.b + b.b;
-    color.a = a.a + b.a;
-
-    return color;
-}
-
-static ParticleSystem*
-check_particle_system (SCM particle_system_smob) {
-    scm_assert_smob_type (particle_system_tag, particle_system_smob);
-
-    return (ParticleSystem *) SCM_SMOB_DATA (particle_system_smob);
+    return (ParticleSystem *) SCM_SMOB_DATA (particle_system);
 }
 
 static void
-init_particle (ParticleSystem *system, Particle *particle) {
-    ALLEGRO_COLOR start_color = variable_color (system->start_color, system->start_color_var);
-    ALLEGRO_COLOR end_color = variable_color (system->end_color, system->end_color_var);
+init_particle (ParticleSystem *system, Particle *particle)
+{
+    ALLEGRO_COLOR start_color = variable_color (system->start_color,
+                                                system->start_color_var);
+    ALLEGRO_COLOR end_color = variable_color (system->end_color,
+                                              system->end_color_var);
     GmkSpriteSheet *sprite_sheet = gmk_scm_to_sprite_sheet (system->sprite_sheet);
     int tile = (int) sprite_sheet->num_tiles * gmk_rand1 ();
     float theta = gmk_deg_to_rad (system->direction +
@@ -61,6 +55,7 @@ init_particle (ParticleSystem *system, Particle *particle) {
     float start_scale = system->start_scale + system->start_scale_var * gmk_rand1 ();
     float end_scale = system->end_scale + system->end_scale_var * gmk_rand1 ();
 
+    /* Messy. */
     particle->life = (int) system->life + system->life_var * gmk_rand1 ();
     particle->image = gmk_sprite_sheet_tile (sprite_sheet, tile);
     particle->color = start_color;
@@ -75,98 +70,59 @@ init_particle (ParticleSystem *system, Particle *particle) {
     particle->duration = 0;
     particle->active = true;
 }
-static SCM
-make_particle_system (SCM s_max_particles, SCM sprite_sheet_smob)
+
+SCM_DEFINE (gmk_s_make_particle_system, "make-particle-system", 2, 0, 0,
+            (SCM max_particles, SCM sprite_sheet),
+            "Make a new particle system instance.")
 {
     SCM smob;
-    ParticleSystem *particle_system;
-    int max_particles = scm_to_int (s_max_particles);
+    ParticleSystem *system;
 
-    /* Step 1: Allocate the memory block.
-     */
-    particle_system = (ParticleSystem *) scm_gc_malloc (sizeof (ParticleSystem),
-                                                        "particle_system");
+    system = (ParticleSystem *) scm_gc_malloc (sizeof (ParticleSystem),
+                                               "particle system");
+    system->particles = NULL;
+    system->max_particles = scm_to_int (max_particles);
+    system->particle_count = 0;
+    system->blend_additive = true;
+    system->timer = 0;
+    system->rate = 0;
+    system->amount = 0;
+    system->life = 0;
+    system->life_var = 0;
+    system->pos.x = 0;
+    system->pos.y = 0;
+    system->pos_var.y = 0;
+    system->pos_var.x = 0;
+    system->radial_accel = 0;
+    system->radial_accel_var = 0;
+    system->tan_accel = 0;
+    system->tan_accel_var = 0;
+    system->direction = 0;
+    system->direction_var = 0;
+    system->speed = 0;
+    system->speed_var = 0;
+    system->start_scale = 1;
+    system->start_scale_var = 0;
+    system->end_scale = 1;
+    system->end_scale_var = 0;
+    system->start_color = al_map_rgba_f (1, 1, 1, 1);
+    system->start_color_var = al_map_rgba_f (0, 0, 0, 0);
+    system->end_color = al_map_rgba_f (0, 0, 0, 0);
+    system->end_color_var = al_map_rgba_f (0, 0, 0, 0);
 
-    /* Step 2: Initialize it with straight code.
-     */
-    particle_system->max_particles = max_particles;
-    particle_system->particle_count = 0;
-    particle_system->blend_additive = true;
-    particle_system->timer = 0;
-    particle_system->rate = 0;
-    particle_system->amount = 0;
-    particle_system->life = 0;
-    particle_system->life_var = 0;
-    particle_system->pos.x = 0;
-    particle_system->pos.y = 0;
-    particle_system->pos_var.y = 0;
-    particle_system->pos_var.x = 0;
-    particle_system->radial_accel = 0;
-    particle_system->radial_accel_var = 0;
-    particle_system->tan_accel = 0;
-    particle_system->tan_accel_var = 0;
-    particle_system->direction = 0;
-    particle_system->direction_var = 0;
-    particle_system->speed = 0;
-    particle_system->speed_var = 0;
-    particle_system->start_scale = 1;
-    particle_system->start_scale_var = 0;
-    particle_system->end_scale = 1;
-    particle_system->end_scale_var = 0;
-    particle_system->start_color = al_map_rgba_f (1, 1, 1, 1);
-    particle_system->start_color_var = al_map_rgba_f (0, 0, 0, 0);
-    particle_system->end_color = al_map_rgba_f (0, 0, 0, 0);
-    particle_system->end_color_var = al_map_rgba_f (0, 0, 0, 0);
+    SCM_NEWSMOB (smob, particle_system_tag, system);
 
-    /* Step 3: Create the smob.
-     */
-    SCM_NEWSMOB (smob, particle_system_tag, particle_system);
-
-    /* Step 4: Finish the initialization.
-     */
-    particle_system->particles = (Particle *) scm_gc_malloc (sizeof (Particle) *
-                                                             max_particles,
-                                                             "particles");
-    particle_system->sprite_sheet = sprite_sheet_smob;
+    system->particles =
+        (Particle *) scm_gc_malloc (sizeof (Particle) * system->max_particles,
+                                    "particles");
+    system->sprite_sheet = sprite_sheet;
 
     return smob;
 }
 
-static SCM
-mark_particle_system (SCM particle_system_smob)
-{
-    ParticleSystem *particle_system = (ParticleSystem *)SCM_SMOB_DATA (particle_system_smob);
-
-    return particle_system->sprite_sheet;
-}
-
-static size_t
-free_particle_system (SCM particle_system_smob)
-{
-    ParticleSystem *particle_system = (ParticleSystem *) SCM_SMOB_DATA (particle_system_smob);
-
-    scm_gc_free (particle_system->particles,
-                 sizeof (Particle) * particle_system->max_particles, "particles");
-    scm_gc_free (particle_system, sizeof (ParticleSystem), "particle_system");
-
-    return 0;
-}
-
-static int
-print_particle_system (SCM particle_system_smob, SCM port, scm_print_state *pstate)
-{
-    ParticleSystem *particle_system = (ParticleSystem *) SCM_SMOB_DATA (particle_system_smob);
-
-    scm_puts ("#<particle-system ", port);
-    scm_display (scm_from_int(particle_system->max_particles), port);
-    scm_puts (">", port);
-
-    /* non-zero means success */
-    return 1;
-}
-
 static void
-draw_particle (Particle *particle) {
+draw_particle (Particle *particle)
+{
     if (particle->active) {
         float cx = al_get_bitmap_width (particle->image) / 2;
         float cy = al_get_bitmap_height (particle->image) / 2;
@@ -180,9 +136,11 @@ draw_particle (Particle *particle) {
     }
 }
 
-static SCM
-draw_particle_system (SCM particle_system_smob) {
-    ParticleSystem *system = check_particle_system (particle_system_smob);
+SCM_DEFINE (gmk_s_draw_particle_system, "draw-particle-system", 1, 0, 0,
+            (SCM particle_system),
+            "Draw particle system.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
     ALLEGRO_STATE state;
 
     al_store_state (&state, ALLEGRO_STATE_BLENDER);
@@ -203,8 +161,9 @@ draw_particle_system (SCM particle_system_smob) {
     return SCM_UNSPECIFIED;
 }
 
-static Particle*
-get_free_particle (ParticleSystem *system) {
+static Particle *
+get_free_particle (ParticleSystem *system)
+{
     if (system->particle_count < system->max_particles) {
         return &system->particles[system->particle_count++];
     }
@@ -213,7 +172,8 @@ get_free_particle (ParticleSystem *system) {
 }
 
 static void
-free_particle (ParticleSystem *system, int index) {
+free_particle (ParticleSystem *system, int index)
+{
     Particle temp;
     Particle *particle =  &system->particles[index];
     int particle_count = --system->particle_count;
@@ -230,19 +190,21 @@ free_particle (ParticleSystem *system, int index) {
 }
 
 static void
-particle_system_do_emit (ParticleSystem *system) {
+particle_system_do_emit (ParticleSystem *system)
+{
     for (int i = 0; i < system->amount; ++i) {
         Particle *particle = get_free_particle (system);
 
         if (particle) {
             init_particle (system, particle);
-       }
+        }
     }
 }
 
 
 static void
-update_particle (ParticleSystem *system, int index) {
+update_particle (ParticleSystem *system, int index)
+{
     Particle *particle = &system->particles[index];
     GmkVector2 radial = gmk_vector2_zero();
     GmkVector2 tangent;
@@ -259,7 +221,7 @@ update_particle (ParticleSystem *system, int index) {
                                          (gmk_vector2_add (radial, tangent)));
         particle->pos = gmk_vector2_add (particle->pos, particle->vel);
         particle->scale += particle->dscale;
-        particle->color = add_color (particle->color, particle->dcolor);
+        particle->color = gmk_add_color (particle->color, particle->dcolor);
         ++particle->duration;
 
         if (particle->duration >= particle->life) {
@@ -268,9 +230,11 @@ update_particle (ParticleSystem *system, int index) {
     }
 }
 
-static SCM
-update_particle_system (SCM particle_system_smob) {
-    ParticleSystem *system = check_particle_system (particle_system_smob);
+SCM_DEFINE (gmk_s_update_particle_system, "update-particle-system", 1, 0, 0,
+            (SCM particle_system),
+            "Update particle system.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
 
     for (int i = 0; i < system->particle_count; ++i) {
         update_particle (system, i);
@@ -285,678 +249,628 @@ update_particle_system (SCM particle_system_smob) {
         }
     }
 
-    scm_remember_upto_here_1 (particle_system_smob);
+    scm_remember_upto_here_1 (particle_system);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_particle_sprite_sheet, "particle-sprite-sheet", 1, 0, 0,
+            (SCM particle_system),
+            "Return sprite sheet for particle system.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return system->sprite_sheet;
+}
+
+SCM_DEFINE (gmk_s_particle_blend_additive, "particle-blend-additive?", 1, 0, 0,
+            (SCM particle_system),
+            "Return @code{#t} if additive blending is used.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_bool (system->blend_additive);
+}
+
+SCM_DEFINE (gmk_s_max_particles, "max-particles", 1, 0, 0,
+            (SCM particle_system),
+            "Return maximum number of particles for @var{particle_system}")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->max_particles);
+}
+
+SCM_DEFINE (gmk_s_particle_count, "particle-count", 1, 0, 0,
+            (SCM particle_system),
+            "Return number of active particles.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->particle_count);
+}
+
+SCM_DEFINE (gmk_s_particle_rate, "particle-rate", 1, 0, 0,
+            (SCM particle_system),
+            "Return rate at which particles are emitted.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->rate);
+}
+
+SCM_DEFINE (gmk_s_particle_amount, "particle-amount", 1, 0, 0,
+            (SCM particle_system),
+            "Return the number of particles that emitted at a time.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->amount);
+}
+
+SCM_DEFINE (gmk_s_particle_life, "particle-life", 1, 0, 0,
+            (SCM particle_system),
+            "Return the minimum lifetime of each particle.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->life);
+}
+
+SCM_DEFINE (gmk_s_particle_life_var, "particle-life-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the lifetime variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->life_var);
+}
+
+SCM_DEFINE (gmk_s_particle_position, "particle-position", 1, 0, 0,
+            (SCM particle_system),
+            "Return the position from which particles are emitted from.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_vector2 (system->pos);
+}
+
+SCM_DEFINE (gmk_s_particle_position_var, "particle-position-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the position variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_vector2 (system->pos_var);
+}
+
+SCM_DEFINE (gmk_s_particle_gravity, "particle-gravity", 1, 0, 0,
+            (SCM particle_system),
+            "Return the particle system gravity.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_vector2 (system->gravity);
+}
+
+SCM_DEFINE (gmk_s_particle_direction, "particle-direction", 1, 0, 0,
+            (SCM particle_system),
+            "Return the direction in which particles are emitted.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->direction);
+}
+
+SCM_DEFINE (gmk_s_particle_direction_var, "particle-direction-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the direction variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->direction_var);
+}
+
+SCM_DEFINE (gmk_s_particle_speed, "particle-speed", 1, 0, 0,
+            (SCM particle_system),
+            "Return the speed with which particles are emitted.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->speed);
+}
+
+SCM_DEFINE (gmk_s_particle_speed_var, "particle-speed-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the speed variance")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->speed_var);
+}
+
+SCM_DEFINE (gmk_s_particle_radial_accel, "particle-radial-accel", 1, 0, 0,
+            (SCM particle_system),
+            "Return the radial acceleration of particles.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->radial_accel);
+}
+
+SCM_DEFINE (gmk_s_particle_radial_accel_var, "particle-radial-accel-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the radial acceleration variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->radial_accel_var);
+}
+
+SCM_DEFINE (gmk_s_particle_tan_accel, "particle-tan-accel", 1, 0, 0,
+            (SCM particle_system),
+            "Return the tangential acceleration of particles.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->tan_accel);
+}
+
+SCM_DEFINE (gmk_s_particle_tan_accel_var, "particle-tan-accel-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the tangential acceleration variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->tan_accel_var);
+}
+
+SCM_DEFINE (gmk_s_particle_start_scale, "particle-start-scale", 1, 0, 0,
+            (SCM particle_system),
+            "Return the initial particle scale vector.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->start_scale);
+}
+
+SCM_DEFINE (gmk_s_particle_start_scale_var, "particle-start-scale-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the initial scale variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->start_scale_var);
+}
+
+SCM_DEFINE (gmk_s_particle_end_scale, "particle-end-scale", 1, 0, 0,
+            (SCM particle_system),
+            "Return the final particle scale vector.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->end_scale);
+}
+
+SCM_DEFINE (gmk_s_particle_end_scale_var, "particle-end-scale-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the final scale variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_double (system->end_scale_var);
+}
+
+SCM_DEFINE (gmk_s_particle_start_color, "particle-start-color", 1, 0, 0,
+            (SCM particle_system),
+            "Return the initial color of particles.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_color (system->start_color);
+}
+
+SCM_DEFINE (gmk_s_particle_start_color_var, "particle-start-color-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the initial color variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_color (system->start_color_var);
+}
+
+SCM_DEFINE (gmk_s_particle_end_color, "particle-end-color", 1, 0, 0,
+            (SCM particle_system),
+            "Return the final color of particles.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_color (system->end_color);
+}
+
+SCM_DEFINE (gmk_s_particle_end_color_var, "particle-end-color-var", 1, 0, 0,
+            (SCM particle_system),
+            "Return the final color variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    return gmk_scm_from_color (system->end_color_var);
+}
+
+SCM_DEFINE (gmk_s_set_particle_sprite_sheet, "set-particle-sprite-sheet", 2, 0, 0,
+            (SCM particle_system, SCM sprite_sheet),
+            "Set the particle system sprite sheet.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->sprite_sheet = sprite_sheet;
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_blend_additive, "set-particle-blend-additive", 2, 0, 0,
+            (SCM particle_system, SCM blend_additive),
+            "Set the particle system blend mode.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->blend_additive = scm_to_bool (blend_additive);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_rate, "set-particle-rate", 2, 0, 0,
+            (SCM particle_system, SCM rate),
+            "Set the particle emission rate.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->rate = scm_to_int (rate);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_amount, "set-particle-amount", 2, 0, 0,
+            (SCM particle_system, SCM amount),
+            "Set the particle emission amount.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->amount = scm_to_int (amount);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_life, "set-particle-life", 2, 0, 0,
+            (SCM particle_system, SCM life),
+            "Set the particle lifetime.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->life = scm_to_int (life);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_life_var, "set-particle-life-var", 2, 0, 0,
+            (SCM particle_system, SCM life_var),
+            "Set the particle lifetime variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->life_var = scm_to_int (life_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_position, "set-particle-position", 2, 0, 0,
+            (SCM particle_system, SCM position),
+            "Set the particle position.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->pos = gmk_scm_to_vector2 (position);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_position_var, "set-particle-position-var", 2, 0, 0,
+            (SCM particle_system, SCM position_var),
+            "Set the particle position variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->pos_var = gmk_scm_to_vector2 (position_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_gravity, "set-particle-gravity", 2, 0, 0,
+            (SCM particle_system, SCM gravity),
+            "Set the particle gravity.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->gravity = gmk_scm_to_vector2 (gravity);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_direction, "set-particle-direction", 2, 0, 0,
+            (SCM particle_system, SCM direction),
+            "Set the particle direction.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->direction = scm_to_double (direction);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_direction_var, "set-particle-direction-var", 2, 0, 0,
+            (SCM particle_system, SCM direction_var),
+            "Set the particle direction variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->direction_var = scm_to_double (direction_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_speed, "set-particle-speed", 2, 0, 0,
+            (SCM particle_system, SCM speed),
+            "Set the particle speed.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->speed = scm_to_double (speed);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_speed_var, "set-particle-speed-var", 2, 0, 0,
+            (SCM particle_system, SCM speed_var),
+            "Set the particle speed variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->speed_var = scm_to_double (speed_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_radial_accel, "set-particle-radial-accel", 2, 0, 0,
+            (SCM particle_system, SCM radial_accel),
+            "Set the particle radial acceleration.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->radial_accel = scm_to_double (radial_accel);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_radial_accel_var,
+            "set-particle-radial-accel-var", 2, 0, 0,
+            (SCM particle_system, SCM radial_accel_var),
+            "Set the particle radial acceleration variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->radial_accel_var = scm_to_double (radial_accel_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_tan_accel, "set-particle-tan-accel", 2, 0, 0,
+            (SCM particle_system, SCM tan_accel),
+            "Set the particle tangential acceleration.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->tan_accel = scm_to_double (tan_accel);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_tan_accel_var, "set-particle-tan-accel-var", 2, 0, 0,
+            (SCM particle_system, SCM tan_accel_var),
+            "Set the particle tangential acceleration variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->tan_accel_var = scm_to_double (tan_accel_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_start_scale, "set-particle-start-scale", 2, 0, 0,
+            (SCM particle_system, SCM start_scale),
+            "Set the particle initial scale.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->start_scale = scm_to_double (start_scale);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_start_scale_var,
+            "set-particle-start-scale-var", 2, 0, 0,
+            (SCM particle_system, SCM start_scale_var),
+            "Set the particle initial scale variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->start_scale_var = scm_to_double (start_scale_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_end_scale, "set-particle-end-scale", 2, 0, 0,
+            (SCM particle_system, SCM end_scale),
+            "Set the particle final scale.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->end_scale = scm_to_double (end_scale);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_end_scale_var,
+            "set-particle-end-scale-var", 2, 0, 0,
+            (SCM particle_system, SCM end_scale_var),
+            "Set the particle final scale variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->end_scale_var = scm_to_double (end_scale_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_start_color, "set-particle-start-color", 2, 0, 0,
+            (SCM particle_system, SCM start_color),
+            "Set the particle initial color.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->start_color = gmk_scm_to_color (start_color);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_start_color_var,
+            "set-particle-start-color-var", 2, 0, 0,
+            (SCM particle_system, SCM start_color_var),
+            "Set the particle initial color variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->start_color_var = gmk_scm_to_color (start_color_var);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_end_color, "set-particle-end-color", 2, 0, 0,
+            (SCM particle_system, SCM end_color),
+            "Set the particle final color.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->end_color = gmk_scm_to_color (end_color);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_s_set_particle_end_color_var,
+            "set-particle-end-color-var", 2, 0, 0,
+            (SCM particle_system, SCM end_color_var),
+            "Set the particle final color variance.")
+{
+    ParticleSystem *system = check_particle_system (particle_system);
+
+    system->end_color_var = gmk_scm_to_color (end_color_var);
 
     return SCM_UNSPECIFIED;
 }
 
 static SCM
-particle_system_sprite_sheet (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
+mark_particle_system (SCM particle_system)
+{
+    ParticleSystem *system = (ParticleSystem *) SCM_SMOB_DATA (particle_system);
 
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return particle_system->sprite_sheet;
+    return system->sprite_sheet;
 }
 
-static SCM
-particle_system_blend_additive (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
+static size_t
+free_particle_system (SCM particle_system)
+{
+    ParticleSystem *system = (ParticleSystem *) SCM_SMOB_DATA (particle_system);
 
-    scm_remember_upto_here_1 (particle_system_smob);
+    scm_gc_free (system->particles,
+                 sizeof (Particle) * system->max_particles, "particles");
+    scm_gc_free (system, sizeof (ParticleSystem), "particle system");
 
-    return scm_from_bool (particle_system->blend_additive);
+    return 0;
 }
 
-static SCM
-particle_system_max_particles (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->max_particles);
-}
-
-static SCM
-particle_system_particle_count (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->particle_count);
-}
-
-static SCM
-particle_system_rate (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->rate);
-}
-
-static SCM
-particle_system_amount (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->amount);
-}
-
-static SCM
-particle_system_life (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->life);
-}
-
-static SCM
-particle_system_life_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_int (particle_system->life_var);
-}
-
-static SCM
-particle_system_position (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_vector2 (particle_system->pos);
-}
-
-static SCM
-particle_system_position_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_vector2 (particle_system->pos_var);
-}
-
-static SCM
-particle_system_gravity (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_vector2 (particle_system->gravity);
-}
-
-static SCM
-particle_system_direction (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->direction);
-}
-
-static SCM
-particle_system_direction_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->direction_var);
-}
-
-static SCM
-particle_system_speed (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->speed);
-}
-
-static SCM
-particle_system_speed_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->speed_var);
-}
-
-static SCM
-particle_system_radial_accel (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->radial_accel);
-}
-
-static SCM
-particle_system_radial_accel_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->radial_accel_var);
-}
-
-static SCM
-particle_system_tan_accel (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->tan_accel);
-}
-
-static SCM
-particle_system_tan_accel_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->tan_accel_var);
-}
-
-static SCM
-particle_system_start_scale (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->start_scale);
-}
-
-static SCM
-particle_system_start_scale_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->start_scale_var);
-}
-
-static SCM
-particle_system_end_scale (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->end_scale);
-}
-
-static SCM
-particle_system_end_scale_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return scm_from_double (particle_system->end_scale_var);
-}
-
-static SCM
-particle_system_start_color (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_color (particle_system->start_color);
-}
-
-static SCM
-particle_system_start_color_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_color (particle_system->start_color_var);
-}
-
-static SCM
-particle_system_end_color (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_color (particle_system->end_color);
-}
-
-static SCM
-particle_system_end_color_var (SCM particle_system_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return gmk_scm_from_color (particle_system->end_color_var);
-}
-
-static SCM
-set_particle_system_sprite_sheet (SCM particle_system_smob, SCM sprite_sheet_smob) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-
-    particle_system->sprite_sheet = sprite_sheet_smob;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_blend_additive (SCM particle_system_smob, SCM s_blend_additive) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    bool blend_additive = scm_to_bool (s_blend_additive);
-
-    particle_system->blend_additive = blend_additive;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_rate (SCM particle_system_smob, SCM s_rate) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    int rate = scm_to_int (s_rate);
-
-    particle_system->rate = rate;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_amount (SCM particle_system_smob, SCM s_amount) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    int amount = scm_to_int (s_amount);
-
-    particle_system->amount = amount;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_life (SCM particle_system_smob, SCM s_life) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    int life = scm_to_int (s_life);
-
-    particle_system->life = life;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_life_var (SCM particle_system_smob, SCM s_life_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    int life_var = scm_to_int (s_life_var);
-
-    particle_system->life_var = life_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_position (SCM particle_system_smob, SCM s_pos) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    GmkVector2 pos = gmk_scm_to_vector2 (s_pos);
-
-    particle_system->pos = pos;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_position_var (SCM particle_system_smob, SCM s_pos_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    GmkVector2 pos_var = gmk_scm_to_vector2 (s_pos_var);
-
-    particle_system->pos_var = pos_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_gravity (SCM particle_system_smob, SCM s_gravity) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    GmkVector2 gravity = gmk_scm_to_vector2 (s_gravity);
-
-    particle_system->gravity = gravity;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_direction (SCM particle_system_smob, SCM s_direction) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float direction = scm_to_double (s_direction);
-
-    particle_system->direction = direction;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_direction_var (SCM particle_system_smob, SCM s_direction_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float direction_var = scm_to_double (s_direction_var);
-
-    particle_system->direction_var = direction_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM set_particle_system_speed (SCM particle_system_smob, SCM s_speed) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float speed = scm_to_double (s_speed);
-
-    particle_system->speed = speed;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_speed_var (SCM particle_system_smob, SCM s_speed_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float speed_var = scm_to_double (s_speed_var);
-
-    particle_system->speed_var = speed_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_radial_accel (SCM particle_system_smob, SCM s_radial_accel) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float radial_accel = scm_to_double (s_radial_accel);
-
-    particle_system->radial_accel = radial_accel;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_radial_accel_var (SCM particle_system_smob, SCM s_radial_accel_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float radial_accel_var = scm_to_double (s_radial_accel_var);
-
-    particle_system->radial_accel_var = radial_accel_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_tan_accel (SCM particle_system_smob, SCM s_tan_accel) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float tan_accel = scm_to_double (s_tan_accel);
-
-    particle_system->tan_accel = tan_accel;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_tan_accel_var (SCM particle_system_smob, SCM s_tan_accel_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float tan_accel_var = scm_to_double (s_tan_accel_var);
-
-    particle_system->tan_accel_var = tan_accel_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_start_scale (SCM particle_system_smob, SCM s_start_scale) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float start_scale = scm_to_double (s_start_scale);
-
-    particle_system->start_scale = start_scale;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_start_scale_var (SCM particle_system_smob, SCM s_start_scale_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float start_scale_var = scm_to_double (s_start_scale_var);
-
-    particle_system->start_scale_var = start_scale_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_end_scale (SCM particle_system_smob, SCM s_end_scale) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float end_scale = scm_to_double (s_end_scale);
-
-    particle_system->end_scale = end_scale;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_end_scale_var (SCM particle_system_smob, SCM s_end_scale_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    float end_scale_var = scm_to_double (s_end_scale_var);
-
-    particle_system->end_scale_var = end_scale_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_start_color (SCM particle_system_smob, SCM s_start_color) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR start_color = gmk_scm_to_color (s_start_color);
-
-    particle_system->start_color = start_color;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_start_color_var (SCM particle_system_smob, SCM s_start_color_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR start_color_var = gmk_scm_to_color (s_start_color_var);
-
-    particle_system->start_color_var = start_color_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-
-static SCM
-set_particle_system_end_color (SCM particle_system_smob, SCM s_end_color) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR end_color = gmk_scm_to_color (s_end_color);
-
-    particle_system->end_color = end_color;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-set_particle_system_end_color_var (SCM particle_system_smob, SCM s_end_color_var) {
-    ParticleSystem *particle_system = check_particle_system (particle_system_smob);
-    ALLEGRO_COLOR end_color_var = gmk_scm_to_color (s_end_color_var);
-
-    particle_system->end_color_var = end_color_var;
-
-    scm_remember_upto_here_1 (particle_system_smob);
-
-    return SCM_UNSPECIFIED;
+static int
+print_particle_system (SCM particle_system, SCM port, scm_print_state *pstate)
+{
+    scm_puts ("#<particle-system max-particles: ", port);
+    scm_display (gmk_s_max_particles (particle_system), port);
+    scm_puts (">", port);
+
+    return 1;
 }
 
 void
-init_particle_system_type (void) {
+gmk_init_particle_system (void) {
     particle_system_tag = scm_make_smob_type ("<particle-system>",
                                               sizeof (ParticleSystem));
     scm_set_smob_mark (particle_system_tag, mark_particle_system);
     scm_set_smob_free (particle_system_tag, free_particle_system);
     scm_set_smob_print (particle_system_tag, print_particle_system);
 
-    scm_c_define_gsubr ("make-particle-system", 2, 0, 0, make_particle_system);
-    scm_c_define_gsubr ("update-particle-system", 1, 0, 0, update_particle_system);
-    scm_c_define_gsubr ("draw-particle-system", 1, 0, 0, draw_particle_system);
-    scm_c_define_gsubr ("particle-sprite-sheet", 1, 0, 0, particle_system_sprite_sheet);
-    scm_c_define_gsubr ("particle-blend-additive", 1, 0, 0, particle_system_blend_additive);
-    scm_c_define_gsubr ("particle-max-particles", 1, 0, 0, particle_system_max_particles);
-    scm_c_define_gsubr ("particle-count", 1, 0, 0, particle_system_particle_count);
-    scm_c_define_gsubr ("particle-rate", 1, 0, 0, particle_system_rate);
-    scm_c_define_gsubr ("particle-amount", 1, 0, 0, particle_system_amount);
-    scm_c_define_gsubr ("particle-life", 1, 0, 0, particle_system_life);
-    scm_c_define_gsubr ("particle-life-var", 1, 0, 0, particle_system_life_var);
-    scm_c_define_gsubr ("particle-position", 1, 0, 0, particle_system_position);
-    scm_c_define_gsubr ("particle-position-var", 1, 0, 0, particle_system_position_var);
-    scm_c_define_gsubr ("particle-gravity", 1, 0, 0, particle_system_gravity);
-    scm_c_define_gsubr ("particle-direction", 1, 0, 0, particle_system_direction);
-    scm_c_define_gsubr ("particle-direction-var", 1, 0, 0, particle_system_direction_var);
-    scm_c_define_gsubr ("particle-speed", 1, 0, 0, particle_system_speed);
-    scm_c_define_gsubr ("particle-speed-var", 1, 0, 0, particle_system_speed_var);
-    scm_c_define_gsubr ("particle-radial-accel", 1, 0, 0, particle_system_radial_accel);
-    scm_c_define_gsubr ("particle-radial-accel-var", 1, 0, 0, particle_system_radial_accel_var);
-    scm_c_define_gsubr ("particle-tan-accel", 1, 0, 0, particle_system_tan_accel);
-    scm_c_define_gsubr ("particle-tan-accel-var", 1, 0, 0, particle_system_tan_accel_var);
-    scm_c_define_gsubr ("particle-start-scale", 1, 0, 0, particle_system_start_scale);
-    scm_c_define_gsubr ("particle-start-scale-var", 1, 0, 0, particle_system_start_scale_var);
-    scm_c_define_gsubr ("particle-end-scale", 1, 0, 0, particle_system_end_scale);
-    scm_c_define_gsubr ("particle-end-scale-var", 1, 0, 0, particle_system_end_scale_var);
-    scm_c_define_gsubr ("particle-start-color", 1, 0, 0, particle_system_start_color);
-    scm_c_define_gsubr ("particle-start-color-var", 1, 0, 0, particle_system_start_color_var);
-    scm_c_define_gsubr ("particle-end-color", 1, 0, 0, particle_system_end_color);
-    scm_c_define_gsubr ("particle-end-color-var", 1, 0, 0, particle_system_end_color_var);
-    scm_c_define_gsubr ("set-particle-sprite-sheet", 2, 0, 0, set_particle_system_sprite_sheet);
-    scm_c_define_gsubr ("set-particle-blend-additive", 2, 0, 0,
-                        set_particle_system_blend_additive);
-    scm_c_define_gsubr ("set-particle-rate", 2, 0, 0, set_particle_system_rate);
-    scm_c_define_gsubr ("set-particle-amount", 2, 0, 0, set_particle_system_amount);
-    scm_c_define_gsubr ("set-particle-life", 2, 0, 0, set_particle_system_life);
-    scm_c_define_gsubr ("set-particle-life-var", 2, 0, 0, set_particle_system_life_var);
-    scm_c_define_gsubr ("set-particle-position", 2, 0, 0, set_particle_system_position);
-    scm_c_define_gsubr ("set-particle-position-var", 2, 0, 0, set_particle_system_position_var);
-    scm_c_define_gsubr ("set-particle-gravity", 2, 0, 0, set_particle_system_gravity);
-    scm_c_define_gsubr ("set-particle-direction", 2, 0, 0, set_particle_system_direction);
-    scm_c_define_gsubr ("set-particle-direction-var", 2, 0, 0,
-                        set_particle_system_direction_var);
-    scm_c_define_gsubr ("set-particle-speed", 2, 0, 0, set_particle_system_speed);
-    scm_c_define_gsubr ("set-particle-speed-var", 2, 0, 0, set_particle_system_speed_var);
-    scm_c_define_gsubr ("set-particle-radial-accel", 2, 0, 0, set_particle_system_radial_accel);
-    scm_c_define_gsubr ("set-particle-radial-accel-var", 2, 0, 0,
-                        set_particle_system_radial_accel_var);
-    scm_c_define_gsubr ("set-particle-tan-accel", 2, 0, 0, set_particle_system_tan_accel);
-    scm_c_define_gsubr ("set-particle-tan-accel-var", 2, 0, 0,
-                        set_particle_system_tan_accel_var);
-    scm_c_define_gsubr ("set-particle-start-scale", 2, 0, 0, set_particle_system_start_scale);
-    scm_c_define_gsubr ("set-particle-start-scale-var", 2, 0, 0,
-                        set_particle_system_start_scale_var);
-    scm_c_define_gsubr ("set-particle-end-scale", 2, 0, 0, set_particle_system_end_scale);
-    scm_c_define_gsubr ("set-particle-end-scale-var", 2, 0, 0,
-                        set_particle_system_end_scale_var);
-    scm_c_define_gsubr ("set-particle-start-color", 2, 0, 0, set_particle_system_start_color);
-    scm_c_define_gsubr ("set-particle-start-color-var", 2, 0, 0,
-                        set_particle_system_start_color_var);
-    scm_c_define_gsubr ("set-particle-end-color", 2, 0, 0, set_particle_system_end_color);
-    scm_c_define_gsubr ("set-particle-end-color-var", 2, 0, 0,
-                        set_particle_system_end_color_var);
+#include "particle_system.x"
 
-    scm_c_export ("make-particle-system", NULL);
-    scm_c_export ("update-particle-system", NULL);
-    scm_c_export ("draw-particle-system", NULL);
-    scm_c_export ("particle-sprite-sheet", NULL);
-    scm_c_export ("particle-blend-additive", NULL);
-    scm_c_export ("particle-max-particles", NULL);
-    scm_c_export ("particle-count", NULL);
-    scm_c_export ("particle-rate", NULL);
-    scm_c_export ("particle-amount", NULL);
-    scm_c_export ("particle-life", NULL);
-    scm_c_export ("particle-life-var", NULL);
-    scm_c_export ("particle-position", NULL);
-    scm_c_export ("particle-position-var", NULL);
-    scm_c_export ("particle-gravity", NULL);
-    scm_c_export ("particle-direction", NULL);
-    scm_c_export ("particle-direction-var", NULL);
-    scm_c_export ("particle-speed", NULL);
-    scm_c_export ("particle-speed-var", NULL);
-    scm_c_export ("particle-radial-accel", NULL);
-    scm_c_export ("particle-radial-accel-var", NULL);
-    scm_c_export ("particle-tan-accel", NULL);
-    scm_c_export ("particle-tan-accel-var", NULL);
-    scm_c_export ("particle-start-scale", NULL);
-    scm_c_export ("particle-start-scale-var", NULL);
-    scm_c_export ("particle-end-scale", NULL);
-    scm_c_export ("particle-end-scale-var", NULL);
-    scm_c_export ("particle-start-color", NULL);
-    scm_c_export ("particle-start-color-var", NULL);
-    scm_c_export ("particle-end-color", NULL);
-    scm_c_export ("particle-end-color-var", NULL);
-    scm_c_export ("set-particle-sprite-sheet", NULL);
-    scm_c_export ("set-particle-blend-additive", NULL);
-    scm_c_export ("set-particle-rate", NULL);
-    scm_c_export ("set-particle-amount", NULL);
-    scm_c_export ("set-particle-life", NULL);
-    scm_c_export ("set-particle-life-var", NULL);
-    scm_c_export ("set-particle-position", NULL);
-    scm_c_export ("set-particle-position-var", NULL);
-    scm_c_export ("set-particle-gravity", NULL);
-    scm_c_export ("set-particle-direction", NULL);
-    scm_c_export ("set-particle-direction-var", NULL);
-    scm_c_export ("set-particle-speed", NULL);
-    scm_c_export ("set-particle-speed-var", NULL);
-    scm_c_export ("set-particle-radial-accel", NULL);
-    scm_c_export ("set-particle-radial-accel-var", NULL);
-    scm_c_export ("set-particle-tan-accel", NULL);
-    scm_c_export ("set-particle-tan-accel-var", NULL);
-    scm_c_export ("set-particle-start-scale", NULL);
-    scm_c_export ("set-particle-start-scale-var", NULL);
-    scm_c_export ("set-particle-end-scale", NULL);
-    scm_c_export ("set-particle-end-scale-var", NULL);
-    scm_c_export ("set-particle-start-color", NULL);
-    scm_c_export ("set-particle-start-color-var", NULL);
-    scm_c_export ("set-particle-end-color", NULL);
-    scm_c_export ("set-particle-end-color-var", NULL);
+    scm_c_export (s_gmk_s_make_particle_system,
+                  s_gmk_s_update_particle_system,
+                  s_gmk_s_draw_particle_system,
+                  s_gmk_s_particle_sprite_sheet,
+                  s_gmk_s_particle_blend_additive,
+                  s_gmk_s_max_particles,
+                  s_gmk_s_particle_count,
+                  s_gmk_s_particle_rate,
+                  s_gmk_s_particle_amount,
+                  s_gmk_s_particle_life,
+                  s_gmk_s_particle_life_var,
+                  s_gmk_s_particle_position,
+                  s_gmk_s_particle_position_var,
+                  s_gmk_s_particle_gravity,
+                  s_gmk_s_particle_direction,
+                  s_gmk_s_particle_direction_var,
+                  s_gmk_s_particle_speed,
+                  s_gmk_s_particle_speed_var,
+                  s_gmk_s_particle_radial_accel,
+                  s_gmk_s_particle_radial_accel_var,
+                  s_gmk_s_particle_tan_accel,
+                  s_gmk_s_particle_tan_accel_var,
+                  s_gmk_s_particle_start_scale,
+                  s_gmk_s_particle_start_scale_var,
+                  s_gmk_s_particle_end_scale,
+                  s_gmk_s_particle_end_scale_var,
+                  s_gmk_s_particle_start_color,
+                  s_gmk_s_particle_start_color_var,
+                  s_gmk_s_particle_end_color,
+                  s_gmk_s_particle_end_color_var,
+                  s_gmk_s_set_particle_sprite_sheet,
+                  s_gmk_s_set_particle_blend_additive,
+                  s_gmk_s_set_particle_rate,
+                  s_gmk_s_set_particle_amount,
+                  s_gmk_s_set_particle_life,
+                  s_gmk_s_set_particle_life_var,
+                  s_gmk_s_set_particle_position,
+                  s_gmk_s_set_particle_position_var,
+                  s_gmk_s_set_particle_gravity,
+                  s_gmk_s_set_particle_direction,
+                  s_gmk_s_set_particle_direction_var,
+                  s_gmk_s_set_particle_speed,
+                  s_gmk_s_set_particle_speed_var,
+                  s_gmk_s_set_particle_radial_accel,
+                  s_gmk_s_set_particle_radial_accel_var,
+                  s_gmk_s_set_particle_tan_accel,
+                  s_gmk_s_set_particle_tan_accel_var,
+                  s_gmk_s_set_particle_start_scale,
+                  s_gmk_s_set_particle_start_scale_var,
+                  s_gmk_s_set_particle_end_scale,
+                  s_gmk_s_set_particle_end_scale_var,
+                  s_gmk_s_set_particle_start_color,
+                  s_gmk_s_set_particle_start_color_var,
+                  s_gmk_s_set_particle_end_color,
+                  s_gmk_s_set_particle_end_color_var,
+                  NULL);
 }
