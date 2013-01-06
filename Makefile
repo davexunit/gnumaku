@@ -20,3 +20,6 @@ src/%.x: src/%.c
 
 .PHONY clean:
 	rm -f $(BIN) $(OBJECTS) $(SNARFS)
+
+run-demo:
+	./demo.scm
