@@ -54,6 +54,7 @@ free_sample (SCM sample)
     GmkSample *s = (GmkSample *) SCM_SMOB_DATA (sample);
 
     al_destroy_sample (s->sample);
+
     scm_gc_free (sample, sizeof (GmkSample), "sample");
 
     return 0;
@@ -163,7 +164,7 @@ gmk_init_audio (void)
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
 
 #include "audio.x"
-pp
+
     scm_c_export (s_gmk_s_load_sample,
                   s_gmk_s_play_sample,
                   s_gmk_s_load_audio_stream,
