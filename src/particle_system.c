@@ -50,21 +50,21 @@ init_particle (ParticleSystem *system, Particle *particle)
     GmkSpriteSheet *sprite_sheet = gmk_scm_to_sprite_sheet (system->sprite_sheet);
     int tile = (int) sprite_sheet->num_tiles * gmk_rand1 ();
     float theta = gmk_deg_to_rad (system->direction +
-                                  system->direction_var * gmk_rand1 ());
-    float speed = system->speed + system->speed_var * gmk_rand1 ();
-    float start_scale = system->start_scale + system->start_scale_var * gmk_rand1 ();
-    float end_scale = system->end_scale + system->end_scale_var * gmk_rand1 ();
+                                  gmk_randf (system->direction_var));
+    float speed = system->speed + gmk_randf (system->speed_var);
+    float start_scale = system->start_scale + gmk_randf (system->start_scale_var);
+    float end_scale = system->end_scale + gmk_randf (system->end_scale_var);
 
     /* Messy. */
-    particle->life = (int) system->life + system->life_var * gmk_rand1 ();
+    particle->life = (int) system->life + gmk_randf (system->life_var);
     particle->image = gmk_sprite_sheet_tile (sprite_sheet, tile);
     particle->color = start_color;
     particle->dcolor = delta_color (start_color, end_color, particle->life);
-    particle->pos.x = system->pos.x + system->pos_var.x * gmk_rand1 ();
-    particle->pos.y = system->pos.y +  system->pos_var.y * gmk_rand1 ();
+    particle->pos.x = system->pos.x + gmk_randf (system->pos_var.x);
+    particle->pos.y = system->pos.y + gmk_randf (system->pos_var.y);
     particle->vel = gmk_vector2_from_polar (speed, theta);
-    particle->radial_accel = system->radial_accel + system->radial_accel_var * gmk_rand1 ();
-    particle->tan_accel = system->tan_accel + system->tan_accel_var * gmk_rand1 ();
+    particle->radial_accel = system->radial_accel + gmk_randf (system->radial_accel_var);
+    particle->tan_accel = system->tan_accel + gmk_randf (system->tan_accel_var);
     particle->scale = start_scale;
     particle->dscale = (end_scale - start_scale) / particle->life;
     particle->duration = 0;
