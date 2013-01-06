@@ -43,6 +43,7 @@ SCM_DEFINE (gmk_s_play_sample, "play-sample", 4, 0, 0,
     al_play_sample (s->sample, scm_to_double (gain),
                     scm_to_double (pan), scm_to_double (speed),
                     ALLEGRO_PLAYMODE_ONCE, NULL);
+    scm_remember_upto_here_1 (sample);
 
     return SCM_UNSPECIFIED;
 }
@@ -163,7 +164,7 @@ gmk_init_audio (void)
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
 
 #include "audio.x"
-
+pp
     scm_c_export (s_gmk_s_load_sample,
                   s_gmk_s_play_sample,
                   s_gmk_s_load_audio_stream,
