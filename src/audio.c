@@ -54,7 +54,6 @@ free_sample (SCM sample)
     GmkSample *s = (GmkSample *) SCM_SMOB_DATA (sample);
 
     al_destroy_sample (s->sample);
-
     scm_gc_free (sample, sizeof (GmkSample), "sample");
 
     return 0;
