@@ -20,7 +20,7 @@ init_gnumaku () {
     gmk_init_image ();
     gmk_init_sprite ();
     gmk_init_rect ();
-    init_font_type ();
+    gmk_init_font ();
     init_sample_type ();
     init_audio_stream_type ();
     init_particle_system_type ();

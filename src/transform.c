@@ -182,9 +182,8 @@ free_transform (SCM transform)
 static int
 print_transform (SCM transform, SCM port, scm_print_state *pstate)
 {
-    scm_puts ("#<transform >", port);
+    scm_puts ("#<transform>", port);
 
-    /* non-zero means success */
     return 1;
 }
 

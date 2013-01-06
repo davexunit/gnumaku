@@ -68,9 +68,9 @@
   (game-resume))
 
 (define (director-draw-fps)
-  (font-draw-text director-font 730 575 (make-color-f 1 1 1 0.7)
-                  (string-append "FPS: "
-                                 (number->string (fps-last-frames director-fps)))))
+  (draw-text director-font (make-vector2 730 575) (make-color-f 1 1 1 0.7)
+             (string-append "FPS: "
+                            (number->string (fps-last-frames director-fps)))))
 
 (define (director-set-draw-target image)
   (set-render-image image))

@@ -1,18 +1,20 @@
-#ifndef FONT_H
-#define FONT_H
+#ifndef GMK_FONT_H
+#define GMK_FONT_H
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <libguile.h>
+#include "common.h"
 
-#include "color.h"
-
-typedef struct
-{
+/*
+ * GmkFont
+ *
+ * A wrapper around ALLEGRO_FONT since allegro does it's own thing with
+ * memory allocation.
+ */
+typedef struct {
     ALLEGRO_FONT *font;
-} Font;
+} GmkFont;
 
-void init_font_type (void);
+SCM gmk_load_font (SCM filename, SCM size);
+SCM gmk_draw_text (SCM font, SCM position, SCM color, SCM text);
+void gmk_init_font (void);
 
 #endif
