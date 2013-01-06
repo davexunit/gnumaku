@@ -11,7 +11,7 @@
 #include "draw.h"
 
 void
-init_gnumaku () {
+gmk_init () {
     gmk_init_vector2 ();
     gmk_init_transform ();
     gmk_init_color ();
@@ -21,8 +21,8 @@ init_gnumaku () {
     gmk_init_sprite ();
     gmk_init_rect ();
     gmk_init_font ();
-    init_sample_type ();
-    init_audio_stream_type ();
+    gmk_init_sample ();
+    gmk_init_audio_stream ();
     init_particle_system_type ();
     gmk_init_bullet_type ();
     init_bullet_system_type ();

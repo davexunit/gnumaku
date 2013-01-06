@@ -3,7 +3,7 @@
 (define-module (gnumaku core)
   #:export (repeat))
 
-(load-extension "./gnumaku" "init_gnumaku")
+(load-extension "./gnumaku" "gmk_init")
 
 (define (repeat times proc)
   "Do something a bunch of times."
