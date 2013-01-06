@@ -175,7 +175,7 @@ bullet_system_bounds (SCM bullet_system_smob) {
 
     scm_remember_upto_here_1 (bullet_system_smob);
 
-    return gmk_make_rect(x, y, width, height);
+    return gmk_s_make_rect(x, y, width, height);
 }
 
 static SCM

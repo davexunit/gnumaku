@@ -18,11 +18,18 @@ typedef struct {
     int life;
     int duration;
     bool active;
-} Particle;
+} GmkParticle;
 
+/*
+ * GmkParticleSystem
+ *
+ * Make pretty particle effects.
+ * There are a ton of tweakable settings to use to make a wide variety
+ * of particle effects.
+ */
 typedef struct {
     SCM sprite_sheet;
-    Particle *particles;
+    GmkParticle *particles;
     bool blend_additive;
     int max_particles;
     int particle_count;
@@ -51,7 +58,7 @@ typedef struct {
     ALLEGRO_COLOR start_color_var;
     ALLEGRO_COLOR end_color;
     ALLEGRO_COLOR end_color_var;
-} ParticleSystem;
+} GmkParticleSystem;
 
 SCM gmk_s_make_particle_system (SCM max_particles, SCM sprite_sheet);
 SCM gmk_s_update_particle_system (SCM particle_system);
