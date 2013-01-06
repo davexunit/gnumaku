@@ -3,6 +3,19 @@
 static scm_t_bits color_tag;
 
 ALLEGRO_COLOR
+gmk_add_color (ALLEGRO_COLOR a, ALLEGRO_COLOR b)
+{
+    ALLEGRO_COLOR color;
+
+    color.r = a.r + b.r;
+    color.g = a.g + b.g;
+    color.b = a.b + b.b;
+    color.a = a.a + b.a;
+
+    return color;
+}
+
+ALLEGRO_COLOR
 gmk_color_mult_alpha (ALLEGRO_COLOR color)
 {
     ALLEGRO_COLOR new_color;
