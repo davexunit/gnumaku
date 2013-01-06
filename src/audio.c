@@ -3,49 +3,56 @@
 static scm_t_bits sample_tag;
 static scm_t_bits audio_stream_tag;
 
-GmkSample*
-check_sample (SCM sample_smob) {
-    scm_assert_smob_type (sample_tag, sample_smob);
+static GmkSample *
+check_sample (SCM sample)
+{
+    scm_assert_smob_type (sample_tag, sample);
 
-    return (GmkSample *) SCM_SMOB_DATA (sample_smob);
+    return (GmkSample *) SCM_SMOB_DATA (sample);
 }
 
-static SCM
-load_sample (SCM s_file) {
+SCM_DEFINE (gmk_s_load_sample, "load-sample", 1, 0, 0,
+            (SCM filename),
+            "Load an audio sample from file.")
+{
     SCM smob;
-    const char *file = scm_to_locale_string (s_file);
     GmkSample *sample = (GmkSample *) scm_gc_malloc (sizeof (GmkSample), "sample");
 
     sample->sample = NULL;
 
     SCM_NEWSMOB (smob, sample_tag, sample);
 
-    sample->sample = al_load_sample (file);
+    sample->sample = al_load_sample (scm_to_locale_string (filename));
 
     if (!sample->sample) {
-        fprintf (stderr, "failed to load audio sample: %s\n", file);
+        scm_error_scm (scm_from_latin1_symbol ("sample-error"), SCM_BOOL_F,
+                       scm_from_locale_string ("Failed to load sample: ~S"),
+                       SCM_EOL, scm_list_1 (filename));
     }
 
     return smob;
 }
 
-static SCM
-play_sample (SCM sample_smob, SCM s_gain, SCM s_pan, SCM s_speed) {
-    GmkSample *sample = check_sample (sample_smob);
-    float gain = scm_to_double (s_gain);
-    float pan = scm_to_double (s_pan);
-    float speed = scm_to_double (s_speed);
+SCM_DEFINE (gmk_s_play_sample, "play-sample", 4, 0, 0,
+            (SCM sample, SCM gain, SCM pan, SCM speed),
+            "Play audio sample. @var{gain}, @var{pan}, and @var{speed} are "
+            "floating point numbers. A @var{pan} of 0 means to pan center.")
+{
+    GmkSample *s = check_sample (sample);
 
-    al_play_sample (sample->sample, gain, pan, speed, ALLEGRO_PLAYMODE_ONCE, NULL);
+    al_play_sample (s->sample, scm_to_double (gain),
+                    scm_to_double (pan), scm_to_double (speed),
+                    ALLEGRO_PLAYMODE_ONCE, NULL);
 
     return SCM_UNSPECIFIED;
 }
 
 static size_t
-free_sample (SCM sample_smob) {
-    GmkSample *sample = (GmkSample *) SCM_SMOB_DATA (sample_smob);
+free_sample (SCM sample)
+{
+    GmkSample *s = (GmkSample *) SCM_SMOB_DATA (sample);
 
-    al_destroy_sample (sample->sample);
+    al_destroy_sample (s->sample);
 
     scm_gc_free (sample, sizeof (GmkSample), "sample");
 
@@ -53,105 +60,125 @@ free_sample (SCM sample_smob) {
 }
 
 static int
-print_sample (SCM sample_smob, SCM port, scm_print_state *pstate) {
-    scm_puts ("#<sample >", port);
+print_sample (SCM sample, SCM port, scm_print_state *pstate)
+{
+    scm_puts ("#<sample>", port);
 
-    /* non-zero means success */
     return 1;
 }
 
-GmkAudioStream*
-check_audio_stream (SCM audio_stream_smob) {
-    scm_assert_smob_type (audio_stream_tag, audio_stream_smob);
+static GmkAudioStream *
+check_audio_stream (SCM audio_stream)
+{
+    scm_assert_smob_type (audio_stream_tag, audio_stream);
 
-    return (GmkAudioStream *) SCM_SMOB_DATA (audio_stream_smob);
+    return (GmkAudioStream *) SCM_SMOB_DATA (audio_stream);
 }
 
-static SCM
-load_audio_stream (SCM s_file) {
+SCM_DEFINE (gmk_s_load_audio_stream, "load-audio-stream", 1, 0, 0,
+            (SCM filename),
+            "Load an audio stream from file. "
+            "Supports common formats such as wav and ogg.")
+{
     SCM smob;
-    const char *file = scm_to_locale_string (s_file);
-    GmkAudioStream *audio_stream = (GmkAudioStream *) scm_gc_malloc (sizeof (GmkAudioStream),
-                                                               "audio_stream");
+    GmkAudioStream *audio_stream =
+        (GmkAudioStream *) scm_gc_malloc (sizeof (GmkAudioStream),
+                                          "audio_stream");
 
     audio_stream->stream = NULL;
 
     SCM_NEWSMOB (smob, audio_stream_tag, audio_stream);
 
     /* Some magic numbers here taken from the allegro 5 example for streams. */
-    audio_stream->stream = al_load_audio_stream (file, 4, 2048);
+    audio_stream->stream = al_load_audio_stream (scm_to_locale_string (filename),
+                                                 4, 2048);
 
     if (!audio_stream->stream) {
-        fprintf (stderr, "failed to load audio audio_stream: %s\n", file);
+        scm_error_scm (scm_from_latin1_symbol ("audio-stream-error"), SCM_BOOL_F,
+                       scm_from_locale_string ("Failed to load audio stream: ~S"),
+                       SCM_EOL, scm_list_1 (filename));
+
     }
 
     return smob;
 }
 
-static SCM
-play_audio_stream (SCM audio_stream_smob, SCM s_gain, SCM s_pan, SCM s_speed,
-                   SCM s_loop) {
-    GmkAudioStream *audio_stream = check_audio_stream (audio_stream_smob);
-    float gain = scm_to_double (s_gain);
-    float pan = scm_to_double (s_pan);
-    float speed = scm_to_double (s_speed);
-    bool loop = scm_to_bool (s_loop);
-    ALLEGRO_PLAYMODE playmode = loop ? ALLEGRO_PLAYMODE_LOOP : ALLEGRO_PLAYMODE_ONCE;
+static ALLEGRO_PLAYMODE
+get_playmode (bool loop)
+{
+    return loop ? ALLEGRO_PLAYMODE_LOOP : ALLEGRO_PLAYMODE_ONCE;
+}
 
-    al_set_audio_stream_gain (audio_stream->stream, gain);
-    al_set_audio_stream_pan (audio_stream->stream, pan);
-    al_set_audio_stream_speed (audio_stream->stream, speed);
-    al_set_audio_stream_playmode (audio_stream->stream, playmode);
-    al_attach_audio_stream_to_mixer (audio_stream->stream, al_get_default_mixer ());
+SCM_DEFINE (gmk_s_play_audio_stream, "play-audio-stream", 5, 0, 0,
+            (SCM audio_stream, SCM gain, SCM pan, SCM speed, SCM loop),
+            "Play audio stream. @var{gain}, @var{pan}, and @var{speed} are "
+            "floating point numbers. @var{pan} of 0 is centered, -1 is left, "
+            "and 1 is right.")
+{
+    GmkAudioStream *stream = check_audio_stream (audio_stream);
+    ALLEGRO_PLAYMODE playmode = get_playmode (scm_to_bool (loop));
 
-    scm_remember_upto_here_1 (audio_stream_smob);
+    al_set_audio_stream_gain (stream->stream, scm_to_double (gain));
+    al_set_audio_stream_pan (stream->stream, scm_to_double (pan));;
+    al_set_audio_stream_speed (stream->stream, scm_to_double (speed));
+    al_set_audio_stream_playmode (stream->stream, playmode);
+    al_attach_audio_stream_to_mixer (stream->stream, al_get_default_mixer ());
+    scm_remember_upto_here_1 (audio_stream);
 
     return SCM_UNSPECIFIED;
 }
 
 static size_t
-free_audio_stream (SCM audio_stream_smob) {
-    GmkAudioStream *audio_stream = (GmkAudioStream *) SCM_SMOB_DATA (audio_stream_smob);
+free_audio_stream (SCM audio_stream)
+{
+    GmkAudioStream *stream = (GmkAudioStream *) SCM_SMOB_DATA (audio_stream);
 
-    al_destroy_audio_stream (audio_stream->stream);
-
-    scm_gc_free (audio_stream, sizeof (GmkAudioStream), "audio_stream");
+    al_destroy_audio_stream (stream->stream);
+    scm_gc_free (stream, sizeof (GmkAudioStream), "audio_stream");
 
     return 0;
 }
 
 static int
-print_audio_stream (SCM audio_stream_smob, SCM port, scm_print_state *pstate) {
-    scm_puts ("#<audio-stream >", port);
+print_audio_stream (SCM audio_stream, SCM port, scm_print_state *pstate)
+{
+    scm_puts ("#<audio-stream>", port);
 
-    /* non-zero means success */
     return 1;
 }
 
 void
-gmk_init_sample (void) {
+gmk_init_audio (void)
+{
+    /* GmkSample */
     sample_tag = scm_make_smob_type ("sample", sizeof (GmkSample));
     scm_set_smob_mark (sample_tag, 0);
     scm_set_smob_free (sample_tag, free_sample);
     scm_set_smob_print (sample_tag, print_sample);
 
-    scm_c_define_gsubr ("load-sample", 1, 0, 0, load_sample);
-    scm_c_define_gsubr ("play-sample", 4, 0, 0, play_sample);
+    /* scm_c_define_gsubr ("load-sample", 1, 0, 0, load_sample); */
+    /* scm_c_define_gsubr ("play-sample", 4, 0, 0, play_sample); */
 
-    scm_c_export ("load-sample", NULL);
-    scm_c_export ("play-sample", NULL);
-}
+    /* scm_c_export ("load-sample", NULL); */
+    /* scm_c_export ("play-sample", NULL); */
 
-void
-gmk_init_audio_stream (void) {
+    /* GmkAudioStream */
     audio_stream_tag = scm_make_smob_type ("audio-stream", sizeof (GmkAudioStream));
     scm_set_smob_mark (audio_stream_tag, 0);
     scm_set_smob_free (audio_stream_tag, free_audio_stream);
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
 
-    scm_c_define_gsubr ("load-audio-stream", 1, 0, 0, load_audio_stream);
-    scm_c_define_gsubr ("play-audio-stream", 5, 0, 0, play_audio_stream);
+    /* scm_c_define_gsubr ("load-audio-stream", 1, 0, 0, load_audio_stream); */
+    /* scm_c_define_gsubr ("play-audio-stream", 5, 0, 0, play_audio_stream); */
 
-    scm_c_export ("load-audio-stream", NULL);
-    scm_c_export ("play-audio-stream", NULL);
+    /* scm_c_export ("load-audio-stream", NULL); */
+    /* scm_c_export ("play-audio-stream", NULL); */
+
+#include "audio.x"
+
+    scm_c_export (s_gmk_s_load_sample,
+                  s_gmk_s_play_sample,
+                  s_gmk_s_load_audio_stream,
+                  s_gmk_s_play_audio_stream,
+                  NULL);
 }

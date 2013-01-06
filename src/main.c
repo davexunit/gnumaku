@@ -21,8 +21,7 @@ gmk_init () {
     gmk_init_sprite ();
     gmk_init_rect ();
     gmk_init_font ();
-    gmk_init_sample ();
-    gmk_init_audio_stream ();
+    gmk_init_audio ();
     init_particle_system_type ();
     gmk_init_bullet_type ();
     init_bullet_system_type ();
