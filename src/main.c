@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <libguile.h>
-
 #include "vector.h"
 #include "transform.h"
 #include "sprite_sheet.h"
@@ -16,9 +12,8 @@
 
 void
 init_gnumaku () {
-    /* Create smobs so we can call C code from Scheme. */
     gmk_init_vector2 ();
-    init_transform_type ();
+    gmk_init_transform ();
     gmk_init_color ();
     gmk_init_blend_mode ();
     gmk_init_sprite_sheet ();

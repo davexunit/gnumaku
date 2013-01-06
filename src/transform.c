@@ -1,166 +1,186 @@
 #include "transform.h"
-#include "math.h"
 
 static scm_t_bits transform_tag;
 
-Transform*
-check_transform (SCM transform_smob)
+static ALLEGRO_TRANSFORM *
+check_transform (SCM transform)
 {
-    scm_assert_smob_type (transform_tag, transform_smob);
+    scm_assert_smob_type (transform_tag, transform);
 
-    return (Transform *) SCM_SMOB_DATA (transform_smob);
+    return (ALLEGRO_TRANSFORM *) SCM_SMOB_DATA (transform);
 }
 
-static SCM
-make_transform (void)
+static ALLEGRO_TRANSFORM *
+malloc_transform (void)
 {
-    SCM smob;
-    Transform *transform = (Transform *) scm_gc_malloc (sizeof (Transform), "transform");
-
-    SCM_NEWSMOB (smob, transform_tag, transform);
-    al_identity_transform (&transform->transform);
-
-    return smob;
+    return (ALLEGRO_TRANSFORM *) scm_gc_malloc (sizeof (ALLEGRO_TRANSFORM), "transform");
 }
 
-static SCM
-get_current_transform (void)
+SCM_DEFINE (gmk_s_make_transform, "make-transform", 5, 0, 0,
+            (SCM x, SCM y, SCM scale_x, SCM scale_y, SCM rotation),
+            "Make transformation matrix.")
 {
-    SCM smob;
-    Transform *transform = (Transform *) scm_gc_malloc (sizeof (Transform), "transform");
+    ALLEGRO_TRANSFORM *transform = malloc_transform ();
 
-    al_copy_transform (&transform->transform, al_get_current_transform ());
-    SCM_NEWSMOB (smob, transform_tag, transform);
-
-    return smob;
+    al_build_transform (transform, scm_to_double (x), scm_to_double (y),
+                        scm_to_double (scale_x), scm_to_double (scale_y),
+                        gmk_deg_to_rad (scm_to_double (rotation)));
+    SCM_RETURN_NEWSMOB (transform_tag, transform);
 }
 
-static SCM
-copy_transform (SCM transform_smob_dest, SCM transform_smob_src)
+SCM_DEFINE (gmk_s_make_identity_transform, "make-identity-transform", 0, 0, 0,
+            (void),
+            "Make identity transformation matrix.")
 {
-    Transform *transform_dest = check_transform (transform_smob_dest);
-    Transform *transform_src = check_transform (transform_smob_src);
+    ALLEGRO_TRANSFORM *transform = malloc_transform ();
 
-    al_copy_transform (&transform_dest->transform, &transform_src->transform);
+    al_identity_transform (transform);
+    SCM_RETURN_NEWSMOB (transform_tag, transform);
+}
+
+SCM_DEFINE (gmk_s_current_transform, "current-transform", 0, 0, 0,
+            (void),
+            "Return currently applied transformation matrix.")
+{
+    ALLEGRO_TRANSFORM *transform = malloc_transform ();
+
+    al_copy_transform (transform, al_get_current_transform ());
+    SCM_RETURN_NEWSMOB (transform_tag, transform);
+}
+
+SCM_DEFINE (gmk_s_copy_transform, "copy-transform", 2, 0, 0,
+            (SCM transform_dest, SCM transform_src),
+            "Copies @var{transform_src} into @var{transform_dest}.")
+{
+    ALLEGRO_TRANSFORM *t_dest = check_transform (transform_dest);
+    ALLEGRO_TRANSFORM *t_src = check_transform (transform_src);
+
+    al_copy_transform (t_dest, t_src);
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-compose_transform (SCM transform_smob_dest, SCM transform_smob_src)
+SCM_DEFINE (gmk_s_compose_transform, "compose-transform", 2, 0, 0,
+            (SCM transform_dest, SCM transform_src),
+            "Compose transformation.")
 {
-    Transform *transform_dest = check_transform (transform_smob_dest);
-    Transform *transform_src = check_transform (transform_smob_src);
+    ALLEGRO_TRANSFORM *t_dest = check_transform (transform_dest);
+    ALLEGRO_TRANSFORM *t_src = check_transform (transform_src);
 
-    al_compose_transform (&transform_dest->transform, &transform_src->transform);
+    al_compose_transform (t_dest, t_src);
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-use_transform (SCM transform_smob)
+SCM_DEFINE (gmk_s_use_transform, "use-transform", 1, 0, 0,
+            (SCM transform),
+            "Set @var{transform} to be the current global transformation matrix.")
 {
-    Transform *transform = check_transform (transform_smob);
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
 
-    al_use_transform (&transform->transform);
+    al_use_transform (t);
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-invert_transform (SCM transform_smob)
+SCM_DEFINE (gmk_s_invert_transform, "invert-transform", 1, 0, 0,
+            (SCM transform),
+            "Invert transformation matrix.")
 {
-    Transform *transform = check_transform (transform_smob);
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
 
-    al_invert_transform (&transform->transform);
+    al_invert_transform (t);
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-identity_transform (SCM transform_smob)
+SCM_DEFINE (gmk_s_identity_transform, "identify-transform", 1, 0, 0,
+            (SCM transform),
+            "Set @var{transform} to be the identity matrix.")
 {
-    Transform *transform = check_transform (transform_smob);
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
 
-    al_identity_transform (&transform->transform);
+    al_identity_transform (t);
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-build_transform (SCM transform_smob, SCM s_x, SCM s_y, SCM s_scale_x, SCM s_scale_y, SCM s_rotation)
-{
-    Transform *transform = check_transform (transform_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
-    float scale_x = scm_to_double (s_scale_x);
-    float scale_y = scm_to_double (s_scale_y);
-    float theta = gmk_deg_to_rad (scm_to_double (s_rotation));
+/* SCM_DEFINE (gmk_s_build_transform, "build-transform" (SCM transform, SCM x, SCM y, SCM scale_x, SCM scale_y, SCM s_rotation) */
+/* { */
+/*     ALLEGRO_TRANSFORM *t = check_transform (transform); */
+/*     float x = scm_to_double (s_x); */
+/*     float y = scm_to_double (s_y); */
+/*     float scale_x = scm_to_double (s_scale_x); */
+/*     float scale_y = scm_to_double (s_scale_y); */
+/*     float theta = gmk_deg_to_rad (scm_to_double (s_rotation)); */
 
-    al_build_transform (&transform->transform, x, y, scale_x, scale_y, theta);
+/*     al_build_transform (transform, x, y, scale_x, scale_y, theta); */
+
+/*     return SCM_UNSPECIFIED; */
+/* } */
+
+SCM_DEFINE (gmk_s_translate_transform, "translate-transform", 3, 0, 0,
+            (SCM transform, SCM x, SCM y),
+            "Translate matrix.")
+{
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
+
+    al_translate_transform (t,
+                            scm_to_double (x),
+                            scm_to_double (y));
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-translate_transform (SCM transform_smob, SCM s_x, SCM s_y)
+SCM_DEFINE (gmk_s_rotate_transform, "rotate-transform", 2, 0, 0,
+            (SCM transform, SCM rotation),
+            "Rotate matrix.")
 {
-    Transform *transform = check_transform (transform_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
 
-    al_translate_transform (&transform->transform, x, y);
+    al_rotate_transform (t,
+                         gmk_deg_to_rad (scm_to_double (rotation)));
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-rotate_transform (SCM transform_smob, SCM s_rotation)
+SCM_DEFINE (gmk_s_scale_transform, "scale-transform", 3, 0, 0,
+            (SCM transform, SCM scale_x, SCM scale_y),
+            "Scale matrix")
 {
-    Transform *transform = check_transform (transform_smob);
-    float theta = gmk_deg_to_rad (scm_to_double (s_rotation));
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
 
-    al_rotate_transform (&transform->transform, theta);
+    al_scale_transform (t,
+                        scm_to_double (scale_x),
+                        scm_to_double (scale_y));
 
     return SCM_UNSPECIFIED;
 }
 
-static SCM
-scale_transform (SCM transform_smob, SCM s_scale_x, SCM s_scale_y)
+SCM_DEFINE (gmk_s_transform_coordinates, "transform-coordinates", 3, 0, 0,
+            (SCM transform, SCM v),
+            "Return @var{v} multiplied by @var{transform}.")
 {
-    Transform *transform = check_transform (transform_smob);
-    float scale_x = scm_to_double (s_scale_x);
-    float scale_y = scm_to_double (s_scale_y);
+    ALLEGRO_TRANSFORM *t = check_transform (transform);
+    GmkVector2 vector = gmk_scm_to_vector2 (v);
 
-    al_scale_transform (&transform->transform, scale_x, scale_y);
+    al_transform_coordinates (t, &vector.x, &vector.y);
 
-    return SCM_UNSPECIFIED;
-}
-
-static SCM
-transform_coordinates (SCM transform_smob, SCM s_x, SCM s_y)
-{
-    Transform *transform = check_transform (transform_smob);
-    float x = scm_to_double (s_x);
-    float y = scm_to_double (s_y);
-
-    al_transform_coordinates (&transform->transform, &x, &y);
-
-    return scm_list_2 (scm_from_double (x), scm_from_double (y));
+    return gmk_scm_from_vector2 (vector);
 }
 
 static size_t
-free_transform (SCM transform_smob)
+free_transform (SCM transform)
 {
-    Transform *transform = (Transform *) SCM_SMOB_DATA (transform_smob);
+    ALLEGRO_TRANSFORM *t = (ALLEGRO_TRANSFORM *) SCM_SMOB_DATA (transform);
 
-    scm_gc_free (transform, sizeof (Transform), "transform");
+    scm_gc_free (t, sizeof (ALLEGRO_TRANSFORM), "transform");
 
     return 0;
 }
 
 static int
-print_transform (SCM transform_smob, SCM port, scm_print_state *pstate)
+print_transform (SCM transform, SCM port, scm_print_state *pstate)
 {
     scm_puts ("#<transform >", port);
 
@@ -169,36 +189,26 @@ print_transform (SCM transform_smob, SCM port, scm_print_state *pstate)
 }
 
 void
-init_transform_type (void)
+gmk_init_transform (void)
 {
-    transform_tag = scm_make_smob_type ("Transform", sizeof (Transform));
+    transform_tag = scm_make_smob_type ("transform", sizeof (ALLEGRO_TRANSFORM));
     scm_set_smob_mark (transform_tag, 0);
     scm_set_smob_free (transform_tag, free_transform);
     scm_set_smob_print (transform_tag, print_transform);
 
-    scm_c_define_gsubr ("make-transform", 1, 0, 0, make_transform);
-    scm_c_define_gsubr ("current-transform", 0, 0, 0, get_current_transform);
-    scm_c_define_gsubr ("copy-transform!", 2, 0, 0, copy_transform);
-    scm_c_define_gsubr ("compose-transform!", 2, 0, 0, compose_transform);
-    scm_c_define_gsubr ("use-transform", 1, 0, 0, use_transform);
-    scm_c_define_gsubr ("invert-transform!", 1, 0, 0, invert_transform);
-    scm_c_define_gsubr ("identity-transform!", 1, 0, 0, identity_transform);
-    scm_c_define_gsubr ("build-transform!", 6, 0, 0, build_transform);
-    scm_c_define_gsubr ("translate-transform!", 3, 0, 0, translate_transform);
-    scm_c_define_gsubr ("rotate-transform!", 2, 0, 0, rotate_transform);
-    scm_c_define_gsubr ("scale-transform!", 3, 0, 0, scale_transform);
-    scm_c_define_gsubr ("transform-coordinates", 3, 0, 0, transform_coordinates);
+#include "transform.x"
 
-    scm_c_export ("make-transform", NULL);
-    scm_c_export ("current-transform", NULL);
-    scm_c_export ("copy-transform!", NULL);
-    scm_c_export ("compose-transform!", NULL);
-    scm_c_export ("use-transform", NULL);
-    scm_c_export ("invert-transform!", NULL);
-    scm_c_export ("identity-transform!", NULL);
-    scm_c_export ("build-transform!", NULL);
-    scm_c_export ("translate-transform!", NULL);
-    scm_c_export ("rotate-transform!", NULL);
-    scm_c_export ("scale-transform!", NULL);
-    scm_c_export ("transform-coordinates", NULL);
+    scm_c_export (s_gmk_s_make_transform,
+                  s_gmk_s_make_identity_transform,
+                  s_gmk_s_current_transform,
+                  s_gmk_s_copy_transform,
+                  s_gmk_s_compose_transform,
+                  s_gmk_s_use_transform,
+                  s_gmk_s_invert_transform,
+                  s_gmk_s_identity_transform,
+                  s_gmk_s_translate_transform,
+                  s_gmk_s_rotate_transform,
+                  s_gmk_s_scale_transform,
+                  s_gmk_s_transform_coordinates,
+                  NULL);
 }

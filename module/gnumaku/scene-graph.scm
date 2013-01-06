@@ -23,7 +23,7 @@
 (define-method (apply-transform (node <scene-node>))
   (let ((transform (current-transform))
         (pos (position node)))
-    (translate-transform! transform (vector2-x pos) (vector2-y pos))
+    (translate-transform transform (vector2-x pos) (vector2-y pos))
     (use-transform transform)))
 
 (define-class <scene-group> (<scene-node>)
