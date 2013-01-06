@@ -156,23 +156,11 @@ gmk_init_audio (void)
     scm_set_smob_free (sample_tag, free_sample);
     scm_set_smob_print (sample_tag, print_sample);
 
-    /* scm_c_define_gsubr ("load-sample", 1, 0, 0, load_sample); */
-    /* scm_c_define_gsubr ("play-sample", 4, 0, 0, play_sample); */
-
-    /* scm_c_export ("load-sample", NULL); */
-    /* scm_c_export ("play-sample", NULL); */
-
     /* GmkAudioStream */
     audio_stream_tag = scm_make_smob_type ("audio-stream", sizeof (GmkAudioStream));
     scm_set_smob_mark (audio_stream_tag, 0);
     scm_set_smob_free (audio_stream_tag, free_audio_stream);
     scm_set_smob_print (audio_stream_tag, print_audio_stream);
-
-    /* scm_c_define_gsubr ("load-audio-stream", 1, 0, 0, load_audio_stream); */
-    /* scm_c_define_gsubr ("play-audio-stream", 5, 0, 0, play_audio_stream); */
-
-    /* scm_c_export ("load-audio-stream", NULL); */
-    /* scm_c_export ("play-audio-stream", NULL); */
 
 #include "audio.x"
 
