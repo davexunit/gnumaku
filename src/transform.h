@@ -3,10 +3,6 @@
 
 #include "common.h"
 
-/* typedef struct { */
-/*     ALLEGRO_TRANSFORM transform; */
-/* } Transform; */
-
-void init_transform_type ();
+void gmk_init_transform ();
 
 #endif
