@@ -25,7 +25,7 @@ gmk_init (void)
     gmk_init_audio ();
     gmk_init_particle_system ();
     gmk_init_bullet_type ();
-    init_bullet_system_type ();
+    gmk_init_bullet_system ();
     gmk_init_draw ();
     gmk_init_game ();
 }
