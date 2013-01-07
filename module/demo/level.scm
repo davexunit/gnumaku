@@ -38,9 +38,9 @@
 (define-method (set-bounds (lvl <level>) system)
   (let ((padding 100))
     (set-bullet-system-bounds system
-                              (* -1 padding) (* -1 padding)
-                              (+ (* 2 padding) (width lvl))
-                              (+ (* 2 padding) (height lvl)))))
+                              (make-rect (* -1 padding) (* -1 padding)
+                                         (+ (* 2 padding) (width lvl))
+                                         (+ (* 2 padding) (height lvl))))))
 
 (define-method (run (level <level>)))
 
@@ -72,25 +72,28 @@
                (hitbox (rect-move (hitbox player) pos))
                (graze-hitbox (rect-move (graze-hitbox player) pos)))
           (bullet-system-collide-rect (enemy-bullet-system level) graze-hitbox
-                                      (lambda () (on-player-graze level)))
+                                      (lambda (bullet)
+                                        (on-player-graze level bullet)))
           (bullet-system-collide-rect (enemy-bullet-system level) hitbox
-                                      (lambda () (on-player-hit level))))))
+                                      (lambda (bullet)
+                                        (on-player-hit level bullet))))))
 
 (define-method (check-enemy-collision (level <level>) enemy)
   (let* ((pos (position enemy))
         (hitbox (rect-move (hitbox enemy) pos)))
     (bullet-system-collide-rect (player-bullet-system level) hitbox
-                                (lambda () (on-enemy-hit level enemy)))))
+                                (lambda (bullet)
+                                  (on-enemy-hit level enemy bullet)))))
 
 (define-method (check-enemies-collision (level <level>))
   (for-each (lambda (enemy) (check-enemy-collision level enemy)) (enemies level)))
 
-(define-method (on-player-graze (level <level>))
+(define-method (on-player-graze (level <level>) bullet)
   (let ((player (player level)))
     (set! (graze-count player) (1+ (graze-count player))))
   #f)
 
-(define-method (on-player-hit (level <level>))
+(define-method (on-player-hit (level <level>) bullet)
   (let ((player (player level)))
     (if (invincible player)
         #f
@@ -101,7 +104,7 @@
         ;; Return true so that the bullet that hit the player is removed
         #t))))
 
-(define-method (on-enemy-hit (level <level>) enemy)
+(define-method (on-enemy-hit (level <level>) enemy bullet)
   (let ((player (player level)))
     (damage enemy (power player))
     (when (<= (health enemy) 0)
