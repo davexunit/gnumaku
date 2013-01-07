@@ -1,5 +1,5 @@
-#ifndef BULLET_SYSTEM_H
-#define BULLET_SYSTEM_H
+#ifndef GMK_BULLET_SYSTEM_H
+#define GMK_BULLET_SYSTEM_H
 
 #include "common.h"
 #include "sprite_sheet.h"
