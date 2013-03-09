@@ -52,7 +52,10 @@
       (let* ((event (al-wait-for-event events))
              (event-type (al-get-event-type event)))
         (unless *director-paused*
-          (cond ((= event-type allegro-event-key-up)
+          (cond ((= event-type allegro-event-key-down)
+                 (director-key-pressed
+                  (al-get-key-event-keycode (al-get-key-event event))))
+                ((= event-type allegro-event-key-up)
                  (director-key-released
                   (al-get-key-event-keycode (al-get-key-event event))))
                 ((= event-type allegro-event-timer)
