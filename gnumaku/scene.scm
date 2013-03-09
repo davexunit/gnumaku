@@ -15,5 +15,5 @@
 (define-generic on-stop)
 (define-generic on-pause)
 (define-generic on-resume)
-(define-generic on-key-released)
+(define-generic on-key-pressed)
 (define-generic on-key-released)
