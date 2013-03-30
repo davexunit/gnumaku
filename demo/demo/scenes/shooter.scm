@@ -1,4 +1,4 @@
-(define-module (gnumaku scenes shooter)
+(define-module (demo scenes shooter)
   #:use-module (oop goops)
   #:use-module (allegro keyboard)
   #:use-module (allegro graphics)
@@ -13,8 +13,13 @@
 (define (make-default-player)
   (make-player #f '(320 460) 4 1 3 #f #f))
 
+;; (define (make-player-bullets)
+;;   (make-particle-system 2000))
+
 (define-class <shooter-scene> ()
-  (player #:accessor player #:init-keyword #:player #:init-thunk make-default-player))
+  (player #:accessor player #:init-keyword #:player #:init-thunk make-default-player)
+  ;(player-bullets #:accessor player-bullets #:init-keyword #:player-bullets #:init-thunk make-player-bullets)
+  )
 
 (define (make-shooter-scene)
   (make <shooter-scene>))
