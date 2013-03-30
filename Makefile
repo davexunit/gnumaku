@@ -7,7 +7,7 @@ LIBS = `pkg-config --libs allegro-5.0 allegro_image-5.0 \
 SOURCES = $(wildcard src/*.c)
 SNARFS = $(SOURCES:.c=.x)
 OBJECTS = $(SOURCES:.c=.o)
-BIN = gnumaku.so
+BIN = libgnumaku.so
 
 $(BIN): $(SNARFS) $(OBJECTS)
 	$(CC) -shared $(OBJECTS) -o $@ $(LIBS)

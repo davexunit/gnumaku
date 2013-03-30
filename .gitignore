@@ -1,4 +1,4 @@
-gnumaku.so
+libgnumaku.so
 *.o
 *.lo
 *~
