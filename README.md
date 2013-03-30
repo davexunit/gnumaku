@@ -4,7 +4,7 @@ Gnumaku
 About
 -----
 Gnumaku is (trying to be) a libre game engine for creating bullet hell
-shooting games in the Scheme language.
+shooting games in the Guile programming language.
 
 [Screencast](https://www.youtube.com/watch?v=cKRkG8I0wDU)
 
@@ -12,14 +12,19 @@ shooting games in the Scheme language.
 
 Tech
 ----
-Gnumaku is written in C and Scheme. GNU Guile is the Scheme
-implementation used, as it is the official GNU extension language and
-fairly easy to work with.
+
+Gnumaku is written in Guile, with some C for performance reasons. GNU
+Guile is a Scheme implementation. It is the official GNU extension
+language and easy to work with.
+
+The Gnumaku Guile modules provide a developer with the infrastructure
+needed to quickly get started developing a shmup.
 
 The Allegro 5 game library has been chosen for it's simplicity and use
-of OpenGL accelerated rendering rather than software rendering.
+of OpenGL accelerated rendering rather than software rendering. The
+guile-allegro5 library provides a wrapper over the Allegro 5 C library.
 
-A good shootemup engine requires a way to make awesome bullet patterns
+A good shmup engine requires a way to make awesome bullet patterns
 easily. Gnumaku features a robust bullet system capable of processing
 thousands of bullets efficiently. Bullets have many customizable
 properties and can be manipulated after they are emitted for creating
@@ -29,6 +34,8 @@ Writing scripts using the built-in coroutines is an easy way to write
 a bullet pattern in a logical, linear fashion.
 
 Here's what a simple bullet script might look like:
+
+_THIS CODE IS OUT OF DATE NOW_
 
 ```scheme
 (define-coroutine (player-shot-1 player)
@@ -57,29 +64,20 @@ resume after 3 frames have passed. When the script continues, we
 recursively call the procedure and the process repeats until the
 player is no longer in the shooting state.
 
-It should be noted that the Gnumaku engine isn't strictly for
-shootemup games. Gnumaku provides the building blocks to make many
-other types of games.
-
-Additional Gnumaku features:
-* Tilesets
-* Sprites
-* Sound effects and music
-* 2D scene graph
-* Particle effects
-
 Dependencies
 ------------
 GNU Guile >= 2.0
 Allegro >= 5.0
+guile-allegro5
 
-*Note:* Guile 2.0 currently has issues compiling on Windows.  Until
-that is resolved, Gnumaku cannot run on Windows.
+Platforms
+---------
+Gnumaku is developed primarily for the GNU/Linux operating system.
 
 Try the Demo!
 ------------------
     make
-    make run-demo
+    ./run-demo
 
 License
 -------
