@@ -1,0 +1,9 @@
+#! /usr/bin/guile -s
+!#
+
+;; Add gnumaku to load path
+(add-to-load-path ".")
+;; Add demo to load path
+(add-to-load-path "demo")
+(use-modules (demo))
+(run-demo)
