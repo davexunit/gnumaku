@@ -3,6 +3,14 @@
 
 static scm_t_bits particle_system_tag;
 
+/* Keywords for the %emit-bullet procedure. */
+SCM_KEYWORD (kw_accel, "accel");
+SCM_KEYWORD (kw_ang_vel, "ang-vel");
+SCM_KEYWORD (kw_lifetime, "lifetime");
+SCM_KEYWORD (kw_color, "color");
+SCM_KEYWORD (kw_directional, "directional");
+SCM_KEYWORD (kw_data, "data");
+
 /*
  * Assert that the SCM object is indeed a particle system and return a
  * pointer to the GmkParticleSystem.
@@ -202,15 +210,24 @@ SCM_DEFINE (gmk_draw_particle_system, "draw-particle-system", 1, 0, 0,
     return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 7, 0, 0,
+SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
             (SCM particle_system, SCM pos, SCM speed, SCM direction,
-             SCM accel, SCM ang_vel, SCM bitmap),
+             SCM bitmap, SCM kwargs),
             "Creates a new particle and adds it to the system")
 {
     GmkParticleSystem *system = check_particle_system (particle_system);
     GmkParticle particle;
     GmkParticleBody body;
     double theta = gmk_deg_to_rad (scm_to_double (direction));
+    /*
+     * Using keyword arguments for properties that aren't always
+     * needed, like angular velocity.
+     */
+    SCM accel = scm_get_keyword (kw_accel, kwargs, scm_from_double (0));
+    SCM ang_vel = scm_get_keyword (kw_ang_vel, kwargs, scm_from_double (0));
+    SCM max_lifetime = scm_get_keyword (kw_lifetime, kwargs, scm_from_int (0));
+    SCM directional = scm_get_keyword (kw_directional, kwargs, SCM_BOOL_F);
+    SCM data = scm_get_keyword (kw_data, kwargs, SCM_BOOL_F);
 
     /* Bail out if we can't create any more particles. */
     if (system->particle_count == system->max_particles) {
@@ -223,17 +240,18 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 7, 0, 0,
     body.scale.y = 1;
     body.vel = gmk_vector2_from_polar (scm_to_double (speed), theta);
     body.accel = gmk_vector2_from_polar (scm_to_double (accel), theta);
+    body.hitbox = gmk_rect_new (-4, -4, 8, 8);
     /* Angular velocity is stored as a transformation matrix. */
     al_build_transform (&body.ang_vel, 0, 0, 1, 1,
                         gmk_deg_to_rad (scm_to_double (ang_vel)));
     particle.body = body;
     particle.kill = false;
-    particle.directional = false;
-    particle.max_lifetime = 0;
+    particle.directional = scm_to_bool (directional);
+    particle.max_lifetime = scm_to_int (max_lifetime);
     particle.lifetime = 0;
     particle.bitmap = scm_to_pointer (bitmap);
     particle.color = al_map_rgba_f (1, 1, 1, 1);
-    particle.data = SCM_BOOL_F;
+    particle.data = data;
     system->particles[system->particle_count++] = particle;
 
     return SCM_BOOL_T;

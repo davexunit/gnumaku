@@ -6,7 +6,6 @@
 
 ;; Wrapper around %emit-particle that first unwraps the allegro
 ;; bitmap.
-(define (emit-particle! particle-system pos speed direction accel
-                        ang-vel bitmap)
-  (%emit-particle! particle-system pos speed direction accel ang-vel
-                   (unwrap-allegro-bitmap bitmap)))
+(define (emit-particle! particle-system pos speed direction bitmap . kwargs)
+  (apply %emit-particle! particle-system pos speed direction
+         (unwrap-allegro-bitmap bitmap) kwargs))
