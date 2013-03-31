@@ -4,5 +4,5 @@
 void
 gmk_init (void)
 {
-    gmk_init_rect ();
+    gmk_init_particle_system ();
 }
