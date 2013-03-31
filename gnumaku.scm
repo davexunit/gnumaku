@@ -1,15 +1,12 @@
-#! /usr/bin/guile -s
-!#
+(define-module (gnumaku)
+  #:use-module (allegro graphics)
+  #:export (emit-particle!))
 
-;; Just a simple bootstrap script.
-(add-to-load-path ".")
-(use-modules (system repl server)
-             (gnumaku director)
-             (gnumaku scenes shooter))
+(load-extension "./libgnumaku" "gmk_init")
 
-;; Create REPL server for live-coding awesomeness.
-(spawn-server)
-
-;; Start game.
-(director-init)
-(director-run (make-shooter-scene))
+;; Wrapper around %emit-particle that first unwraps the allegro
+;; bitmap.
+(define (emit-particle! particle-system pos speed direction accel
+                        ang-vel bitmap)
+  (%emit-particle! particle-system pos speed direction accel ang-vel
+                   (unwrap-allegro-bitmap bitmap)))

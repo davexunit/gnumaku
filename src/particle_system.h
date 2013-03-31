@@ -18,7 +18,7 @@
 typedef struct {
     GmkVector2 pos;
     GmkVector2 vel;
-    GmkVector2 acc;
+    GmkVector2 accel;
     GmkVector2 scale;
     /* Angular velocity: change in particle direction. */
     ALLEGRO_TRANSFORM ang_vel;
@@ -56,6 +56,6 @@ typedef struct {
     int *particle_ids;
 } GmkParticleSystem;
 
-void gmk_init_particle_system (void);
+void gmk_inixot_particle_system (void);
 
 #endif

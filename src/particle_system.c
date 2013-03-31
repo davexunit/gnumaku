@@ -1,4 +1,5 @@
 #include "particle_system.h"
+#include "math.h"
 
 static scm_t_bits particle_system_tag;
 
@@ -41,7 +42,83 @@ make_particle_ids (GmkParticleSystem *particle_system)
                                   "particle ids");
 }
 
-SCM_DEFINE (gmk_s_make_particle_system, "make-particle-system", 1, 0, 0,
+static void
+update_particle_body (GmkParticleBody *body)
+{
+    al_transform_coordinates (&body->ang_vel,
+                              &body->vel.x, &body->vel.y);
+    al_transform_coordinates (&body->ang_vel,
+                              &body->accel.x, &body->accel.y);
+    body->pos = gmk_vector2_add (body->pos, body->vel);
+    body->vel = gmk_vector2_add (body->vel, body->accel);
+}
+
+static bool
+is_particle_time_expired (GmkParticle *particle)
+{
+    /* max_lifetime of 0 means unlimited life span. */
+    return particle->max_lifetime != 0 && particle->lifetime >= particle->max_lifetime;
+}
+
+static bool
+is_particle_dead (GmkParticle *particle)
+{
+    return particle->kill || is_particle_time_expired (particle);
+}
+
+static void
+update_particle (GmkParticle *particle)
+{
+    update_particle_body (&particle->body);
+    particle->lifetime++;
+    particle->kill = is_particle_dead (particle);
+}
+
+static float
+particle_sprite_angle (GmkParticle *particle)
+{
+    if (particle->directional) {
+        return gmk_vector2_angle (particle->body.vel);
+    }
+
+    return 0;
+}
+
+static void
+draw_particle (GmkParticle *particle)
+{
+    GmkParticleBody body = particle->body;
+    float cx = al_get_bitmap_width (particle->bitmap) / 2;
+    float cy = al_get_bitmap_height (particle->bitmap) / 2;
+    float angle = particle_sprite_angle (particle);
+    // ALLEGRO_COLOR color = gmk_color_mult_alpha (particle->color);
+
+    al_draw_tinted_scaled_rotated_bitmap (particle->bitmap, particle->color,
+                                          cx, cy,
+                                          body.pos.x, body.pos.y,
+                                          body.scale.x, body.scale.y,
+                                          angle, 0);
+}
+
+static void
+free_particle (GmkParticleSystem *particle_system, int index)
+{
+    GmkParticle *particle = particle_system->particles + index;
+    GmkParticle temp;
+    int particle_count = --particle_system->particle_count;
+    int particle_id = particle->id;
+
+    /* Swap particles in memory pool. */
+    temp = particle_system->particles[particle_count];
+    particle_system->particles[particle_count] = *particle;
+    particle_system->particles[index] = temp;
+
+    /* Update id->index mapping. */
+    particle_system->particle_ids[temp.id] = index;
+    particle_system->particle_ids[particle_id] = particle_count;
+}
+
+SCM_DEFINE (gmk_make_particle_system, "make-particle-system", 1, 0, 0,
             (SCM max_particles),
             "Makes a new particle system and allocates memory for "
             "@var{max_particles} particles.")
@@ -62,10 +139,122 @@ SCM_DEFINE (gmk_s_make_particle_system, "make-particle-system", 1, 0, 0,
     return smob;
 }
 
+SCM_DEFINE (gmk_particle_system_max, "particle-system-max", 1, 0, 0,
+            (SCM particle_system),
+            "Returns the maximum number of particles that can be in the system "
+            "at once.")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->max_particles);
+}
+
+SCM_DEFINE (gmk_particle_system_count, "particle-system-count", 1, 0, 0,
+            (SCM particle_system),
+            "Returns the number of active particles that are in the system.")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+
+    return scm_from_int (system->particle_count);
+}
+
+SCM_DEFINE (gmk_update_particle_system, "update-particle-system!", 1, 0, 0,
+            (SCM particle_system),
+            "Update particle system.")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+
+    for (int i = 0; i < system->particle_count; ++i) {
+        GmkParticle *particle = system->particles + i;
+
+        update_particle (particle);
+
+        if (particle->kill) {
+            free_particle (system, i--);
+        }
+    }
+
+    scm_remember_upto_here_1 (particle_system);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_draw_particle_system, "draw-particle-system", 1, 0, 0,
+            (SCM particle_system),
+            "Draw particle system.")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+    ALLEGRO_STATE state;
+
+    al_store_state (&state, ALLEGRO_STATE_BLENDER);
+    al_hold_bitmap_drawing (true);
+
+    for (int i = 0; i < system->particle_count; ++i) {
+        GmkParticle *particle = system->particles + i;
+
+        draw_particle (particle);
+    }
+
+    al_hold_bitmap_drawing (false);
+    al_restore_state (&state);
+    scm_remember_upto_here_1 (particle_system);
+
+    return SCM_UNSPECIFIED;
+}
+
+SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 7, 0, 0,
+            (SCM particle_system, SCM pos, SCM speed, SCM direction,
+             SCM accel, SCM ang_vel, SCM bitmap),
+            "Creates a new particle and adds it to the system")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+    GmkParticle particle;
+    GmkParticleBody body;
+    double theta = gmk_deg_to_rad (scm_to_double (direction));
+
+    /* Bail out if we can't create any more particles. */
+    if (system->particle_count == system->max_particles) {
+        return SCM_BOOL_F;
+    }
+
+    body.pos.x = scm_to_double (scm_car (pos));
+    body.pos.y = scm_to_double (scm_cadr (pos));
+    body.scale.x = 1;
+    body.scale.y = 1;
+    body.vel = gmk_vector2_from_polar (scm_to_double (speed), theta);
+    body.accel = gmk_vector2_from_polar (scm_to_double (accel), theta);
+    /* Angular velocity is stored as a transformation matrix. */
+    al_build_transform (&body.ang_vel, 0, 0, 1, 1,
+                        gmk_deg_to_rad (scm_to_double (ang_vel)));
+    particle.body = body;
+    particle.kill = false;
+    particle.directional = false;
+    particle.max_lifetime = 0;
+    particle.lifetime = 0;
+    particle.bitmap = scm_to_pointer (bitmap);
+    particle.color = al_map_rgba_f (1, 1, 1, 1);
+    particle.data = SCM_BOOL_F;
+    system->particles[system->particle_count++] = particle;
+
+    return SCM_BOOL_T;
+}
+
+SCM_DEFINE (gmk_clear_particle_system, "clear-particle-system!", 1, 0, 0,
+            (SCM particle_system),
+            "Removes all particles from the particle system.")
+{
+    GmkParticleSystem *system = check_particle_system (particle_system);
+
+    system->particle_count = 0;
+    scm_remember_upto_here_1 (particle_system);
+
+    return SCM_UNSPECIFIED;
+}
+
 static SCM
 mark_particle_system (SCM particle_system)
 {
-    GmkParticleSystem *system = (GmkParticleSystem *) SCM_SMOB_DATA (particle_system);
+    // GmkParticleSystem *system = (GmkParticleSystem *) SCM_SMOB_DATA (particle_system);
 
     return SCM_BOOL_F;
 }
@@ -102,6 +291,12 @@ gmk_init_particle_system (void)
 
 #include "particle_system.x"
 
-    scm_c_export (s_gmk_s_make_particle_system,
+    scm_c_export (s_gmk_make_particle_system,
+                  s_gmk_particle_system_max,
+                  s_gmk_particle_system_count,
+                  s_gmk_update_particle_system,
+                  s_gmk_draw_particle_system,
+                  s_gmk_emit_particle,
+                  s_gmk_clear_particle_system,
                   NULL);
 }
