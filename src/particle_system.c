@@ -4,6 +4,7 @@
 static scm_t_bits particle_system_tag;
 
 /* Keywords for the %emit-bullet procedure. */
+SCM_KEYWORD (kw_scale, "scale");
 SCM_KEYWORD (kw_accel, "accel");
 SCM_KEYWORD (kw_ang_vel, "ang-vel");
 SCM_KEYWORD (kw_lifetime, "lifetime");
@@ -223,6 +224,8 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
      * Using keyword arguments for properties that aren't always
      * needed, like angular velocity.
      */
+    SCM scale = scm_get_keyword (kw_scale, kwargs,
+                                 scm_list_2 (scm_from_int (1), scm_from_int (1)));
     SCM accel = scm_get_keyword (kw_accel, kwargs, scm_from_double (0));
     SCM ang_vel = scm_get_keyword (kw_ang_vel, kwargs, scm_from_double (0));
     SCM max_lifetime = scm_get_keyword (kw_lifetime, kwargs, scm_from_int (0));
@@ -236,8 +239,8 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
 
     body.pos.x = scm_to_double (scm_car (pos));
     body.pos.y = scm_to_double (scm_cadr (pos));
-    body.scale.x = 1;
-    body.scale.y = 1;
+    body.scale.x = scm_to_double (scm_car (scale));
+    body.scale.y = scm_to_double (scm_cadr (scale));
     body.vel = gmk_vector2_from_polar (scm_to_double (speed), theta);
     body.accel = gmk_vector2_from_polar (scm_to_double (accel), theta);
     body.hitbox = gmk_rect_new (-4, -4, 8, 8);
