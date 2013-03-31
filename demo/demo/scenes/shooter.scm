@@ -2,37 +2,49 @@
   #:use-module (oop goops)
   #:use-module (allegro keyboard)
   #:use-module (allegro graphics)
+  #:use-module (allegro addons image)
+  #:use-module (gnumaku)
   #:use-module (gnumaku scene)
   #:use-module (gnumaku director)
   #:use-module (gnumaku sprite)
   #:use-module (gnumaku player)
-  #:export (make-shooter-scene))
+  #:export (make-shooter-scene
+            player
+            player-bullets))
 
 (define bitmap #f)
 
 (define (make-default-player)
   (make-player #f '(320 460) 4 1 3 #f #f))
 
-;; (define (make-player-bullets)
-;;   (make-particle-system 2000))
+(define (make-player-bullets)
+  (make-particle-system 60000))
+
+(define (make-bullet-image)
+  (al-load-bitmap "assets/sprite_sheets/bullet.png"))
 
 (define-class <shooter-scene> ()
   (player #:accessor player #:init-keyword #:player #:init-thunk make-default-player)
-  ;(player-bullets #:accessor player-bullets #:init-keyword #:player-bullets #:init-thunk make-player-bullets)
-  )
+  (player-bullets #:accessor player-bullets #:init-keyword #:player-bullets #:init-thunk make-player-bullets)
+  (bullet-image #:accessor bullet-image #:init-keyword #:bullet-image))
 
 (define (make-shooter-scene)
   (make <shooter-scene>))
 
 (define-method (draw (scene <shooter-scene>))
+  (al-clear-to-color .1 .4 .5)
+  (draw-particle-system (player-bullets scene))
   (draw-player (player scene)))
 
 (define-method (update (scene <shooter-scene>))
+  (update-particle-system! (player-bullets scene))
   (update-player! (player scene)))
 
 (define-method (on-start (scene <shooter-scene>))
   (set! bitmap (al-load-bitmap "assets/sprite_sheets/player.png"))
-  (set-player-sprite! (player scene) (make-sprite bitmap)))
+  (set! (bullet-image scene) (make-bullet-image))
+  (set-player-sprite! (player scene) (make-sprite bitmap))
+  (fire-a-bunch scene))
 
 (define-method (on-stop (scene <shooter-scene>))
   (al-destroy-bitmap bitmap))
@@ -66,3 +78,18 @@
            (set-player-direction! player 'right #f))
           ((= keycode allegro-key-escape)
            (director-pop-scene)))))
+
+(define-method (fire-circle (scene <shooter-scene>))
+  (let ((n 32)
+        (speed .7))
+    (let loop ((i 0))
+      (when (< i n)
+        (emit-particle! (player-bullets scene) '(320 240) speed (* 360 (/ i n)) 0 0 (bullet-image scene))
+        (loop (1+ i))))))
+
+(define-method (fire-a-bunch (scene <shooter-scene>))
+  (let ((n 40000))
+    (let loop ((i 0))
+      (when (< i n)
+        (emit-particle! (player-bullets scene) (list (random 640) (random 480)) .2 (random 360) 0 0 (bullet-image scene))
+        (loop (1+ i))))))
