@@ -44,7 +44,7 @@
   (set! bitmap (al-load-bitmap "assets/sprite_sheets/player.png"))
   (set! (bullet-image scene) (make-bullet-image))
   (set-player-sprite! (player scene) (make-sprite bitmap))
-  (fire-a-bunch scene))
+  (fire-circle scene))
 
 (define-method (on-stop (scene <shooter-scene>))
   (al-destroy-bitmap bitmap))
@@ -81,15 +81,16 @@
 
 (define-method (fire-circle (scene <shooter-scene>))
   (let ((n 32)
-        (speed .7))
+        (speed 2))
     (let loop ((i 0))
       (when (< i n)
-        (emit-particle! (player-bullets scene) '(320 240) speed (* 360 (/ i n)) 0 0 (bullet-image scene))
+        (emit-particle! (player-bullets scene) '(320 240) speed (* 360 (/ i n))
+                        (bullet-image scene) #:ang-vel 4 #:accel .01)
         (loop (1+ i))))))
 
 (define-method (fire-a-bunch (scene <shooter-scene>))
   (let ((n 40000))
     (let loop ((i 0))
       (when (< i n)
-        (emit-particle! (player-bullets scene) (list (random 640) (random 480)) .2 (random 360) 0 0 (bullet-image scene))
+        (emit-particle! (player-bullets scene) (list (random 640) (random 480)) .4 (random 360) (bullet-image scene))
         (loop (1+ i))))))
