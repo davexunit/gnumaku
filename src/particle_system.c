@@ -54,12 +54,23 @@ make_particle_ids (GmkParticleSystem *particle_system)
 static void
 update_particle_body (GmkParticleBody *body)
 {
-    al_transform_coordinates (&body->ang_vel,
-                              &body->vel.x, &body->vel.y);
-    al_transform_coordinates (&body->ang_vel,
-                              &body->accel.x, &body->accel.y);
-    body->pos = gmk_vector2_add (body->pos, body->vel);
-    body->vel = gmk_vector2_add (body->vel, body->accel);
+    al_transform_coordinates (&body->_ang_vel,
+                              &body->_vel.x, &body->_vel.y);
+    al_transform_coordinates (&body->_ang_vel,
+                              &body->_accel.x, &body->_accel.y);
+    body->pos = gmk_vector2_add (body->pos, body->_vel);
+    body->_vel = gmk_vector2_add (body->_vel, body->_accel);
+}
+
+static void
+recalculate_particle_body (GmkParticleBody *body)
+{
+    float theta = gmk_deg_to_rad (body->direction);
+
+    body->_vel = gmk_vector2_from_polar (body->speed, theta);
+    body->_accel = gmk_vector2_from_polar (body->accel, theta);
+    /* Angular velocity is stored as a transformation matrix. */
+    al_build_transform (&body->_ang_vel, 0, 0, 1, 1, gmk_deg_to_rad (body->ang_vel));
 }
 
 static bool
@@ -87,7 +98,7 @@ static float
 particle_sprite_angle (GmkParticle *particle)
 {
     if (particle->directional) {
-        return gmk_vector2_angle (particle->body.vel);
+        return gmk_deg_to_rad (particle->body.direction);
     }
 
     return 0;
@@ -219,7 +230,6 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
     GmkParticleSystem *system = check_particle_system (particle_system);
     GmkParticle particle;
     GmkParticleBody body;
-    double theta = gmk_deg_to_rad (scm_to_double (direction));
     /*
      * Using keyword arguments for properties that aren't always
      * needed, like angular velocity.
@@ -241,12 +251,12 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
     body.pos.y = scm_to_double (scm_cadr (pos));
     body.scale.x = scm_to_double (scm_car (scale));
     body.scale.y = scm_to_double (scm_cadr (scale));
-    body.vel = gmk_vector2_from_polar (scm_to_double (speed), theta);
-    body.accel = gmk_vector2_from_polar (scm_to_double (accel), theta);
+    body.speed = scm_to_double (speed);
+    body.accel = scm_to_double (accel);
+    body.direction = scm_to_double (direction);
+    body.ang_vel = scm_to_double (ang_vel);
     body.hitbox = gmk_rect_new (-4, -4, 8, 8);
-    /* Angular velocity is stored as a transformation matrix. */
-    al_build_transform (&body.ang_vel, 0, 0, 1, 1,
-                        gmk_deg_to_rad (scm_to_double (ang_vel)));
+    recalculate_particle_body (&body);
     particle.body = body;
     particle.kill = false;
     particle.directional = scm_to_bool (directional);

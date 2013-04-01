@@ -14,14 +14,20 @@
 
 /*
  * The physical representation of a particle.
+ *
+ * Member variables beginning with an underscore denote cached values
+ * for more efficient updating.
  */
 typedef struct {
+    float speed;
+    float accel;
+    float direction;
+    float ang_vel;
     GmkVector2 pos;
-    GmkVector2 vel;
-    GmkVector2 accel;
     GmkVector2 scale;
-    /* Angular velocity: change in particle direction. */
-    ALLEGRO_TRANSFORM ang_vel;
+    GmkVector2 _vel;
+    GmkVector2 _accel;
+    ALLEGRO_TRANSFORM _ang_vel;
     GmkRect hitbox;
 } GmkParticleBody;
 
