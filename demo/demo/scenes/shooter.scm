@@ -1,4 +1,5 @@
 (define-module (demo scenes shooter)
+  #:use-module (srfi srfi-42)
   #:use-module (oop goops)
   #:use-module (allegro keyboard)
   #:use-module (allegro graphics)
@@ -8,6 +9,8 @@
   #:use-module (gnumaku director)
   #:use-module (gnumaku sprite)
   #:use-module (gnumaku player)
+  #:use-module (gnumaku agenda)
+  #:use-module (gnumaku coroutine)
   #:export (make-shooter-scene
             player
             player-bullets))
@@ -26,7 +29,8 @@
 (define-class <shooter-scene> ()
   (player #:accessor player #:init-keyword #:player #:init-thunk make-default-player)
   (player-bullets #:accessor player-bullets #:init-keyword #:player-bullets #:init-thunk make-player-bullets)
-  (bullet-image #:accessor bullet-image #:init-keyword #:bullet-image))
+  (bullet-image #:accessor bullet-image #:init-keyword #:bullet-image)
+  (agenda #:accessor agenda #:init-thunk make-agenda))
 
 (define (make-shooter-scene)
   (make <shooter-scene>))
@@ -37,6 +41,7 @@
   (draw-player (player scene)))
 
 (define-method (update (scene <shooter-scene>))
+  (update-agenda! (agenda scene))
   (update-particle-system! (player-bullets scene))
   (update-player! (player scene)))
 
@@ -80,13 +85,18 @@
            (director-pop-scene)))))
 
 (define-method (fire-circle (scene <shooter-scene>))
-  (let ((n 32)
-        (speed 2))
-    (let loop ((i 0))
-      (when (< i n)
-        (emit-particle! (player-bullets scene) '(320 240) speed (* 360 (/ i n))
-                        (bullet-image scene) #:ang-vel 4 #:accel .01)
-        (loop (1+ i))))))
+  (define num-bullets 32)
+
+  (define (fire-bullet i)
+    (emit-particle! (player-bullets scene) '(320 240) 2 (* 360 (/ i num-bullets))
+                    (bullet-image scene) #:ang-vel .5)
+    (wait))
+
+  (define-coroutine (fire)
+    (do-ec (: i num-bullets) (fire-bullet i))
+    (fire))
+
+  (agenda-schedule! (agenda scene) fire 0))
 
 (define-method (fire-a-bunch (scene <shooter-scene>))
   (let ((n 40000))
