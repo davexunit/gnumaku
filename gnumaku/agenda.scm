@@ -3,12 +3,15 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:export (make-agenda
-            agenda-schedule
-            update-agenda
-            clear-agenda))
+            agenda-schedule!
+            update-agenda!
+            clear-agenda!
+            wait))
 
 ;; This code is a modified version of the agenda implementation in SICP.
 ;; Thank you, SICP!
+
+(define *current-agenda* #f)
 
 (define-record-type <time-segment>
   (%make-time-segment time queue)
@@ -68,7 +71,7 @@
   "Returns time given a delta from the current agenda time."
   (+ (agenda-time agenda) (inexact->exact (round dt))))
 
-(define (agenda-schedule agenda dt callback)
+(define (agenda-schedule! agenda callback dt)
   "Schedules a callback procedure in the agenda relative to the current agenda time."
   (let ((time (agenda-time-delay agenda dt)))
     (define (belongs-before? segments)
@@ -102,9 +105,10 @@
     ((deq! q)) ;; Execute scheduled procedure
     (process-queue q)))
 
-(define (update-agenda agenda dt)
+(define (update-agenda! agenda)
   "Moves agenda forward in time and run scheduled procedures."
-  (set-agenda-time agenda (+ (agenda-time agenda) dt))
+  (set! *current-agenda* agenda)
+  (set-agenda-time agenda (1+ (agenda-time agenda)))
   (let next-segment ()
     (unless (agenda-empty? agenda)
       (let ((segment (first-segment agenda)))
@@ -115,6 +119,10 @@
           (set-agenda-segments agenda (rest-segments agenda))
           (next-segment))))))
 
-(define (clear-agenda agenda)
+(define (clear-agenda! agenda)
   "Removes all scheduled procedures from the agenda."
   (set-agenda-segments agenda '()))
+
+(define* (wait #:optional (delay 1))
+  (abort-to-prompt 'coroutine-prompt
+                   (lambda (resume) (agenda-schedule! *current-agenda* resume delay))))
