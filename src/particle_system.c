@@ -138,6 +138,23 @@ free_particle (GmkParticleSystem *particle_system, int index)
     particle_system->particle_ids[particle_id] = particle_count;
 }
 
+static void
+init_particles (GmkParticleSystem *particle_system)
+{
+    /*
+     * Assign each particle a unique id. As particles are spawned and
+     * killed they are swapped around a lot in the array. These ids
+     * correspond to indices in a second array that map a particle to
+     * its current place in the particle array.
+     *
+     * This allows a developer to have access to individual particles,
+     * even though they're getting shuffled around constantly.
+     */
+    for (int i = 0; i < particle_system->max_particles; ++i) {
+        particle_system->particles[i].id = i;
+    }
+}
+
 SCM_DEFINE (gmk_make_particle_system, "make-particle-system", 1, 0, 0,
             (SCM max_particles),
             "Makes a new particle system and allocates memory for "
@@ -155,6 +172,7 @@ SCM_DEFINE (gmk_make_particle_system, "make-particle-system", 1, 0, 0,
     SCM_NEWSMOB (smob, particle_system_tag, particle_system);
     particle_system->particles = make_particles (particle_system);
     particle_system->particle_ids = make_particle_ids (particle_system);
+    init_particles (particle_system);
 
     return smob;
 }
