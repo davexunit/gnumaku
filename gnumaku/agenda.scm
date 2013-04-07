@@ -2,6 +2,7 @@
   #:use-module (ice-9 q)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
+  #:use-module (gnumaku coroutine)
   #:export (make-agenda
             agenda-schedule!
             update-agenda!
@@ -124,5 +125,4 @@
   (set-agenda-segments agenda '()))
 
 (define* (wait #:optional (delay 1))
-  (abort-to-prompt 'coroutine-prompt
-                   (lambda (resume) (agenda-schedule! *current-agenda* resume delay))))
+  (yield (lambda (resume) (agenda-schedule! *current-agenda* resume delay))))
