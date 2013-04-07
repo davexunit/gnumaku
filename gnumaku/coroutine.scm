@@ -1,6 +1,7 @@
 (define-module (gnumaku coroutine)
   #:export (coroutine
-            define-coroutine))
+            define-coroutine)
+  #:replace (yield))
 
 (define (do-coroutine thunk)
   "Creates a procedure that be yield and resume at any point. Used for cooperative multi-threading."
@@ -33,3 +34,6 @@
        (define (name . args) . body)
        ;; Coroutine time.
        (do-coroutine (lambda () (name . args)))))))
+
+(define (yield callback)
+  (abort-to-prompt 'coroutine-prompt callback))
