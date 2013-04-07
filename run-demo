@@ -6,4 +6,5 @@
 ;; Add demo to load path
 (add-to-load-path "demo")
 (use-modules (demo))
+(chdir "demo")
 (run-demo)
