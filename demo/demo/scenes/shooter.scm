@@ -8,9 +8,9 @@
   #:use-module (gnumaku scene)
   #:use-module (gnumaku director)
   #:use-module (gnumaku sprite)
-  #:use-module (gnumaku player)
   #:use-module (gnumaku agenda)
   #:use-module (gnumaku coroutine)
+  #:use-module (demo player)
   #:export (make-shooter-scene
             player
             player-bullets))
@@ -49,7 +49,7 @@
   (set! bitmap (al-load-bitmap "assets/sprite_sheets/player.png"))
   (set! (bullet-image scene) (make-bullet-image))
   (set-player-sprite! (player scene) (make-sprite bitmap))
-  (fire-circle scene))
+  (fire-spiral scene))
 
 (define-method (on-stop (scene <shooter-scene>))
   (al-destroy-bitmap bitmap))
@@ -84,16 +84,21 @@
           ((= keycode allegro-key-escape)
            (director-pop-scene)))))
 
-(define-method (fire-circle (scene <shooter-scene>))
-  (define num-bullets 32)
+(define-method (fire-spiral (scene <shooter-scene>))
+  (define num-bullets 33)
+  (define num-arms 3)
 
-  (define (fire-bullet i)
-    (emit-particle! (player-bullets scene) '(320 240) 2 (* 360 (/ i num-bullets))
-                    (bullet-image scene) #:ang-vel .5)
-    (wait))
+  (define (fire-bullet i offset)
+    (let ((angle (+ (* 360 (/ i num-bullets)) offset)))
+      (emit-particle! (player-bullets scene) '(320 240) 2
+                      angle (bullet-image scene) #:ang-vel .2)))
+
+  (define (fire-spiral i)
+    (do-ec (: j num-arms) (fire-bullet i (* 360 (/ j num-arms))))
+    (wait 2))
 
   (define-coroutine (fire)
-    (do-ec (: i num-bullets) (fire-bullet i))
+    (do-ec (: i num-bullets) (fire-spiral i))
     (fire))
 
   (agenda-schedule! (agenda scene) fire 0))
@@ -102,5 +107,6 @@
   (let ((n 40000))
     (let loop ((i 0))
       (when (< i n)
-        (emit-particle! (player-bullets scene) (list (random 640) (random 480)) .4 (random 360) (bullet-image scene))
+        (emit-particle! (player-bullets scene) (list (random 640) (random 480))
+                        .4 (random 360) (bullet-image scene))
         (loop (1+ i))))))
