@@ -246,7 +246,7 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
             "Creates a new particle and adds it to the system")
 {
     GmkParticleSystem *system = check_particle_system (particle_system);
-    GmkParticle particle;
+    GmkParticle *particle;
     GmkParticleBody body;
     /*
      * Using keyword arguments for properties that aren't always
@@ -265,6 +265,7 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
         return SCM_BOOL_F;
     }
 
+    /* Create physics body. */
     body.pos.x = scm_to_double (scm_car (pos));
     body.pos.y = scm_to_double (scm_cadr (pos));
     body.scale.x = scm_to_double (scm_car (scale));
@@ -275,15 +276,17 @@ SCM_DEFINE (gmk_emit_particle, "%emit-particle!", 5, 0, 1,
     body.ang_vel = scm_to_double (ang_vel);
     body.hitbox = gmk_rect_new (-4, -4, 8, 8);
     recalculate_particle_body (&body);
-    particle.body = body;
-    particle.kill = false;
-    particle.directional = scm_to_bool (directional);
-    particle.max_lifetime = scm_to_int (max_lifetime);
-    particle.lifetime = 0;
-    particle.bitmap = scm_to_pointer (bitmap);
-    particle.color = al_map_rgba_f (1, 1, 1, 1);
-    particle.data = data;
-    system->particles[system->particle_count++] = particle;
+
+    /* Grab the next particle in the pool and initialize it. */
+    particle = system->particles + system->particle_count++;
+    particle->body = body;
+    particle->kill = false;
+    particle->directional = scm_to_bool (directional);
+    particle->max_lifetime = scm_to_int (max_lifetime);
+    particle->lifetime = 0;
+    particle->bitmap = scm_to_pointer (bitmap);
+    particle->color = al_map_rgba_f (1, 1, 1, 1);
+    particle->data = data;
 
     return SCM_BOOL_T;
 }
