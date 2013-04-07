@@ -1,4 +1,4 @@
-(define-module (gnumaku player)
+(define-module (demo player)
   #:use-module (oop goops)
   #:use-module (srfi srfi-9)
   #:use-module (gnumaku sprite)
