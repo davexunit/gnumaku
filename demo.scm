@@ -1,6 +1,6 @@
-#! /usr/bin/guile -s
+#! /usr/local/bin/guile \
+-L ./module -s
 !#
 
-(add-to-load-path "./module")
 (use-modules (demo main))
 (main)
